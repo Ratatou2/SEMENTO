@@ -17,7 +17,7 @@ wait_queue = Queue()  # 중복 제거를 위해 set
 # 화물 배송을 위한 get_point, drop_point 설정
 def generate_delivery_order(dock_list=None, pick=2):
     # 따로 선착장 리스트가 주어지는게 아니라면, 디폴트 실행
-    if dock_list is None: dock_list = ['a', 'b', 'c', 'd']
+    if dock_list is None: dock_list = ['A', 'B', 'C', 'D']
 
     # 순열 제작
     perm = permutations(dock_list, pick)
@@ -28,17 +28,17 @@ def generate_delivery_order(dock_list=None, pick=2):
     return selected_permutation
 
 
-def find_way(get_point, drop_point):
-    # 랜덤 start_point
-    OHT_location = choice(load_list)
-
-    # start_point부터 get_point까지 길찾기
-    # 함수(OHT_location, get_point),
-
-    # get_point부터 end_point까지 길찾기
-    # 함수(get_point, end_point)
-
-    return OHT_location, get_point, drop_point
+# def find_way(get_point, drop_point):
+#     # 랜덤 start_point
+#     OHT_location = choice(load_list)
+#
+#     # start_point부터 get_point까지 길찾기
+#     # 함수(OHT_location, get_point),
+#
+#     # get_point부터 end_point까지 길찾기
+#     # 함수(get_point, end_point)
+#
+#     return OHT_location, get_point, drop_point
 
 
 if __name__ == '__main__':
