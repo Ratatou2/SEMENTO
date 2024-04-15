@@ -51,10 +51,17 @@ if __name__ == '__main__':
     target_node_id = equipment_dict.get(target_node)
     OHT_location = choice(ways_list)
 
+    pick_up_x = grid.node_dict.get(pickup_node_id).x
+    pick_up_y = grid.node_dict.get(pickup_node_id).y
+
+    target_x = grid.node_dict.get(target_node_id).x
+    target_y = grid.node_dict.get(target_node_id).y
+
+
     print("====동작한다잉====")
     print("시작지점 :", (OHT_location.x, OHT_location.y))
-    print("pickup지점 : ", (grid.node_dict.get(pickup_node_id).x, grid.node_dict.get(pickup_node_id).y))
-    print("target지점 : ", (grid.node_dict.get(target_node_id).x, grid.node_dict.get(target_node_id).y))
+    print("pickup지점 : ", (pick_up_x, pick_up_y))
+    print("target지점 : ", (target_x, target_y))
     print("================")
     oht = OHT('OHT001', grid, OHT_location.id, pickup_node_id, target_node_id)
     path = oht.bfs_find_path()
@@ -86,10 +93,12 @@ if __name__ == '__main__':
         for x, row in enumerate(grid_data):
             arrow_row = []
             for y, item in enumerate(row):
-
                 if x == oht.location.x and y == oht.location.y:
                     arrow_row.append("🚚")
-
+                elif x == pick_up_x and y == pick_up_y:
+                    arrow_row.append("🌍")
+                elif x == target_x and y == target_y:
+                    arrow_row.append("🌕")
                 elif isinstance(item, list):
                     # 리스트 안의 여러 방향을 처리
                     combined_arrows = direction_arrows[item[0]]
