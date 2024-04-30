@@ -22,31 +22,52 @@ function setActive(item, path) {
         class="dashboard-container"
         :class="{ active: activeItem === 'dashboard' }"
         @click="setActive('dashboard', '/dashboard')"
+        :style="
+          activeItem === 'dashboard' ? 'background-color: #0057ff6e;' : ''
+        "
       >
         <font-awesome-icon :icon="['fas', 'house']" style="color: white" />
-        <span class="dashboard">Dashboard</span>
+        <span
+          class="dashboard-word"
+          :style="activeItem === 'dashboard' ? 'font-weight: bold; ' : ''"
+          >Dashboard</span
+        >
       </div>
       <div
         class="analytics-container"
         :class="{ active: activeItem === 'analytics' }"
         @click="setActive('analytics', '/analytics')"
+        :style="
+          activeItem === 'analytics' ? 'background-color: #0057ff6e;' : ''
+        "
       >
         <font-awesome-icon
           :icon="['fas', 'chart-simple']"
           style="color: white"
         />
-        <span class="analytics">Analytics</span>
+        <span
+          class="analytics-word"
+          :style="activeItem === 'analytics' ? 'font-weight: bold; ' : ''"
+          >Analytics</span
+        >
       </div>
       <div
         class="simulation-log-container"
         :class="{ active: activeItem === 'simulation-logs' }"
         @click="setActive('simulation-logs', '/simulation')"
+        :style="
+          activeItem === 'simulation-logs' ? 'background-color: #0057ff6e;' : ''
+        "
       >
         <font-awesome-icon
           :icon="['fas', 'square-poll-horizontal']"
           style="color: white"
         />
-        <span class="simulation-log">Simulation Logs</span>
+        <span
+          class="simulation-log-word"
+          :style="activeItem === 'simulation-logs' ? 'font-weight: bold; ' : ''"
+          >Simulation Logs</span
+        >
       </div>
     </div>
   </div>
@@ -73,40 +94,49 @@ function setActive(item, path) {
 }
 
 .dashboard-container {
-  padding: 15% 0 0 15%;
+  padding: 4% 0 4% 15%;
+  margin: 3% 0 0 3%;
+  width: 90%;
+  border-radius: 8px;
 }
 
 .dashboard-container :hover {
-  background-color: #0057ff6e;
+  cursor: pointer;
 }
 
-.dashboard {
+.dashboard-word {
   padding-left: 10%;
   color: white;
 }
 
 .analytics-container {
-  padding: 15% 0 0 15%;
+  padding: 4% 0 4% 15%;
+  margin: 3% 0 0 3%;
+  width: 90%;
+  border-radius: 8px;
 }
 
 .analytics-container :hover {
-  background-color: #0057ff6e;
+  cursor: pointer;
 }
 
-.analytics {
+.analytics-word {
   padding-left: 10%;
   color: white;
 }
 
 .simulation-log-container {
-  padding: 15% 0 0 15%;
+  padding: 4% 0 4% 15%;
+  margin: 3% 0 0 3%;
+  width: 90%;
+  border-radius: 8px;
 }
 
 .simulation-log-container :hover {
-  background-color: #0057ff6e;
+  cursor: pointer;
 }
 
-.simulation-log {
+.simulation-log-word {
   padding-left: 10%;
   color: white;
 }
