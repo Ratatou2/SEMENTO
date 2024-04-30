@@ -53,20 +53,6 @@ function setActive(item, path) {
 </template>
 
 <style scoped>
-.side-bar-container {
-  height: 100%;
-  width: 18%;
-  background-color: black;
-  position: fixed;
-  top: 0;
-  left: 0;
-  line-height: 1.2;
-}
-
-.side-bar-container :hover {
-  cursor: pointer;
-}
-
 .logo-container {
   padding-left: 10%;
 }

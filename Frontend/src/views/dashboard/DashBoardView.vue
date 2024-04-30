@@ -1,8 +1,42 @@
-<script setup>
-import SideBar from "@/components/sideBar/SideBar.vue";
-</script>
+<script setup></script>
 <template>
-  <SideBar />
-  대시보드
+  <div>Lorem</div>
+  <pre>
+    zz
+    z
+    z
+    z
+    z
+    z
+    z
+    z
+    z
+    z
+    z
+    z
+    z
+    z
+    z
+    z
+    z
+    z
+    z
+    z
+    z
+    z
+    z
+    z
+    z
+    z
+    z
+    z
+    z
+    z
+    z
+    z
+    z
+    
+
+  </pre>
 </template>
 <style scoped></style>

@@ -1,5 +1,5 @@
 <script setup></script>
 
-<template>AI 분석</template>
+<template></template>
 
 <style scoped></style>

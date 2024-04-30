@@ -1,10 +1,5 @@
-<script setup>
-import SideBar from "@/components/sideBar/SideBar.vue";
-</script>
+<script setup></script>
 
-<template>
-  <SideBar />
-  개별이송체 분석
-</template>
+<template>개별이송체 분석</template>
 
 <style scoped></style>
