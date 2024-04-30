@@ -1,5 +1,10 @@
-<script setup></script>
+<script setup>
+import SideBar from "@/components/sideBar/SideBar.vue";
+</script>
 
-<template>AI 분석</template>
+<template>
+  <SideBar />
+  AI 분석
+</template>
 
 <style scoped></style>

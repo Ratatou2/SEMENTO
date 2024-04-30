@@ -1,4 +1,15 @@
-<script setup></script>
+<script setup>
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+
+const activeItem = ref("");
+const router = useRouter();
+
+function setActive(item, path) {
+  activeItem.value = item;
+  router.push(path);
+}
+</script>
 
 <template>
   <div class="side-bar-container">
@@ -7,12 +18,35 @@
       <div class="logo-subheading">Modern Admin Dashboard</div>
     </div>
     <div class="nav-bar-container">
-      <div class="dashboard-container">
+      <div
+        class="dashboard-container"
+        :class="{ active: activeItem === 'dashboard' }"
+        @click="setActive('dashboard', '/dashboard')"
+      >
         <font-awesome-icon :icon="['fas', 'house']" style="color: white" />
         <span class="dashboard">Dashboard</span>
       </div>
-      <div class="analytics-container">
+      <div
+        class="analytics-container"
+        :class="{ active: activeItem === 'analytics' }"
+        @click="setActive('analytics', '/analytics')"
+      >
+        <font-awesome-icon
+          :icon="['fas', 'chart-simple']"
+          style="color: white"
+        />
         <span class="analytics">Analytics</span>
+      </div>
+      <div
+        class="simulation-log-container"
+        :class="{ active: activeItem === 'simulation-logs' }"
+        @click="setActive('simulation-logs', '/simulation')"
+      >
+        <font-awesome-icon
+          :icon="['fas', 'square-poll-horizontal']"
+          style="color: white"
+        />
+        <span class="simulation-log">Simulation Logs</span>
       </div>
     </div>
   </div>
@@ -27,6 +61,10 @@
   top: 0;
   left: 0;
   line-height: 1.2;
+}
+
+.side-bar-container :hover {
+  cursor: pointer;
 }
 
 .logo-container {
@@ -52,7 +90,37 @@
   padding: 15% 0 0 15%;
 }
 
+.dashboard-container :hover {
+  background-color: #0057ff6e;
+}
+
 .dashboard {
+  padding-left: 10%;
+  color: white;
+}
+
+.analytics-container {
+  padding: 15% 0 0 15%;
+}
+
+.analytics-container :hover {
+  background-color: #0057ff6e;
+}
+
+.analytics {
+  padding-left: 10%;
+  color: white;
+}
+
+.simulation-log-container {
+  padding: 15% 0 0 15%;
+}
+
+.simulation-log-container :hover {
+  background-color: #0057ff6e;
+}
+
+.simulation-log {
   padding-left: 10%;
   color: white;
 }
