@@ -5,7 +5,10 @@
  title="Card 제목"
  content="value 값"
  percentage="증감율"
- fontColor="blue or red"/>
+ fontColor="blue or red"
+ height="높이값"
+ width="너비값"
+ />
 
 -->
 <script setup>
