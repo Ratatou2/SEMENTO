@@ -34,9 +34,22 @@ import Header from "@/components/header/Header.vue";
   top: 0;
   left: 0;
   line-height: 1.2;
+  z-index: 100;
 }
 
 .content {
   margin-left: 18%;
+}
+</style>
+
+<style>
+.white-box {
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.05);
 }
 </style>
