@@ -67,7 +67,7 @@ setTimeout(() => {
       <div class="current-time">
         <font-awesome-icon
           :icon="['fas', 'angles-right']"
-          size="lg"
+          size="xs"
           style="color: #9f9f9f"
         />
         <span class="time">
@@ -124,12 +124,12 @@ setTimeout(() => {
 
 .time {
   color: #9f9f9f;
-  font-size: 25px;
+  font-size: 15px;
 }
 
 .page-title {
   font-weight: bold;
-  font-size: 30px;
+  font-size: 20px;
 }
 
 .right-side {
