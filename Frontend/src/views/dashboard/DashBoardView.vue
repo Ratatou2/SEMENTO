@@ -4,6 +4,7 @@ import BlackDataCard from "@/components/card/BlackDataCard.vue";
 import Line from "@/components/line/Line.vue";
 import HeadText from "@/components/Text/HeadText.vue";
 import Cardhead from "@/components/Text/Cardhead.vue";
+import Table from "@/components/table/Table.vue";
 // 차트
 import StickChart from "./components/job-analysis/StickChart.vue";
 import PieChart from "./components/job-analysis/PieChart.vue";
@@ -96,7 +97,40 @@ const month = currentDate.getMonth(); // 월 가져오기 (0부터 시작하므�
         <div class="title">
           <Cardhead header-text="실패한 작업 로그(198건)" content-text="데드라인까지 도착하지 못한 OHT에 대한 원인을 보여줍니다." />
         </div>
-        <div>표 넣을 자리</div>
+        <Table
+            width="100%"
+            :columns="['No.', 'OHT ID', 'ERROR', 'COUNT']"
+            :data="[
+              ['1', '1923', '300', '23회'],
+              ['2', '1932', '300', '2회'],
+              ['3', '1932', '300', '2회'],
+              ['4', '1932', '300', '2회'],
+              ['5', '1932', '300', '2회'],
+              ['6', '1932', '300', '2회'],
+              ['7', '1932', '300', '2회'],
+              ['1', '1923', '300', '23회'],
+              ['2', '1932', '300', '2회'],
+              ['3', '1932', '300', '2회'],
+              ['4', '1932', '300', '2회'],
+              ['5', '1932', '300', '2회'],
+              ['6', '1932', '300', '2회'],
+              ['7', '1932', '300', '2회'],
+              ['1', '1923', '300', '23회'],
+              ['2', '1932', '300', '2회'],
+              ['3', '1932', '300', '2회'],
+              ['4', '1932', '300', '2회'],
+              ['5', '1932', '300', '2회'],
+              ['6', '1932', '300', '2회'],
+              ['7', '1932', '300', '2회'],
+              ['1', '1923', '300', '23회'],
+              ['2', '1932', '300', '2회'],
+              ['3', '1932', '300', '2회'],
+              ['4', '1932', '300', '2회'],
+              ['5', '1932', '300', '2회'],
+              ['6', '1932', '300', '2회'],
+              ['7', '1932', '300', '2회'],
+            ]"
+          />
       </div>
     </div>
     <!-- 상태 분석 -->
@@ -163,5 +197,7 @@ const month = currentDate.getMonth(); // 월 가져오기 (0부터 시작하므�
 
 .job-table {
   width: 100%;
+  height: 710px;
+  overflow-y: scroll;
 }
 </style>

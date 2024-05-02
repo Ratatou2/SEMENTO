@@ -15,11 +15,11 @@ const props = defineProps({
   data: Array, // 테이블 데이터
   height: {
     type: String,
-    default: "atuo",
+    default: "auto",
   },
   width: {
     type: String,
-    default: "823px",
+    default: "100%",
   },
 });
 
@@ -81,8 +81,8 @@ function getColumnColor(column) {
 <style scoped>
 .table-container {
   border-radius: 5px;
-  overflow: hidden; /* 이 부분을 추가하여 내부 요소가 둥근 모서리를 따라가도록 함 */
   background-color: white;
+  padding: 0 30px;
 }
 table {
   width: 100%;
@@ -94,7 +94,7 @@ th.table-header {
   background-color: #000000bd;
   color: white;
   font-weight: 600;
-  font-size: 1.2rem;
+  font-size: 19px;
 }
 th.first-th {
   border-top-left-radius: 5px; /* 첫 번째 th에 왼쪽 둥근 모서리 적용 */
@@ -109,7 +109,7 @@ td.table-cell {
   text-align: center;
   background-color: white;
   color: black;
-  font-size: 1.1rem;
+  font-size: 15px;
   font-weight: 200;
 }
 td.table-cell div.error-cell {
