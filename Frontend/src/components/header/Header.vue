@@ -1,6 +1,7 @@
 <script setup>
 import { ref, watch } from "vue";
 import { useRoute } from "vue-router";
+import Line from "../line/Line.vue";
 
 // 페이지 제목 반응형 참조로 생성
 const pageTitle = ref("Dashboard");
@@ -88,6 +89,7 @@ setTimeout(() => {
       </div>
     </div>
   </div>
+  <Line class="line"></Line>
 </template>
 
 <style scoped>
@@ -97,7 +99,10 @@ setTimeout(() => {
   align-items: center;
   padding: 10px 20px;
   background-color: #f3f4f6;
-  border-bottom: 1px solid #e1e4e8;
+}
+
+.line {
+  margin-bottom: 17px;
 }
 
 .left-side,

@@ -21,43 +21,6 @@ const options = [
   { name: "6호기" },
   { name: "7호기" },
 ];
-
-// const nameWithLang = ({ name }) => `${name} `;
-
-const cardData = [
-  {
-    title: "Card 제목 1",
-    content: "value 값 1",
-    percentage: "증감율 1",
-    fontColor: "blue",
-    height: "높이값",
-    width: "너비값",
-  },
-  {
-    title: "Card 제목 2",
-    content: "value 값 2",
-    percentage: "증감율 2",
-    fontColor: "red",
-    height: "높이값",
-    width: "너비값",
-  },
-  {
-    title: "Card 제목 3",
-    content: "value 값 3",
-    percentage: "증감율 3",
-    fontColor: "blue",
-    height: "높이값",
-    width: "너비값",
-  },
-  {
-    title: "Card 제목 4",
-    content: "value 값 4",
-    percentage: "증감율 4",
-    fontColor: "red",
-    height: "높이값",
-    width: "너비값",
-  },
-];
 </script>
 
 <template>
@@ -83,7 +46,7 @@ const cardData = [
         <Button title="Simulation" backgroundColor="black" fontColor="white" />
       </div>
     </section>
-    <Line id></Line>
+    <Line></Line>
     <!-- 검색결과 -->
     <section class="result">
       <!-- 시뮬레이션 -->
