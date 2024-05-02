@@ -1,5 +1,29 @@
-<script setup></script>
+<!-- 
+** Cardhead 사용법 **
 
-<template></template>
+ <Cardhead 
+ headerText = "제목"
+ />
 
-<style scoped></style>
+-->
+<script setup>
+const props = defineProps({
+  headerText: {
+    type: String,
+    default: "제목",
+  },
+});
+</script>
+
+<template>
+  <h1>{{ headerText }}</h1>
+</template>
+
+<style scoped>
+h1 {
+  font-weight: 900;
+  color: #222222;
+  font-size: 20px;
+}
+
+</style>
