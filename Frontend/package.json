@@ -9,6 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "chart.js": "^4.4.2",
+    "chartjs-plugin-datalabels": "^2.2.0",
     "@popperjs/core": "^2.11.8",
     "chart.js": "^4.4.2",
     "d3": "^7.9.0",
