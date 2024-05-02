@@ -1,6 +1,7 @@
 <script setup>
 // 컴포넌트
 import BlackDataCard from "@/components/card/BlackDataCard.vue";
+<<<<<<< HEAD
 import Line from "@/components/line/Line.vue";
 import HeadText from "@/components/Text/HeadText.vue";
 import Cardhead from "@/components/Text/Cardhead.vue";
@@ -102,6 +103,26 @@ const month = currentDate.getMonth(); // 월 가져오기 (0부터 시작하므�
     <!-- 상태 분석 -->
   </div>
   
+=======
+import Table from "@/components/table/Table.vue";
+</script>
+<template>
+  <div>Lorem</div>
+  <!-- <BlackDataCard
+    title="OHT Usage"
+    content="30 대"
+    percentage="+1.43%"
+    :width="'377px'"
+    :height="'142px'"
+  /> -->
+  <Table
+    :columns="['No.', 'OHT ID', 'ERROR', 'COUNT']"
+    :data="[
+      ['1', '1923', '300', '23회'],
+      ['2', '1932', '300', '2회'],
+    ]"
+  />
+>>>>>>> 72d30308c391ad20765698f3cd70eee09def771b
 </template>
 <style scoped>
 .row {

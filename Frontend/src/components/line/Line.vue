@@ -6,11 +6,21 @@
 -->
 <script setup></script>
 
-<template><hr /></template>
+<template>
+  <div class="container"><hr /></div>
+</template>
 
 <style scoped>
+.container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 hr {
-  background: #d1d1d1;
+  width: 97%;
+  background: #e1e4e8;
   height: 1px;
   border: 0;
 }

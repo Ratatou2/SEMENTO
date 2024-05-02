@@ -8,6 +8,8 @@ import Line from "@/components/line/Line.vue";
 import { ref } from "vue";
 import Multiselect from "vue-multiselect";
 import "vue-multiselect/dist/vue-multiselect.css";
+import StickChart from "./components/StickChart.vue";
+import BlackDataCard from "@/components/card/BlackDataCard.vue";
 
 const value = ref();
 const options = [
@@ -19,8 +21,6 @@ const options = [
   { name: "6호기" },
   { name: "7호기" },
 ];
-
-// const nameWithLang = ({ name }) => `${name} `;
 </script>
 
 <template>
@@ -46,10 +46,11 @@ const options = [
         <Button title="Simulation" backgroundColor="black" fontColor="white" />
       </div>
     </section>
-    <Line id></Line>
+    <Line></Line>
     <!-- 검색결과 -->
     <section class="result">
-      <div class="white-box">
+      <!-- 시뮬레이션 -->
+      <div class="white-box simulation-box">
         <section class="title">
           <Cardhead
             headerText="Simulation"
@@ -60,11 +61,75 @@ const options = [
           <Simulation />
         </section>
       </div>
+      <!-- 가로정렬 : 작업량평균, 블랙데이터카드 -->
+      <section class="garo">
+        <!-- 작업량 평균비교 막대그래프 -->
+        <div class="white-box barchart-box">
+          <section class="title">
+            <Cardhead
+              headerText="작업량 평균 비교"
+              contentText="동시간대 전체 OHT작업량과 시간별 평균을 비교합니다"
+            ></Cardhead>
+          </section>
+          <div class="bar-chart">
+            <div class="bar-chart-content"><StickChart /></div>
+          </div>
+        </div>
+        <!-- 블랙데이터카드 -->
+        <div class="black-card-box">
+          <div class="black-card-content">
+            <BlackDataCard
+              title="Total Work"
+              content="1,986"
+              percentage="-1.43%"
+              fontColor="red"
+              height="높이값"
+              width="250px"
+            />
+            <BlackDataCard
+              title="Out Of DeadLine"
+              content="20"
+              percentage="-1%"
+              fontColor="red"
+              height="높이값"
+              width="250px"
+            />
+          </div>
+          <div class="black-card-content">
+            <BlackDataCard
+              title="Average Speed"
+              content="4.2m/s"
+              percentage="+10%"
+              fontColor="blue"
+              height="높이값"
+              width="250px"
+            />
+            <BlackDataCard
+              title="OHT ERROR"
+              content="12"
+              percentage="+1.6%"
+              fontColor="blue"
+              height="높이값"
+              width="250px"
+            />
+          </div>
+        </div>
+      </section>
     </section>
   </div>
 </template>
 
 <style scoped>
+.garo {
+  width: 97%;
+  display: flex;
+  justify-content: space-between;
+}
+.black-card-content {
+  width: 100%;
+  display: flex;
+  gap: 20px;
+}
 .body-container {
   width: 100%;
   display: flex;
@@ -87,6 +152,7 @@ const options = [
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 25px;
 }
 #oht-selector {
   width: 200px;
@@ -101,11 +167,36 @@ const options = [
   font-size: 15px;
 }
 
-.white-box {
-  width: 97%;
+.bar-chart {
+  width: 90%;
+  height: 220px;
+  overflow: scroll;
+  overflow-y: hidden;
+}
+
+.bar-chart-content {
+  width: 1200px;
+  height: 100%;
+}
+
+.black-card-box {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  /* align-items: end; */
+}
+.simulation-box {
   min-height: 400px;
+  width: 97%;
+}
+
+.barchart-box {
+  width: 54%;
+}
+
+.white-box {
   gap: 15px;
-  padding: 20px 0px 30px 0px;
+  padding: 20px 10px 10px 0px;
 }
 
 .title {
