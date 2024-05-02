@@ -32,9 +32,9 @@ section {
   padding: 0px 0px;
 }
 h1 {
-  font-weight: 500;
+  font-weight: 700;
   color: #464255;
-  font-size: 24px;
+  font-size: 19px;
 }
 p {
   font-weight: 500;
