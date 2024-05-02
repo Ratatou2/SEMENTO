@@ -115,6 +115,16 @@ const options = [
           </div>
         </div>
       </section>
+      <!-- Log By Total-work -->
+      <div class="white-box log-table-box">
+        <section class="title">
+          <Cardhead
+            headerText="Log By Total Work(1986건)"
+            contentText="각 작업을 클릭하여 해당하는 로그를 시뮬레이션과 함께 확인하실 수 있습니다."
+          />
+        </section>
+        <section>표 컴포넌트가 표시될자리</section>
+      </div>
     </section>
   </div>
 </template>
@@ -135,6 +145,7 @@ const options = [
   display: flex;
   flex-direction: column;
   gap: 20px;
+  margin-bottom: 50px;
 }
 .input {
   display: flex;
@@ -187,6 +198,11 @@ const options = [
 }
 .simulation-box {
   min-height: 400px;
+  width: 97%;
+}
+
+.log-table-box {
+  min-height: 200px;
   width: 97%;
 }
 
