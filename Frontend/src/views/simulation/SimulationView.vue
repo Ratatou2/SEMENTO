@@ -10,6 +10,7 @@ import Multiselect from "vue-multiselect";
 import "vue-multiselect/dist/vue-multiselect.css";
 import StickChart from "./components/StickChart.vue";
 import BlackDataCard from "@/components/card/BlackDataCard.vue";
+import SimulationSideTapView from "./SimulationSideTapView.vue";
 
 const value = ref();
 const options = [
@@ -21,6 +22,12 @@ const options = [
   { name: "6호기" },
   { name: "7호기" },
 ];
+
+const isSidePageOpen = ref(false);
+
+function toggleSidePage() {
+  isSidePageOpen.value = !isSidePageOpen.value;
+}
 </script>
 
 <template>
@@ -123,13 +130,42 @@ const options = [
             contentText="각 작업을 클릭하여 해당하는 로그를 시뮬레이션과 함께 확인하실 수 있습니다."
           />
         </section>
-        <section>표 컴포넌트가 표시될자리</section>
+        <section>
+          <button @click="toggleSidePage">보기</button>표 컴포넌트가 표시될자리
+        </section>
       </div>
     </section>
+  </div>
+  <div class="side-page" :class="{ open: isSidePageOpen }">
+    <!-- 사이드 페이지 내용을 여기에 추가하세요 -->
+    <section class="back-icon">
+      <font-awesome-icon
+        @click="toggleSidePage"
+        :icon="['fas', 'angles-right']"
+        size="2xl"
+        style="color: #383839"
+      />
+    </section>
+    <SimulationSideTapView />
   </div>
 </template>
 
 <style scoped>
+.side-page {
+  width: 48%;
+  height: 100%;
+  background-color: #f3f2f7;
+  position: fixed;
+  top: 0;
+  right: -48%; /* 초기 위치는 오른쪽 바깥에 있습니다 */
+  transition: right 0.5s;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.09);
+}
+
+.side-page.open {
+  right: 0; /* 열릴 때 위치 */
+}
+
 .garo {
   width: 97%;
   display: flex;
@@ -208,17 +244,6 @@ const options = [
 
 .barchart-box {
   width: 54%;
-}
-
-.white-box {
-  gap: 15px;
-  padding: 20px 10px 10px 0px;
-}
-
-.title {
-  width: 100%;
-  display: flex;
-  flex-direction: start;
 }
 
 .content {

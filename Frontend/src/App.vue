@@ -50,5 +50,12 @@ import Header from "@/components/header/Header.vue";
   align-items: center;
   border-radius: 5px;
   box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.05);
+  gap: 15px;
+  padding: 20px 10px 10px 0px;
+}
+.title {
+  width: 100%;
+  display: flex;
+  flex-direction: start;
 }
 </style>
