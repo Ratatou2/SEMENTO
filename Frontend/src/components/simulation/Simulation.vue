@@ -2,6 +2,11 @@
 import { ref, onMounted } from "vue";
 import * as d3 from "d3";
 
+//컬러설정
+const pathColor = "#B4B4B4";
+const facilityColor = "#292D30";
+const ohtColor = "orange";
+
 const container = ref(null);
 const svgContainer = ref(null);
 
@@ -821,7 +826,7 @@ onMounted(() => {
     .attr("y1", (d) => yScale(nodes.find((node) => node.id === d.source).y))
     .attr("x2", (d) => xScale(nodes.find((node) => node.id === d.target).x))
     .attr("y2", (d) => yScale(nodes.find((node) => node.id === d.target).y))
-    .attr("stroke", "steelblue");
+    .attr("stroke", pathColor);
 
   const nodeGroup = svg
     .selectAll(".node")
@@ -836,7 +841,7 @@ onMounted(() => {
     .append("circle")
     .attr("r", 5)
     // .attr("fill", "steelblue")
-    .attr("fill", (d) => (idList.includes(d.id) ? "orange" : "steelblue"));
+    .attr("fill", (d) => (idList.includes(d.id) ? facilityColor : pathColor));
 
   nodeGroup
     .append("text")
@@ -847,7 +852,7 @@ onMounted(() => {
     .text((d) => d.id);
 
   // 점 생성 및 이동 경로 설정
-  const point = svg.append("circle").attr("r", 5).attr("fill", "red");
+  const point = svg.append("circle").attr("r", 6).attr("fill", ohtColor);
 
   const path = svg.append("path").attr("fill", "none");
   // .attr("stroke", "red")
@@ -885,6 +890,7 @@ onMounted(() => {
   <div
     class="container"
     ref="container"
+    @wheel.prevent="handleWheel"
     @wheel="handleWheel"
     @mousedown.prevent="startDrag"
     @mousemove.prevent="drag"
