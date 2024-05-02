@@ -4,13 +4,26 @@ import { Chart, registerables } from 'chart.js';
 import { Bar } from 'vue-chartjs';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
+const props = defineProps({
+  width: {
+    type: String,
+    default: "100%",
+  },
+  height: {
+    type: String,
+    default: "300px",
+  },
+});
+
 // 시간
 const labels = [
-    '13h', '14h', '15h', '16h', '17h', '18h',
-    '19h', '20h', '21h', '22h', '23h', '24h'
+    "0h", "1h", "2h", "3h", "4h", "5h", 
+    "6h", "7h", "8h", "9h", "10h", "11h", 
+    "12h", '13h', '14h', '15h', '16h', '17h', 
+    '18h', '19h', '20h', '21h', '22h', '23h'
 ];
 // 값
-const data = [40, 20, 12, 39, 10, 40, 39, 80, 40, 20, 12, 11];
+const data = [40, 20, 12, 39, 10, 40, 39, 80, 40, 20, 12, 11, 40, 20, 12, 39, 10, 40, 39, 80, 40, 20, 12, 11];
 
 
 // Chart.js 컴포넌트 등록
@@ -24,17 +37,10 @@ const chartData = reactive({
     {
       label: false,
       backgroundColor: [
-          '#BCE0F2',
-          '#BCE0F2',
-          '#BCE0F2',
-          '#BCE0F2',
-          '#BCE0F2',
-          '#BCE0F2',
-          '#BCE0F2',
-          '#BCE0F2',
-          '#BCE0F2',
-          '#BCE0F2',
-          '#BCE0F2',
+          '#BCE0F2', '#BCE0F2','#BCE0F2', '#BCE0F2', '#BCE0F2','#BCE0F2',
+          '#BCE0F2', '#BCE0F2','#BCE0F2', '#BCE0F2', '#BCE0F2','#BCE0F2',
+          '#BCE0F2', '#BCE0F2','#BCE0F2', '#BCE0F2', '#BCE0F2','#BCE0F2',
+          '#BCE0F2', '#BCE0F2','#BCE0F2', '#BCE0F2', '#BCE0F2',
           '#003CB0', // 마지막 막대만 색깔 다르게
       ],
       data,
@@ -52,6 +58,9 @@ const chartOptions = reactive({
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
+        tooltip: {
+            displayColors: false, // 색상 제거
+        },
         datalabels: { // 막대별 값 설정
             color: '#555555',
             font: {
@@ -105,9 +114,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <div>
-    <Bar :data="chartData" :options="chartOptions"/>
-  </div>
+    <div :style="{ width: width, height: height}">
+        <Bar :data="chartData" :options="chartOptions"/>
+    </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+</style>

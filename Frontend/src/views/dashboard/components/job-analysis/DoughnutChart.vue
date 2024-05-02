@@ -4,6 +4,17 @@ import { Chart, registerables } from 'chart.js';
 import { Doughnut } from 'vue-chartjs';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
+const props = defineProps({
+  width: {
+    type: String,
+    default: "100%",
+  },
+  height: {
+    type: String,
+    default: "300px",
+  },
+});
+
 const data = [10, 30, 60];
 
 Chart.register(...registerables);
@@ -67,7 +78,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div>
+    <div :style="{width:width, height:height}">
         <Doughnut :data="chartData" :options="chartOptions" />
     </div>
 </template>

@@ -31,7 +31,7 @@ const props = defineProps({
   },
   height: {
     type: String,
-    default: "atuo",
+    default: "auto",
   },
   width: {
     type: String,

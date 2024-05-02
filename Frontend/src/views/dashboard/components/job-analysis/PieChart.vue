@@ -4,6 +4,17 @@ import { Chart, registerables } from 'chart.js';
 import { Pie } from 'vue-chartjs';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
+const props = defineProps({
+  width: {
+    type: String,
+    default: "100%",
+  },
+  height: {
+    type: String,
+    default: "300px",
+  },
+});
+
 Chart.register(...registerables);
 Chart.register(ChartDataLabels);
 
@@ -73,7 +84,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div>
+    <div :style="{width: width, height: height}">
         <Pie :data="chartData" :options="chartOptions" />
     </div>
 </template>
