@@ -82,7 +82,6 @@ function getColumnColor(column) {
 .table-container {
   border-radius: 5px;
   background-color: white;
-  padding: 0 30px;
 }
 table {
   width: 100%;

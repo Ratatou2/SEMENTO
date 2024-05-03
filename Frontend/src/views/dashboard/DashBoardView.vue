@@ -5,10 +5,12 @@ import Line from "@/components/line/Line.vue";
 import HeadText from "@/components/Text/HeadText.vue";
 import Cardhead from "@/components/Text/Cardhead.vue";
 import Table from "@/components/table/Table.vue";
+import WhiteCard from "./components/state-analysis/WhiteCard.vue";
 // 차트
 import StickChart from "./components/job-analysis/StickChart.vue";
 import PieChart from "./components/job-analysis/PieChart.vue";
 import DoughnutChart from "./components/job-analysis/DoughnutChart.vue";
+import LineChart from "./components/state-analysis/LineChart.vue";
 
 // 날짜 계산
 const months = [
@@ -32,108 +34,160 @@ const month = currentDate.getMonth(); // 월 가져오기 (0부터 시작하므�
 
 </script>
 <template>
-  <div class="container col">
+  <div class="col container-header">
+    <div class="row">
+      <div class="search-period">
+        Months
+      </div>
+      <div class="search-date">
+        {{ months[month] }}, {{ year }}
+      </div>
+    </div>
+  </div>
+  <Line />
+  <div class="container col gap-40">
     <!-- 작업 분석 -->
-    <!-- 작업 분석 - 시간대별 작업량 -->
-    <div class="col container-item">
-      <div class="row">
-        <div class="search-period">
-          Months
-        </div>
-        <div class="search-date">
-          {{ months[month] }}, {{ year }}
-        </div>
-      </div>
-      <Line />
-    </div>
-    <HeadText header-text="# Job Analysis" />
-    <div class="container-item row gap-20">
-      <div class="col">
-        <BlackDataCard
-          title="OHT Usage"
-          content="30 대"
-          :width="'320px'"
-          :height="'130px'"
-        />
-        <BlackDataCard
-          title="Total Work"
-          content="10,986"
-          percentage="+1.43%"
-          :width="'320px'"
-          :height="'130px'"
-        />
-        <BlackDataCard
-          title="Average Daily Work per OHT"
-          content="1,178"
-          percentage="-4.43%"
-          :width="'320px'"
-          :height="'130px'"
-        />
-      </div>
-      <div class="white-box">
-        <div class="title">
-          <Cardhead header-text="시간대 별 작업량" content-text="한달동안 시간대 별 OHT의 작업량을 보여줍니다." />
-        </div>
-        <StickChart width="850px" height="310px" />
-      </div>
-    </div>
-    <!-- 작업 분석 - 작업 성공 실패 -->
-    <div class="row gap-20">
-      <div class="col">
-        <div class="white-box job-chart">
-          <div class="title">
-            <Cardhead header-text="작업 성공률" content-text="전체 작업에 대해 데드라인 내에 도착한 OHT의 비율을 보여줍니다." />
-          </div>
-          <PieChart width="200px" height="200px" />
-        </div>
-        <div class="white-box job-chart">
-          <div class="title">
-            <Cardhead header-text="작업 실패 원인 별 비율" content-text="실패한 작업에 대해 실패 원인에 대한 비율을 보여줍니다." />
-          </div>
-          <DoughnutChart width="200px" height="200px" />
-        </div>
-      </div>
-      <div class = "white-box job-table">
-        <div class="title">
-          <Cardhead header-text="실패한 작업 로그(198건)" content-text="데드라인까지 도착하지 못한 OHT에 대한 원인을 보여줍니다." />
-        </div>
-        <Table
-            width="100%"
-            :columns="['No.', 'OHT ID', 'ERROR', 'COUNT']"
-            :data="[
-              ['1', '1923', '300', '23회'],
-              ['2', '1932', '300', '2회'],
-              ['3', '1932', '300', '2회'],
-              ['4', '1932', '300', '2회'],
-              ['5', '1932', '300', '2회'],
-              ['6', '1932', '300', '2회'],
-              ['7', '1932', '300', '2회'],
-              ['1', '1923', '300', '23회'],
-              ['2', '1932', '300', '2회'],
-              ['3', '1932', '300', '2회'],
-              ['4', '1932', '300', '2회'],
-              ['5', '1932', '300', '2회'],
-              ['6', '1932', '300', '2회'],
-              ['7', '1932', '300', '2회'],
-              ['1', '1923', '300', '23회'],
-              ['2', '1932', '300', '2회'],
-              ['3', '1932', '300', '2회'],
-              ['4', '1932', '300', '2회'],
-              ['5', '1932', '300', '2회'],
-              ['6', '1932', '300', '2회'],
-              ['7', '1932', '300', '2회'],
-              ['1', '1923', '300', '23회'],
-              ['2', '1932', '300', '2회'],
-              ['3', '1932', '300', '2회'],
-              ['4', '1932', '300', '2회'],
-              ['5', '1932', '300', '2회'],
-              ['6', '1932', '300', '2회'],
-              ['7', '1932', '300', '2회'],
-            ]"
+    <div class="col">
+      <HeadText header-text="# Job Analysis" />
+      <!-- 작업 분석 - 시간대별 작업량 -->
+      <div class="container-item row gap-20">
+        <div class="col">
+          <BlackDataCard
+            title="OHT Usage"
+            content="30 대"
+            :width="'320px'"
+            :height="'130px'"
           />
+          <BlackDataCard
+            title="Total Work"
+            content="10,986"
+            percentage="+1.43%"
+            :width="'320px'"
+            :height="'130px'"
+          />
+          <BlackDataCard
+            title="Average Daily Work per OHT"
+            content="1,178"
+            percentage="-4.43%"
+            :width="'320px'"
+            :height="'130px'"
+          />
+        </div>
+        <div class="white-box job-time">
+          <div class="title">
+            <Cardhead header-text="시간대 별 작업량" content-text="한달동안 시간대 별 OHT의 작업량을 보여줍니다." />
+          </div>
+          <div class="padding-left-20">
+            <StickChart width="100%" height="310px" />
+          </div>
+        </div>
       </div>
     </div>
+
+    <!-- 작업 분석 - 작업 성공 실패 -->
+    <div class="col">
+      <div class="row gap-20">
+        <div class="col">
+          <div class="white-box job-chart">
+            <div class="title">
+              <Cardhead header-text="작업 성공률" content-text="전체 작업에 대해 데드라인 내에 도착한 OHT의 비율을 보여줍니다." />
+            </div>
+            <PieChart width="200px" height="200px" />
+          </div>
+          <div class="white-box job-chart">
+            <div class="title">
+              <Cardhead header-text="작업 실패 원인 별 비율" content-text="실패한 작업에 대해 실패 원인에 대한 비율을 보여줍니다." />
+            </div>
+            <DoughnutChart width="200px" height="200px" />
+          </div>
+        </div>
+        <div class = "white-box job-table">
+          <div class="title">
+            <Cardhead header-text="실패한 작업 로그(198건)" content-text="데드라인까지 도착하지 못한 OHT에 대한 원인을 보여줍니다." />
+          </div>
+          <div class="padding-left-20">
+            <Table
+              width="100%"
+              :columns="['No.', 'OHT ID', 'ERROR', 'COUNT']"
+              :data="[
+                ['1', '1923', '300', '23회'],
+                ['2', '1932', '300', '2회'],
+                ['3', '1932', '300', '2회'],
+                ['4', '1932', '300', '2회'],
+                ['5', '1932', '300', '2회'],
+                ['6', '1932', '300', '2회'],
+                ['7', '1932', '300', '2회'],
+                ['1', '1923', '300', '23회'],
+                ['2', '1932', '300', '2회'],
+                ['3', '1932', '300', '2회'],
+                ['4', '1932', '300', '2회'],
+                ['5', '1932', '300', '2회'],
+                ['6', '1932', '300', '2회'],
+                ['7', '1932', '300', '2회'],
+                ['1', '1923', '300', '23회'],
+                ['2', '1932', '300', '2회'],
+                ['3', '1932', '300', '2회'],
+                ['4', '1932', '300', '2회'],
+                ['5', '1932', '300', '2회'],
+                ['6', '1932', '300', '2회'],
+                ['7', '1932', '300', '2회'],
+                ['1', '1923', '300', '23회'],
+                ['2', '1932', '300', '2회'],
+                ['3', '1932', '300', '2회'],
+                ['4', '1932', '300', '2회'],
+                ['5', '1932', '300', '2회'],
+                ['6', '1932', '300', '2회'],
+                ['7', '1932', '300', '2회'],
+              ]"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- 상태 분석 -->
+    <div class="col">
+      <HeadText header-text="# State Analysis" />
+      <div class="container-item row gap-20">
+        <div class="col">
+          <BlackDataCard
+            title="OHT Deadline"
+            content="30m 20s"
+            :width="'320px'"
+            :height="'130px'"
+          />
+          <BlackDataCard
+            title="Average Working Hours"
+            content="4m 35s"
+            percentage="+1.43%"
+            :width="'320px'"
+            :height="'130px'"
+          />
+          <BlackDataCard
+            title="Average Idle Hours"
+            content="15m 24s"
+            percentage="-4.43%"
+            :width="'320px'"
+            :height="'130px'"
+          />
+        </div>
+        <div class="col" style="width: 100%; height: 100%">
+          <div class="white-box line-chart">
+            <div class="title">
+              <Cardhead header-text="시간대 별 작업/유휴 상태 OHT 수" content-text="시간대 별로 작업 중인 OHT와 유휴 상태의 OHT 수를 보여줍니다." />
+            </div>
+            <div class="padding-left-20">
+              <LineChart height="220px"/>
+            </div>
+          </div>
+          <div class="row" style="width: 100%;">
+            <WhiteCard title="작업이 가장 많은 시간대" startTime="14:00" endTime="16:00" width="33%" height="70px" />
+            <WhiteCard title="OHT가 가장 활발한 시간대" startTime="14:00" endTime="16:00" width="33%" height="70px"/>
+            <WhiteCard title="유휴 상태가 많은 시간대" startTime="14:00" endTime="16:00" width="33%" height="70px"/>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
   
 </template>
@@ -153,13 +207,26 @@ const month = currentDate.getMonth(); // 월 가져오기 (0부터 시작하므�
 .gap-20 {
   gap: 20px;
 }
+.gap-30 {
+  gap: 30px;
+}
+.gap-40 {
+  gap: 40px;
+}
 
+.padding-left-20 {
+  width: 100%;
+  padding-left: 30px;
+}
+
+.container-header {
+ padding-left: 30px; 
+}
 .container {
   width: 100%;
   height: 100%;
-  padding: 20px;
+  padding: 10px 30px;
   overflow: hidden;
-  gap: 20px
 }
 
 .search-period {
@@ -181,11 +248,13 @@ const month = currentDate.getMonth(); // 월 가져오기 (0부터 시작하므�
   font-weight: 400;
   margin-left: 10px;
 }
+.job-time{
+  width: 100%;  
+}
 
 .bar-chart {
   padding: 20px 0;
   width: 100%;
-  align-items: flex-start;
   overflow-x: auto;
   overflow-y: hidden;
 }
@@ -198,6 +267,11 @@ const month = currentDate.getMonth(); // 월 가져오기 (0부터 시작하므�
 .job-table {
   width: 100%;
   height: 710px;
-  overflow-y: scroll;
+  overflow-y: auto;
+}
+
+.line-chart {
+  width: 100%;
+  padding: 20px 0;
 }
 </style>

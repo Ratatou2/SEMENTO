@@ -1,0 +1,182 @@
+<script setup>
+import { ref, onMounted, watchEffect } from "vue";
+import { Chart, registerables } from 'chart.js';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
+
+const props = defineProps({
+  width: {
+    type: String,
+    default: "100%",
+  },
+  height: {
+    type: String,
+    default: "300px",
+  },
+});
+
+const labels = [
+    "0h", "1h", "2h", "3h", "4h", "5h", 
+    "6h", "7h", "8h", "9h", "10h", "11h", 
+    "12h", '13h', '14h', '15h', '16h', '17h', 
+    '18h', '19h', '20h', '21h', '22h', '23h'
+];
+const working_ohts = [
+  14, 20, 25, 11, 28, 17, 30, 18, 12, 26, 29, 15, 
+  21, 27, 22, 19, 23, 16, 24, 13, 31, 32, 33, 15
+];
+const idle_ohts = [
+  17, 23, 20, 22, 32, 30, 27, 29, 19, 25, 30, 18, 
+  21, 22, 16, 21, 22, 26, 29, 33, 34, 35, 36, 37
+];
+
+Chart.register(...registerables);
+Chart.register(ChartDataLabels);
+
+const lineChart = ref(null);
+
+//update를 위한 변수
+let lineChartRef = null;
+
+onMounted(async () => {
+  //라인차트
+  drawLine();
+  //실시간 변화시 차트 업데이트
+  watchEffect(() => {
+    //라인차트 업데이트
+    lineChartRef.data.datasets[0].data = working_ohts;
+    lineChartRef.data.datasets[1].data = idle_ohts;
+    lineChartRef.update();
+  });
+});
+
+function drawLine() {
+  const ctx = lineChart.value.getContext("2d");
+  let gradientFill = ctx.createLinearGradient(0, 0, 0, 200);
+  gradientFill.addColorStop(0, "rgba(0, 7, 182, 0.1)");
+  gradientFill.addColorStop(1, "rgba(0, 0, 0, 0)");
+
+  const data = {
+    labels: labels,
+
+    datasets: [
+      {
+        label: "Working",
+        data: working_ohts,
+        borderColor: "#2E8FD6",
+        tension: 0.5,
+        pointStyle: 'Rounded',
+        pointRadius: 1,
+        // pointBorderWidth: 0,
+        pointHoverRadius: 5,
+        pointHoverBorderWidth: 1,
+        pointBackgroundColor: "#422F8A",
+        fill: true, // 선 배경 채우기
+        backgroundColor: gradientFill, // 배경 그라데이션 
+        borderWidth: 2.5,
+        hoverOffset: 4,
+      },
+      {
+        label: "Idle",
+        data: idle_ohts,
+        fill: false,
+        borderColor: "#ECE9F1",
+        tension: 0.5,
+        pointStyle: 'Rounded',
+        pointRadius: 1,
+        pointBackgroundColor: "#555555",
+        borderWidth: 2.5, // 선의 두께 설정
+        hoverOffset: 4,
+      },
+    ],
+  };
+
+  lineChartRef = new Chart(ctx, {
+    type: "line",
+    data: data,
+    options: {
+      interaction: {
+        intersect: false,
+      },
+      maintainAspectRatio: false,
+      plugins: {
+        tooltip: {
+            enabled: true, // 튤팁 활성화 (기본값 true)
+            backgroundColor: "#ffffff", // 튤팁 색상
+            padding: 10, // 튤팁 패딩
+            titleColor: '#555555',
+            titleAlign: 'left',
+            titleFont: {
+                weight: 'bold',
+                size: 10,
+                lineHeight: 1.5
+            },
+            bodyColor: '#555555',
+            bodyAlign: 'center',
+            bodyFont: {
+                weight: 'bold',
+                size: 14,
+                lineHeight: 1.5
+            },
+            displayColors: false, // 색상 제거
+        },
+        datalabels: {
+            formatter: function(value, context) {
+                return '';
+            },
+        },
+        legend: {
+            labels: {
+                usePointStyle: true,
+                boxHeight: 6
+            }
+        }
+      },
+      scales: {
+        y: {
+          ticks: {
+            color: "#A2A3A5",
+            // forces step size to be 50 units
+            stepSize: 5,
+            callback: (value, index) => {
+              if (value == 0) return "";
+              return value % 5 === 0 ? value : "";
+            },
+          },
+          grid: {
+            drawTicks: false,
+            color: "#ECE9F1",
+            lineWidth: 1,
+          },
+          border: {
+            display: false,
+          },
+        },
+        x: {
+          ticks: {
+            color: "#A2A3A5",
+            callback: (value, index) => {
+              return value + "h";
+            },
+          },
+          grid: {
+            display: false,
+          },
+          border: {
+            display: false,
+          },
+        },
+      },
+    },
+  });
+}
+
+</script>
+
+<template>
+  <div :style="{ width: width, height: height}">
+    <canvas ref="lineChart"> </canvas>
+  </div>
+</template>
+
+<style scoped>
+</style>

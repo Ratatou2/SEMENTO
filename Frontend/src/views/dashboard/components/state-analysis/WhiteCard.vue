@@ -24,20 +24,30 @@ const props = defineProps({
     type: String,
     default: "",
   },
+  width: {
+    type: String,
+    default: "200px",
+  },
+  height: {
+    type: String,
+    default: "150px"
+  }
 });
 </script>
 <template>
-  <div class="card-container">
+  <div class="card-container" :style="{ width: width, height: height}">
     <div class="card-title">
       <font-awesome-icon
         :icon="['fas', 'circle']"
         size="2xs"
         style="color: lightgreen"
       />
-      {{ title }}
+      <div>
+        {{ title }}
+      </div>
     </div>
     <div class="card-content-container">
-      <div class="card-content">{{ startTime }} * {{ endTime }}</div>
+      <div class="card-content">{{ startTime }} - {{ endTime }}</div>
     </div>
   </div>
 </template>
@@ -53,6 +63,13 @@ const props = defineProps({
 }
 
 .card-title {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+}
+
+.card-title > div {
   font-weight: 600;
   font-size: 15px;
 }
@@ -61,6 +78,7 @@ const props = defineProps({
   display: flex; /* 가로로 나열 */
   justify-content: space-between; /* 양쪽 정렬 */
   align-items: center; /* 수직 가운데 정렬 */
+  padding: 0 20px;
 }
 
 .card-content {
