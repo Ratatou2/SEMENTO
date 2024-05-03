@@ -5,6 +5,7 @@ import Line from "@/components/line/Line.vue";
 import HeadText from "@/components/Text/HeadText.vue";
 import Cardhead from "@/components/Text/Cardhead.vue";
 import Table from "@/components/table/Table.vue";
+import WhiteCard from "./components/state-analysis/WhiteCard.vue";
 // 차트
 import StickChart from "./components/job-analysis/StickChart.vue";
 import PieChart from "./components/job-analysis/PieChart.vue";
@@ -170,16 +171,19 @@ const month = currentDate.getMonth(); // 월 가져오기 (0부터 시작하므�
             :height="'130px'"
           />
         </div>
-        <div class="col" style="width: 100%;">
+        <div class="col" style="width: 100%; height: 100%">
           <div class="white-box line-chart">
             <div class="title">
               <Cardhead header-text="시간대 별 작업/유휴 상태 OHT 수" content-text="시간대 별로 작업 중인 OHT와 유휴 상태의 OHT 수를 보여줍니다." />
             </div>
             <div class="padding-left-20">
-              <LineChart height="200px"/>
+              <LineChart height="220px"/>
             </div>
           </div>
-          <div class="row">
+          <div class="row" style="width: 100%;">
+            <WhiteCard title="작업이 가장 많은 시간대" startTime="14:00" endTime="16:00" width="33%" height="70px" />
+            <WhiteCard title="OHT가 가장 활발한 시간대" startTime="14:00" endTime="16:00" width="33%" height="70px"/>
+            <WhiteCard title="유휴 상태가 많은 시간대" startTime="14:00" endTime="16:00" width="33%" height="70px"/>
           </div>
         </div>
       </div>
