@@ -74,6 +74,9 @@ const chartOptions = {
       backgroundColor: "#000",
       padding: 10,
     },
+    datalabels: {
+      display: false,
+    },
   },
 
   scales: {

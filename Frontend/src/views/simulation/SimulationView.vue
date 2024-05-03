@@ -99,7 +99,7 @@ function toggleSidePageHandler(data) {
               content="1,986"
               percentage="-1.43%"
               fontColor="red"
-              height="높이값"
+              :height="'130px'"
               width="250px"
             />
             <BlackDataCard
@@ -107,7 +107,7 @@ function toggleSidePageHandler(data) {
               content="20"
               percentage="-1%"
               fontColor="red"
-              height="높이값"
+              :height="'130px'"
               width="250px"
             />
           </div>
@@ -117,7 +117,7 @@ function toggleSidePageHandler(data) {
               content="4.2m/s"
               percentage="+10%"
               fontColor="blue"
-              height="높이값"
+              :height="'130px'"
               width="250px"
             />
             <BlackDataCard
@@ -125,7 +125,7 @@ function toggleSidePageHandler(data) {
               content="12"
               percentage="+1.6%"
               fontColor="blue"
-              height="높이값"
+              :height="'130px'"
               width="250px"
             />
           </div>
