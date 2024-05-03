@@ -11,6 +11,7 @@ import "vue-multiselect/dist/vue-multiselect.css";
 import StickChart from "./components/StickChart.vue";
 import BlackDataCard from "@/components/card/BlackDataCard.vue";
 import SimulationSideTapView from "./SimulationSideTapView.vue";
+import Table from "@/components/table/Table.vue";
 
 const value = ref();
 const options = [
@@ -25,8 +26,16 @@ const options = [
 
 const isSidePageOpen = ref(false);
 
-function toggleSidePage() {
+function toggleSidePage(date) {
+  //emit으로 받은 date정보를 통해 사이드페이지의 내용을 load
+
+  //show상태로 변경
   isSidePageOpen.value = !isSidePageOpen.value;
+}
+
+//emit 받는 핸들러
+function toggleSidePageHandler(data) {
+  toggleSidePage(data);
 }
 </script>
 
@@ -130,8 +139,47 @@ function toggleSidePage() {
             contentText="각 작업을 클릭하여 해당하는 로그를 시뮬레이션과 함께 확인하실 수 있습니다."
           />
         </section>
-        <section>
-          <button @click="toggleSidePage">보기</button>표 컴포넌트가 표시될자리
+        <section class="table-container">
+          <Table
+            width="100%"
+            bodyFontSize="14px"
+            headerFontSize="12px"
+            @toggle-side-page="toggleSidePageHandler"
+            :columns="[
+              'No.',
+              'Period',
+              'Time Taken',
+              'ERROR',
+              'Average Speed',
+              'Out of DeadLine',
+            ]"
+            :data="[
+              [
+                '1',
+                '2024.01.07 12:03:21 - 2024.01.07 12:10:30',
+                '7m 9',
+                '300',
+                '2.3m/s',
+                'FALSE',
+              ],
+              [
+                '1',
+                '2024.01.07 12:03:21 - 2024.01.07 12:10:30',
+                '7m 9',
+                '300',
+                '2.3m/s',
+                'FALSE',
+              ],
+              [
+                '1',
+                '2024.01.07 12:03:21 - 2024.01.07 12:10:30',
+                '7m 9',
+                '300',
+                '2.3m/s',
+                'FALSE',
+              ],
+            ]"
+          />
         </section>
       </div>
     </section>
@@ -143,7 +191,7 @@ function toggleSidePage() {
         @click="toggleSidePage"
         :icon="['fas', 'angles-right']"
         size="2xl"
-        style="color: #383839"
+        style="color: #383839; margin-left: 15px; margin-top: 20px"
       />
     </section>
     <SimulationSideTapView />
@@ -160,6 +208,7 @@ function toggleSidePage() {
   right: -48%; /* 초기 위치는 오른쪽 바깥에 있습니다 */
   transition: right 0.5s;
   box-shadow: -2px 0 8px rgba(0, 0, 0, 0.09);
+  overflow: scroll;
 }
 
 .side-page.open {
@@ -239,6 +288,11 @@ function toggleSidePage() {
 
 .log-table-box {
   min-height: 200px;
+  width: 97%;
+  display: flex;
+  align-items: center;
+}
+.table-container {
   width: 97%;
 }
 
