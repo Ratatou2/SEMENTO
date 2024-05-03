@@ -1,7 +1,7 @@
 <!-- 
 ** Cardhead 사용법 **
 
- <Cardhead 
+ <HeadText 
  headerText = "제목"
  />
 
@@ -21,9 +21,8 @@ const props = defineProps({
 
 <style scoped>
 h1 {
-  font-weight: 900;
+  font-weight: 700;
   color: #222222;
   font-size: 20px;
 }
-
 </style>

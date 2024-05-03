@@ -67,7 +67,7 @@ const idList = [
   "203",
 ];
 const updateTransform = () => {
-  svgContainer.value.style.transition = "transform 0.3s ease-in-out"; // 확대 및 축소 시에만 transition 추가
+  //svgContainer.value.style.transition = "transform 0.3s ease-in-out"; // 확대 및 축소 시에만 transition 추가
   svgContainer.value.style.transform = `scale(${scale}) translate(${translateX}px, ${translateY}px)`;
 };
 
