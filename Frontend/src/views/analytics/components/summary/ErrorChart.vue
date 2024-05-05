@@ -4,12 +4,12 @@ import { hierarchy, pack } from 'd3-hierarchy'
 const errorData = [
   {
     name: 'Facility Error',
-    amount: 75,
+    amount: 35,
     color: '#292D30'
   },
   {
     name: 'OHT Error',
-    amount: 20,
+    amount: 60,
     color: '#34B3F1'
   },
   {
@@ -35,15 +35,15 @@ const rootHierarchy = hierarchy(transformedErrorData)
 
 // Pack the circles inside the viewbox
 const layoutData = pack()
-  .size([500, 500])
-  .padding(10)(rootHierarchy);
+  .size([300, 350])
+  .padding(-10)(rootHierarchy);
 
 </script>
 
 <template>
   <div>
-    <svg width="500" height="500">
-      <g
+    <svg width="300" height="500">
+      <g 
         class="error"
         v-for="error in layoutData.children"
         :key="error.data.name"
@@ -52,13 +52,13 @@ const layoutData = pack()
         }"
       >
         <circle class="error__circle" :r="error.r" :fill="error.data.color"></circle>
-        <text class="error__label">{{ error.data.name }}</text>
+        <text class="error__label" y="-5">{{ error.data.name }}</text>
+        <text class="error__amount" y="20">{{ error.data.amount }}</text>
       </g>
     </svg>
     <div class="controls">
       <div class="control" v-for="error in errors" :key="error.name">
         <label>{{ error.name }}</label>
-        <input type="number" v-model="error.amount" step="10" min="10">
       </div>
     </div>
   </div>
@@ -82,6 +82,13 @@ svg {
 .error__label {
   fill: #fff;
   font-weight: bold;
+  text-shadow: 0 3px 10px rgba(0, 0, 0, 0.6);
+}
+
+.error__amount {
+  fill: #fff;
+  font-weight: bold;
+  font-size: 20px;
   text-shadow: 0 3px 10px rgba(0, 0, 0, 0.6);
 }
 

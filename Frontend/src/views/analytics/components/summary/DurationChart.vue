@@ -10,7 +10,7 @@ const props = defineProps({
   },
   height: {
     type: String,
-    default: "300px",
+    default: "100%",
   },
 });
 

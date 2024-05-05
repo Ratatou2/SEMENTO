@@ -9,6 +9,7 @@ import "vue-multiselect/dist/vue-multiselect.css";
 // chart
 import DurationChart from "./components/summary/DurationChart.vue";
 import ErrorChart from "./components/summary/ErrorChart.vue";
+import CongestionChart from "./components/summary/CongestionChart.vue";
 
 </script>
 
@@ -41,7 +42,7 @@ import ErrorChart from "./components/summary/ErrorChart.vue";
     </section>
     <!-- 그래프 분석 -->
     <section class="chart">
-        <div class="white-box barchart-box">
+        <div class="white-box error-chart-box">
           <section class="title">
             <Cardhead
               headerText="Error Chart"
@@ -52,15 +53,31 @@ import ErrorChart from "./components/summary/ErrorChart.vue";
             <div class="error-chart-content"><ErrorChart /></div>
           </div>
         </div>
-        <div class="white-box barchart-box">
-          <section class="title">
-            <Cardhead
-              headerText="Duration Time Chart"
-              contentText="각 정체 상황별 소요시간 그래프입니다."
-            ></Cardhead>
-          </section>
-          <div class="duration-chart">
-            <div class="duration-chart-content"><DurationChart /></div>
+        <div class="right-chart-box">
+          <div class="white-box">
+            <section class="title">
+              <Cardhead
+                headerText="Congestion Time"
+                contentText="기간동안 소요된 총 정체시간 입니다."
+              ></Cardhead>
+            </section>
+            <div class="congestion-chart">
+              <div class="congestion-chart-content"><CongestionChart /></div>
+            </div>
+            <div class="congestion-chart-text">
+              <Text text="총 2시간 15분 23초의 정체시간이 소요되었습니다."  size="19px" />
+            </div>
+          </div>
+          <div class="white-box duration-chart-box">
+            <section class="title">
+              <Cardhead
+                headerText="Duration Time Chart"
+                contentText="각 정체 상황별 소요시간 그래프입니다."
+              ></Cardhead>
+            </section>
+            <div class="duration-chart">
+              <div class="duration-chart-content"><DurationChart /></div>
+            </div>
           </div>
         </div>
     </section>
@@ -106,8 +123,22 @@ import ErrorChart from "./components/summary/ErrorChart.vue";
 .chart {
     display: flex;
     flex-direction: row;
-    gap: 10px;
-    padding-left: 23px;
+    gap: 20px;
+    padding: 0 23px;
+    height: 500px;
+}
+
+.error-chart-box {
+}
+
+.duration-chart-box {
+  height: 100%;
+}
+
+.right-chart-box {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .duration-chart {
@@ -119,7 +150,6 @@ import ErrorChart from "./components/summary/ErrorChart.vue";
 
 .duration-chart-content {
   width: 800px;
-  height: 100%;
 }
 
 .error-chart {
@@ -131,6 +161,20 @@ import ErrorChart from "./components/summary/ErrorChart.vue";
 
 .error-chart-content {
   height: 100%;
+}
+
+.congestion-chart {
+  width: 100%;
+  padding: 0 20px;
+}
+
+.congestion-chart-content {
+  height: 50px;
+}
+
+.congestion-chart-text {
+  width: 100%;
+  padding: 0 20px;
 }
 
 .simulation-box {
