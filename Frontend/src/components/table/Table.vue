@@ -10,16 +10,29 @@
 
 -->
 <script setup>
+import { ref } from "vue";
 const props = defineProps({
   columns: Array, // 테이블의 컬럼명 배열
   data: Array, // 테이블 데이터
   height: {
     type: String,
-    default: "atuo",
+    default: "auto",
   },
   width: {
     type: String,
-    default: "823px",
+    default: "100%",
+  },
+  headerColor: {
+    type: String,
+    default: "#000000bd",
+  },
+  headerFontSize: {
+    type: String,
+    default: "19px",
+  },
+  bodyFontSize: {
+    type: String,
+    default: "15px",
   },
 });
 const emits = defineEmits(["toggle-side-page"]);
@@ -66,6 +79,7 @@ function getColumnColor(column) {
               'last-th': index === columns.length - 1,
             }"
             class="table-header"
+            :style="{ backgroundColor: headerColor, fontSize: headerFontSize }"
           >
             {{ column }}
           </th>
@@ -82,9 +96,17 @@ function getColumnColor(column) {
           <td
             v-for="(cell, columnIndex) in row"
             :key="columnIndex"
+            :style="{
+              fontSize: bodyFontSize,
+            }"
             class="table-cell"
           >
-            <div :class="{ 'error-cell': columns[columnIndex] === 'ERROR' }">
+            <div
+              :class="{
+                'error-cell': columns[columnIndex] === 'ERROR',
+                'status-cell': columns[columnIndex] === 'STATUS',
+              }"
+            >
               <div class="inner-content">
                 {{ cell }}
               </div>
@@ -99,7 +121,6 @@ function getColumnColor(column) {
 <style scoped>
 .table-container {
   border-radius: 5px;
-  overflow: hidden; /* 이 부분을 추가하여 내부 요소가 둥근 모서리를 따라가도록 함 */
   background-color: white;
 }
 table {
@@ -109,10 +130,10 @@ table {
 th.table-header {
   padding: 10px;
   text-align: center;
-  background-color: #000000bd;
+  /* background-color: #000000bd; */
   color: white;
   font-weight: 600;
-  font-size: 1.2rem;
+  /* font-size: 19px; */
 }
 th.first-th {
   border-top-left-radius: 5px; /* 첫 번째 th에 왼쪽 둥근 모서리 적용 */
@@ -125,9 +146,9 @@ th.last-th {
 td.table-cell {
   padding: 10px;
   text-align: center;
-  background-color: white;
+  /* background-color: white; */
   color: black;
-  font-size: 1.1rem;
+  /* font-size: 15px; */
   font-weight: 200;
 }
 td.table-cell div.error-cell {
