@@ -6,6 +6,7 @@ import SearchInput from "@/components/searchBar/SearchInput.vue";
 import Button from "@/components/button/Button.vue";
 import Line from "@/components/line/Line.vue";
 import "vue-multiselect/dist/vue-multiselect.css";
+import SmallSimulation from "./components/detection-report/SmallSimulation.vue";
 // chart
 import DurationChart from "./components/summary/DurationChart.vue";
 import ErrorChart from "./components/summary/ErrorChart.vue";
@@ -38,6 +39,9 @@ import CongestionChart from "./components/summary/CongestionChart.vue";
     <section class="result">  
       <!-- 시뮬레이션 -->
       <div class="white-box simulation-box">
+        <div class="content">
+          <SmallSimulation />
+        </div>
       </div>
     </section>
     <!-- 그래프 분석 -->
@@ -117,7 +121,7 @@ import CongestionChart from "./components/summary/CongestionChart.vue";
   display: flex;
   flex-direction: column;
   gap: 25px;
-  padding-left: 23px;
+  padding: 0 20px;
 }
 
 .chart {
@@ -179,7 +183,7 @@ import CongestionChart from "./components/summary/CongestionChart.vue";
 
 .simulation-box {
   min-height: 400px;
-  width: 97%;
+  width: 100%;
 }
 
 .title {
