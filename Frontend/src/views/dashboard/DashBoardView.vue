@@ -14,34 +14,28 @@ import LineChart from "./components/state-analysis/LineChart.vue";
 
 // 날짜 계산
 const months = [
-  "January",   // 1월
-  "February",  // 2월
-  "March",     // 3월
-  "April",     // 4월
-  "May",       // 5월
-  "June",      // 6월
-  "July",      // 7월
-  "August",    // 8월
+  "January", // 1월
+  "February", // 2월
+  "March", // 3월
+  "April", // 4월
+  "May", // 5월
+  "June", // 6월
+  "July", // 7월
+  "August", // 8월
   "September", // 9월
-  "October",   // 10월
-  "November",  // 11월
-  "December"   // 12월
+  "October", // 10월
+  "November", // 11월
+  "December", // 12월
 ];
 const currentDate = new Date();
 const year = currentDate.getFullYear(); // 년도 가져오기
 const month = currentDate.getMonth(); // 월 가져오기 (0부터 시작하므로 +1 해줘야 함)
-
-
 </script>
 <template>
   <div class="col container-header">
     <div class="row">
-      <div class="search-period">
-        Months
-      </div>
-      <div class="search-date">
-        {{ months[month] }}, {{ year }}
-      </div>
+      <div class="search-period">Months</div>
+      <div class="search-date">{{ months[month] }}, {{ year }}</div>
     </div>
   </div>
   <Line />
@@ -75,7 +69,10 @@ const month = currentDate.getMonth(); // 월 가져오기 (0부터 시작하므�
         </div>
         <div class="white-box job-time">
           <div class="title">
-            <Cardhead header-text="시간대 별 작업량" content-text="한달동안 시간대 별 OHT의 작업량을 보여줍니다." />
+            <Cardhead
+              header-text="시간대 별 작업량"
+              content-text="한달동안 시간대 별 OHT의 작업량을 보여줍니다."
+            />
           </div>
           <div class="padding-left-20">
             <StickChart width="100%" height="310px" />
@@ -90,20 +87,29 @@ const month = currentDate.getMonth(); // 월 가져오기 (0부터 시작하므�
         <div class="col">
           <div class="white-box job-chart">
             <div class="title">
-              <Cardhead header-text="작업 성공률" content-text="전체 작업에 대해 데드라인 내에 도착한 OHT의 비율을 보여줍니다." />
+              <Cardhead
+                header-text="작업 성공률"
+                content-text="전체 작업에 대해 데드라인 내에 도착한 OHT의 비율을 보여줍니다."
+              />
             </div>
             <PieChart width="200px" height="200px" />
           </div>
           <div class="white-box job-chart">
             <div class="title">
-              <Cardhead header-text="작업 실패 원인 별 비율" content-text="실패한 작업에 대해 실패 원인에 대한 비율을 보여줍니다." />
+              <Cardhead
+                header-text="작업 실패 원인 별 비율"
+                content-text="실패한 작업에 대해 실패 원인에 대한 비율을 보여줍니다."
+              />
             </div>
             <DoughnutChart width="200px" height="200px" />
           </div>
         </div>
-        <div class = "white-box job-table">
+        <div class="white-box job-table">
           <div class="title">
-            <Cardhead header-text="실패한 작업 로그(198건)" content-text="데드라인까지 도착하지 못한 OHT에 대한 원인을 보여줍니다." />
+            <Cardhead
+              header-text="실패한 작업 로그(198건)"
+              content-text="데드라인까지 도착하지 못한 OHT에 대한 원인을 보여줍니다."
+            />
           </div>
           <div class="padding-left-20">
             <Table
@@ -174,22 +180,43 @@ const month = currentDate.getMonth(); // 월 가져오기 (0부터 시작하므�
         <div class="col" style="width: 100%; height: 100%">
           <div class="white-box line-chart">
             <div class="title">
-              <Cardhead header-text="시간대 별 작업/유휴 상태 OHT 수" content-text="시간대 별로 작업 중인 OHT와 유휴 상태의 OHT 수를 보여줍니다." />
+              <Cardhead
+                header-text="시간대 별 작업/유휴 상태 OHT 수"
+                content-text="시간대 별로 작업 중인 OHT와 유휴 상태의 OHT 수를 보여줍니다."
+              />
             </div>
             <div class="padding-left-20">
-              <LineChart height="220px"/>
+              <LineChart height="220px" />
             </div>
           </div>
-          <div class="row" style="width: 100%;">
-            <WhiteCard title="작업이 가장 많은 시간대" startTime="14:00" endTime="16:00" width="33%" height="70px" />
-            <WhiteCard title="OHT가 가장 활발한 시간대" startTime="14:00" endTime="16:00" width="33%" height="70px"/>
-            <WhiteCard title="유휴 상태가 많은 시간대" startTime="14:00" endTime="16:00" width="33%" height="70px"/>
+          <div class="row" style="width: 100%">
+            <WhiteCard
+              title="작업이 가장 많은 시간대"
+              startTime="14:00"
+              endTime="16:00"
+              width="33%"
+              height="70px"
+            />
+            <WhiteCard
+              title="OHT가 가장 활발한 시간대"
+              startTime="14:00"
+              endTime="16:00"
+              width="33%"
+              height="70px"
+            />
+            <WhiteCard
+              title="유휴 상태가 많은 시간대"
+              startTime="14:00"
+              endTime="16:00"
+              width="33%"
+              height="70px"
+            />
           </div>
         </div>
       </div>
     </div>
   </div>
-  
+  <div class="footer"></div>
 </template>
 <style scoped>
 .row {
@@ -220,7 +247,7 @@ const month = currentDate.getMonth(); // 월 가져오기 (0부터 시작하므�
 }
 
 .container-header {
- padding-left: 30px; 
+  padding-left: 30px;
 }
 .container {
   width: 100%;
@@ -243,13 +270,13 @@ const month = currentDate.getMonth(); // 월 가져오기 (0부터 시작하므�
 .search-date {
   height: 30px;
   line-height: 30px;
-  color: #9F9F9F;
+  color: #9f9f9f;
   font-size: small;
   font-weight: 400;
   margin-left: 10px;
 }
-.job-time{
-  width: 100%;  
+.job-time {
+  width: 100%;
 }
 
 .bar-chart {

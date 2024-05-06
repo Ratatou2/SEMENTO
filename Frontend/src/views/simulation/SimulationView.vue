@@ -196,6 +196,7 @@ function toggleSidePageHandler(data) {
     </section>
     <SimulationSideTapView />
   </div>
+  <div class="footer"></div>
 </template>
 
 <style scoped>

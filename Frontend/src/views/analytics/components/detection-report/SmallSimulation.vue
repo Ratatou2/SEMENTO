@@ -6,7 +6,12 @@ import * as d3 from "d3";
 const pathColor = "#B4B4B4";
 const facilityColor = "#292D30";
 const ohtColor = "orange";
-const congestionPathColor = ["#B4B4B4", "rgba(255, 184, 0, 0.7)", "rgba(255, 107, 0, 0.7)", "rgba(249, 0, 0, 0.7)"];
+const congestionPathColor = [
+  "#B4B4B4",
+  "rgba(255, 184, 0, 0.7)",
+  "rgba(255, 107, 0, 0.7)",
+  "rgba(249, 0, 0, 0.7)",
+];
 
 const container = ref(null);
 const svgContainer = ref(null);
@@ -815,62 +820,62 @@ onMounted(() => {
     .scaleLinear()
     .domain([yExtent[0], yExtent[1]])
     .range([padding, height - padding]);
- 
-// 정체 구간 데이터
-const congestion_links = [
+
+  // 정체 구간 데이터
+  const congestion_links = [
     {
-        links: [
-            { source: "8", target: "9" },
-            { source: "7", target: "8" },
-            { source: "6", target: "7" },
-            { source: "5", target: "6" },
-            { source: "4", target: "5" },
-        ],
-        level: 1,
-        count: 2,
+      links: [
+        { source: "8", target: "9" },
+        { source: "7", target: "8" },
+        { source: "6", target: "7" },
+        { source: "5", target: "6" },
+        { source: "4", target: "5" },
+      ],
+      level: 1,
+      count: 2,
     },
     {
-        links: [
-            { source: "183", target: "125" },  
-            { source: "182", target: "183" },
-            { source: "181", target: "182" },
-            { source: "180", target: "181" },
-            { source: "179", target: "180" },
-            { source: "178", target: "179" },
-            { source: "177", target: "178" },
-        ],
-        level: 3,
-        count: 15,
+      links: [
+        { source: "183", target: "125" },
+        { source: "182", target: "183" },
+        { source: "181", target: "182" },
+        { source: "180", target: "181" },
+        { source: "179", target: "180" },
+        { source: "178", target: "179" },
+        { source: "177", target: "178" },
+      ],
+      level: 3,
+      count: 15,
     },
     {
-        links: [
-            { source: "301", target: "302" },
-            { source: "302", target: "303" },
-            { source: "303", target: "304" },
-        ],
-        level: 2,
-        count: 5,
-    }
-  ]  
+      links: [
+        { source: "301", target: "302" },
+        { source: "302", target: "303" },
+        { source: "303", target: "304" },
+      ],
+      level: 2,
+      count: 5,
+    },
+  ];
 
   // 링크 그릴 변수
- var linkSelection = svg.selectAll(".link");
+  var linkSelection = svg.selectAll(".link");
 
- // 정체 구간 그리기 - 노드와 링크보다 먼저그려야 위에 표시됨
- for(const congestion of congestion_links) {
-  const newCongestionLinks = linkSelection
-    .data(congestion.links)
-    .enter()
-    .append("line")
-    .attr("class", "link")
-    .attr("x1", (d) => xScale(nodes.find((node) => node.id === d.source).x))
-    .attr("y1", (d) => yScale(nodes.find((node) => node.id === d.source).y))
-    .attr("x2", (d) => xScale(nodes.find((node) => node.id === d.target).x))
-    .attr("y2", (d) => yScale(nodes.find((node) => node.id === d.target).y))
-    .attr("stroke", congestionPathColor[congestion.level])
-    .attr("stroke-width", 10); 
+  // 정체 구간 그리기 - 노드와 링크보다 먼저그려야 위에 표시됨
+  for (const congestion of congestion_links) {
+    const newCongestionLinks = linkSelection
+      .data(congestion.links)
+      .enter()
+      .append("line")
+      .attr("class", "link")
+      .attr("x1", (d) => xScale(nodes.find((node) => node.id === d.source).x))
+      .attr("y1", (d) => yScale(nodes.find((node) => node.id === d.source).y))
+      .attr("x2", (d) => xScale(nodes.find((node) => node.id === d.target).x))
+      .attr("y2", (d) => yScale(nodes.find((node) => node.id === d.target).y))
+      .attr("stroke", congestionPathColor[congestion.level])
+      .attr("stroke-width", 10);
     linkSelection = linkSelection.merge(newCongestionLinks);
- }
+  }
 
   // 노드와 링크 그리기
   const newLinks = linkSelection
@@ -908,10 +913,8 @@ const congestion_links = [
     .attr("fill", "white")
     .text((d) => d.id);
 
-
-
-   // 정체 구간 횟수 표시
-   const congestionNodeGroup = svg
+  // 정체 구간 횟수 표시
+  const congestionNodeGroup = svg
     .selectAll(".node")
     .data(congestion_links)
     .enter()
@@ -920,25 +923,28 @@ const congestion_links = [
     // .attr("transform", (d) => `translate(${d.x},${d.y})`);
     .attr("transform", (congestion) => {
       const midIdx = Math.floor(congestion.links.length / 2);
-        const x = nodes.find((node) => node.id === congestion.links[midIdx].source).x;
-        const y = nodes.find((node) => node.id === congestion.links[midIdx].source).y;
-        return `translate(${xScale(x)},${yScale(y)})`;
+      const x = nodes.find(
+        (node) => node.id === congestion.links[midIdx].source
+      ).x;
+      const y = nodes.find(
+        (node) => node.id === congestion.links[midIdx].source
+      ).y;
+      return `translate(${xScale(x)},${yScale(y)})`;
     });
 
-    congestionNodeGroup
+  congestionNodeGroup
     .append("circle")
     .attr("r", 15)
     // .attr("fill", "steelblue")
     .attr("fill", (congestion) => congestionPathColor[congestion.level]);
 
-    congestionNodeGroup
+  congestionNodeGroup
     .append("text")
     .attr("text-anchor", "middle")
     .attr("dy", ".35em")
     .attr("font-size", "1rem")
     .attr("fill", "white")
     .text((congestion) => congestion.count);
-
 });
 </script>
 
