@@ -53,6 +53,7 @@ import Header from "@/components/header/Header.vue";
   gap: 15px;
   padding: 20px 10px 10px 0px;
 }
+
 .title {
   width: 100%;
   display: flex;
