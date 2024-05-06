@@ -36,8 +36,17 @@ const props = defineProps({
   },
 });
 const emits = defineEmits(["toggle-side-page"]);
-const handleColumnClick = (row) => {
-  emits("toggle-side-page", row[1]); // 두 번째 셀의 데이터를 이벤트로 전달
+const selectedRowIndex = ref(null);
+
+const handleRowClick = (index) => {
+  if (selectedRowIndex.value === index) {
+    // 이미 선택된 행을 클릭하면 null로 설정
+    emits("toggle-side-page", props.data[index]);
+    selectedRowIndex.value = null;
+  } else {
+    selectedRowIndex.value = index; // 새로운 행 선택
+    emits("toggle-side-page", props.data[index]); // 'data' 배열에서 두 번째 셀의 데이터를 이벤트로 전달
+  }
 };
 
 function getColumnColor(column) {
@@ -81,7 +90,8 @@ function getColumnColor(column) {
         <tr
           v-for="(row, index) in data"
           :key="index"
-          @click="handleColumnClick(row)"
+          @click="handleRowClick(index)"
+          :class="{ 'selected-row': selectedRowIndex === index }"
         >
           <td
             v-for="(cell, columnIndex) in row"
@@ -159,5 +169,15 @@ td.table-cell div.status-cell div.inner-content {
   display: inline-block;
   color: #2e5aac;
   font-weight: bold;
+}
+
+/* 마우스 호버 시 행의 배경색을 변경 */
+tr:hover {
+  background-color: #003cb033;
+  cursor: pointer;
+}
+
+.selected-row {
+  background-color: #89a7e0; /* 선택된 행의 배경색 */
 }
 </style>

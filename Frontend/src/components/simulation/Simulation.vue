@@ -2,6 +2,9 @@
 import { ref, onMounted } from "vue";
 import * as d3 from "d3";
 
+//로그
+const currentTime = ref("2024.01.08 13:38:23");
+
 //컬러설정
 const pathColor = "#B4B4B4";
 const facilityColor = "#292D30";
@@ -10,7 +13,7 @@ const ohtColor = "orange";
 const container = ref(null);
 const svgContainer = ref(null);
 
-let scale = 1;
+let scale = 1.0;
 let translateX = 0;
 let translateY = 0;
 let isDragging = false;
@@ -111,7 +114,7 @@ onMounted(() => {
   // const height = 250;
   const width = parentWidth;
   const height = parentHeight * 0.7;
-  const padding = 20;
+  const padding = 43;
 
   const svg = d3
     .select(svgContainer.value)
@@ -896,6 +899,7 @@ onMounted(() => {
     @mousemove.prevent="drag"
     @mouseup.prevent="endDrag"
   >
+    <div class="timer">{{ currentTime }}</div>
     <div ref="svgContainer"></div>
   </div>
 </template>
@@ -906,7 +910,22 @@ onMounted(() => {
   overflow: hidden;
   border: 1px dashed rgb(207, 207, 207);
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+  position: relative;
+}
+
+.timer {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  z-index: 10;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  font-weight: 600;
+  font-size: x-large;
+  padding: 2px 10px;
+  border-radius: 5px;
 }
 </style>
