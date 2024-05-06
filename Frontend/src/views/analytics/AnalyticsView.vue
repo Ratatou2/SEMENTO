@@ -7,6 +7,7 @@ import Button from "@/components/button/Button.vue";
 import Line from "@/components/line/Line.vue";
 import "vue-multiselect/dist/vue-multiselect.css";
 import SmallSimulation from "./components/detection-report/SmallSimulation.vue";
+import Info from "@/components/info/Info.vue";
 // chart
 import DurationChart from "./components/summary/DurationChart.vue";
 import ErrorChart from "./components/summary/ErrorChart.vue";
@@ -49,6 +50,9 @@ const detectionReportText = "# Detection Report (" + cnt.value + ")";
     <section class="result">
       <!-- 시뮬레이션 -->
       <div class="white-box simulation-box">
+        <div class="info-box">
+          <Info />
+        </div>
         <div class="content">
           <SmallSimulation />
         </div>
@@ -151,7 +155,7 @@ const detectionReportText = "# Detection Report (" + cnt.value + ")";
 .header {
   display: flex;
   flex-direction: column;
-  padding-left: 23px;
+  padding: 0 23px;
 }
 .result {
   display: flex;
@@ -230,5 +234,13 @@ const detectionReportText = "# Detection Report (" + cnt.value + ")";
 
 .content {
   width: 96%;
+}
+
+.info-box {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  padding: 0 20px;
 }
 </style>
