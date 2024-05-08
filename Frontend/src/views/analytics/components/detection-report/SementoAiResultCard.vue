@@ -38,6 +38,8 @@ const props = defineProps({
             width="100%"
             bodyFontSize="14px"
             headerFontSize="12px"
+            headerColor="white"
+            headerTextColor="black"
             :columns="[
               'TIME',
               'OHT ID',

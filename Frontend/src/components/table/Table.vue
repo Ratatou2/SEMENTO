@@ -26,6 +26,10 @@ const props = defineProps({
     type: String,
     default: "#000000bd",
   },
+  headerTextColor: {
+    type: String,
+    default: "white",
+  },
   headerFontSize: {
     type: String,
     default: "19px",
@@ -79,7 +83,11 @@ function getColumnColor(column) {
               'last-th': index === columns.length - 1,
             }"
             class="table-header"
-            :style="{ backgroundColor: headerColor, fontSize: headerFontSize }"
+            :style="{
+              backgroundColor: headerColor,
+              color: headerTextColor,
+              fontSize: headerFontSize,
+            }"
           >
             {{ column }}
           </th>
@@ -134,6 +142,7 @@ th.table-header {
   color: white;
   font-weight: 600;
   /* font-size: 19px; */
+  border-bottom: #e7e7ed 1px solid;
 }
 th.first-th {
   border-top-left-radius: 5px; /* 첫 번째 th에 왼쪽 둥근 모서리 적용 */

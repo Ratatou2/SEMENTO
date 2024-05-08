@@ -32,6 +32,8 @@ function transformatDate(date) {
           width="100%"
           bodyFontSize="14px"
           headerFontSize="12px"
+          header-color="white"
+          header-text-color="black"
           :columns="[
             'TIME',
             'OHT ID',
