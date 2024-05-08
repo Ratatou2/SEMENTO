@@ -2,11 +2,10 @@ package com.dfg.semento.document;
 
 import com.dfg.semento.enums.Mode;
 import com.dfg.semento.enums.Status;
-import jakarta.persistence.Column;
-import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+
+import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
@@ -17,8 +16,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Document(indexName = "#{'semento-mysql-logs-'+T(java.time.LocalDate).now().toString().replace('-', '.')}")
 public class LogDocument {
+
     @Id
-    @org.springframework.data.annotation.Id
     @Field(type= FieldType.Keyword, name = "doc_id")
     public String docId;
 

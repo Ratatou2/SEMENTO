@@ -20,9 +20,9 @@ public class DashboardController {
     private final DashboardService dashboardService;
 
     @GetMapping("/test")
-    public ResponseEntity test(){
+    public ResponseEntity<List<LogDocument>> test(){
         List<LogDocument> logs = dashboardService.test();
-        return new ResponseEntity(logs,HttpStatus.OK);
+        return ResponseEntity.ok(logs);
     }
 
 
