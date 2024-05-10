@@ -3,6 +3,7 @@ package com.dfg.semento.controller;
 import com.dfg.semento.document.LogDocument;
 import com.dfg.semento.dto.request.SearchTimeRequest;
 import com.dfg.semento.dto.response.OhtJobAnalysisResponse;
+import com.dfg.semento.dto.response.OhtJobHourlyResponse;
 import com.dfg.semento.service.DashboardService;
 
 import jakarta.validation.Valid;
@@ -36,6 +37,13 @@ public class DashboardController {
     public ResponseEntity<OhtJobAnalysisResponse> ohtJobAnalysis(@Valid @RequestBody SearchTimeRequest request) throws IOException {
         OhtJobAnalysisResponse ohtJobAnalysis = dashboardService.ohtJobAnalysis(request.getStartTime(), request.getEndTime());
         return ResponseEntity.ok(ohtJobAnalysis);
+    }
+
+    @PostMapping("/oht-job-hourly")
+    public ResponseEntity<List<OhtJobHourlyResponse>> ohtJobHourly(@Valid @RequestBody SearchTimeRequest request) throws
+        IOException {
+        List<OhtJobHourlyResponse> ohtJobHourlyResponse = dashboardService.ohtJobHourly(request.getStartTime(), request.getEndTime());
+        return ResponseEntity.ok(ohtJobHourlyResponse);
     }
 
 }
