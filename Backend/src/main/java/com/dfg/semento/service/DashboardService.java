@@ -1,6 +1,8 @@
 package com.dfg.semento.service;
 
 import com.dfg.semento.document.LogDocument;
+import com.dfg.semento.dto.DoubleDataDto;
+import com.dfg.semento.dto.IntegerDataDto;
 import com.dfg.semento.dto.request.SearchTimeRequest;
 import com.dfg.semento.dto.response.OhtJobAnalysisResponse;
 import com.dfg.semento.dto.response.OhtJobHourlyResponse;
@@ -18,6 +20,8 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.indices.CreateIndexRequest;
+import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -43,7 +47,9 @@ import org.elasticsearch.script.Script;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,34 +67,54 @@ public class DashboardService {
         return dashboardRepository.findAll();
     }
 
+    /**
+     * startTime, endTime을 기준으로 지난 기간의 시작, 종료 시간 계산하기
+     */
+    private SearchTimeRequest calculateLastPeriod(LocalDateTime startTime, LocalDateTime endTime) {
+        // 현재 시간에서 1달 전의 년도와 월 계산
+        int lastMonthYear = startTime.minusMonths(1).getYear();
+        int lastMonth = startTime.minusMonths(1).getMonthValue();
+
+        // 지난 달의 첫 번째 날과 마지막 날 구하기
+        LocalDateTime firstDayOfLastMonth = LocalDateTime.of(LocalDate.of(lastMonthYear, lastMonth, 1), LocalTime.MIN);
+        LocalDateTime lastDayOfLastMonth = LocalDateTime.of(LocalDate.of(lastMonthYear, lastMonth, 1).withDayOfMonth(1).plusMonths(1).minusDays(1), LocalTime.MAX);
+        return new SearchTimeRequest(firstDayOfLastMonth, lastDayOfLastMonth);
+    }
+
+
     /** 기간동안 OHT 작업량 분석(oht대수, 전체 작업량, oht별 작업량 평균)
      */
     public OhtJobAnalysisResponse ohtJobAnalysis(LocalDateTime startTime, LocalDateTime endTime) throws IOException {
+        // TODO : 지난 기간 기준으로 startTime, endTime 계산 - 함수 만들기
+        SearchTimeRequest lastPeriod = calculateLastPeriod(startTime, endTime);
+        // TODO : 지난 기간 기준으로 데이터 조회 후 퍼센트 계산
+
         // 운행한 OHT 대수
-        long ohtCount = getOhtCount(startTime, endTime);
-        System.out.println(ohtCount);
+        int ohtCount = getOhtCount(startTime, endTime);
 
         // 기간동안 전체 OHT 작업량
-        long totalWork = getOhtTotalWorkByStartTimeAndEndTime(startTime, endTime);
-        System.out.println(totalWork);
+        int totalWork = getOhtTotalWorkByStartTimeAndEndTime(startTime, endTime);
+        int lastTotalWork = getOhtTotalWorkByStartTimeAndEndTime(lastPeriod.getStartTime(), lastPeriod.getEndTime());
+        double totalWorkPercentage = CalculateOhtData.getDifferencePercentage(totalWork, lastTotalWork);
+
 
         // 기간동안 각 OHT별 작업량 평균
         double averageWork = getOhtAverageWorkByStartTimeAndTime(startTime, endTime);
-        System.out.println(averageWork);
+        double lastAverageWork = getOhtAverageWorkByStartTimeAndTime(lastPeriod.getStartTime(), lastPeriod.getEndTime());
+        double averageWorkPercentage = CalculateOhtData.getDifferencePercentage(averageWork, lastAverageWork);
 
         return OhtJobAnalysisResponse.builder()
-            .ohtCount(ohtCount)
-            .totalWork(totalWork)
-            .averageWork(averageWork)
+            .ohtCount(new IntegerDataDto(ohtCount, 0))
+            .totalWork(new IntegerDataDto(totalWork, totalWorkPercentage))
+            .averageWork(new DoubleDataDto(averageWork, averageWorkPercentage))
             .build();
     }
-
 
 
     /**
      * 기간동안 운행했던 OHT 대수 계산 함수
     */
-    private long getOhtCount(LocalDateTime startTime, LocalDateTime endTime) throws IOException {
+    private int getOhtCount(LocalDateTime startTime, LocalDateTime endTime) throws IOException {
         //ES의 질의 생성
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 
@@ -121,13 +147,13 @@ public class DashboardService {
         // 결과에서 작업량 추출
         Cardinality ohtCount  = searchResponse.getAggregations().get("oht_count");
 
-        return ohtCount.getValue();
+        return (int) ohtCount.getValue();
     }
 
     /**
      * 기간동안 전체 작업량 계산 함수
      */
-    public long getOhtTotalWorkByStartTimeAndEndTime(LocalDateTime startTime, LocalDateTime endTime) throws
+    public int getOhtTotalWorkByStartTimeAndEndTime(LocalDateTime startTime, LocalDateTime endTime) throws
         IOException {
         //ES의 질의 생성
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
@@ -335,6 +361,11 @@ public class DashboardService {
         // index 리스트를 만든다.
         String[] indexArray = GenerateIndexNameArray.getIndexNameArray(startTime, endTime);
 
+        // index가 존재하지 않으면 생성하기
+        for (String indexName : indexArray) {
+            ensureIndexExists(indexName);
+        }
+
         //검색 요청객체 생성 및 인덱스이름 설정 및 검색소스 설정
         SearchRequest searchRequest = new SearchRequest(indexArray); // 실제 인덱스 이름 사용
         searchRequest.source(searchSourceBuilder);
@@ -346,4 +377,19 @@ public class DashboardService {
 
         return searchResponse;
     }
+
+    /**
+     * 인덱스가 존재하는지 확인 후 없으면 생성
+     */
+    public void ensureIndexExists(String indexName) throws IOException {
+        GetIndexRequest getIndexRequest = new GetIndexRequest(indexName);
+        boolean exists = client.indices().exists(getIndexRequest, RequestOptions.DEFAULT);
+
+        if (!exists) {
+            // 인덱스가 존재하지 않으면 생성
+            CreateIndexRequest createIndexRequest = new CreateIndexRequest(indexName);
+            client.indices().create(createIndexRequest, RequestOptions.DEFAULT);
+        }
+    }
+
 }

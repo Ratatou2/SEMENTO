@@ -1,5 +1,8 @@
 package com.dfg.semento.dto.response;
 
+import com.dfg.semento.dto.DoubleDataDto;
+import com.dfg.semento.dto.IntegerDataDto;
+
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,9 +15,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class OhtJobAnalysisResponse {
 
-	private long ohtCount;
+	private IntegerDataDto ohtCount;
 
-	private long totalWork;
+	private IntegerDataDto totalWork;
 
-	private double averageWork;
+	private DoubleDataDto averageWork;
 }
