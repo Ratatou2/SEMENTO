@@ -11,6 +11,7 @@ public class CalculateOhtData {
      * @return
      */
     public static double getDifferencePercentage(double ohtValue, double overallValue){
+        if(overallValue == 0) return 100;
         return  ((ohtValue - overallValue) / overallValue) * 100;
     }
 }
