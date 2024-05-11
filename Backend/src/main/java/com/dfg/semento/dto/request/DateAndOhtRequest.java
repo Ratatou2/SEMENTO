@@ -15,7 +15,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class WorkInformationRequest {
+public class DateAndOhtRequest {
 
     //검색조건 시작일자
     @NotNull @PastOrPresent

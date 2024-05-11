@@ -1,10 +1,13 @@
 package com.dfg.semento.controller;
 
-import com.dfg.semento.dto.request.WorkInformationRequest;
+import com.dfg.semento.dto.request.DateAndOhtRequest;
+import com.dfg.semento.dto.response.ComparedDataResponse;
 import com.dfg.semento.service.SimulationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,12 +29,8 @@ public class SimulationController {
      * @author 최서현
      */
     @PostMapping("/work-information")
-    public void workInfomation(@Valid @RequestBody WorkInformationRequest request){
+    public ResponseEntity<ComparedDataResponse> workInfomation(@Valid @RequestBody DateAndOhtRequest request){
         log.debug("[request] : "+request.toString());
-        try{
-            simulationService.getAverageSpeedComparison(request.getStartDate(), request.getEndDate(), request.getOhtId());
-        } catch(IOException e){
-            log.error(e.getMessage());
-        }
+        return ResponseEntity.ok(simulationService.getComparedDate(request));
     }
 }
