@@ -29,7 +29,7 @@ public class SimulationController {
      * @author 최서현
      */
     @PostMapping("/work-information")
-    public ResponseEntity<ComparedDataResponse> workInfomation(@Valid @RequestBody DateAndOhtRequest request){
+    public ResponseEntity<ComparedDataResponse> workInfomation(@Valid @RequestBody DateAndOhtRequest request) throws IOException {
         log.debug("[request] : "+request.toString());
         return ResponseEntity.ok(simulationService.getComparedDate(request));
     }
