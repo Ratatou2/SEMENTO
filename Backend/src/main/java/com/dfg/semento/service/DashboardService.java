@@ -11,10 +11,7 @@ import com.dfg.semento.dto.response.JobResultAnalysisResponse;
 import com.dfg.semento.dto.response.OhtJobAnalysisResponse;
 import com.dfg.semento.dto.response.OhtJobHourlyResponse;
 import com.dfg.semento.repository.DashboardRepository;
-import com.dfg.semento.util.CalculateOhtData;
-import com.dfg.semento.util.FormattedTime;
-import com.dfg.semento.util.GenerateIndexNameArray;
-import com.dfg.semento.util.TimeConverter;
+import com.dfg.semento.util.*;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -544,7 +541,7 @@ public class DashboardService {
     public  SearchResponse sendElasticsearchQuery(LocalDateTime startTime, LocalDateTime endTime, SearchSourceBuilder searchSourceBuilder) throws
         IOException {
         // index 리스트를 만든다.
-        String[] indexArray = GenerateIndexNameArray.getIndexNameArray(startTime, endTime);
+        String[] indexArray = ElasticsearchQueryUtil.getIndexNameArray(startTime, endTime);
 
         // index가 존재하지 않으면 생성하기
         for (String indexName : indexArray) {
