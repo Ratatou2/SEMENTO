@@ -2,7 +2,7 @@ package com.dfg.semento.util;
 
 /** 통계를 만드는 클래스
  */
-public class CalculateOhtData {
+public class CalculateData {
 
     /** 두 데이터의 차이 퍼센테이지를 구함
      * @author 최서현

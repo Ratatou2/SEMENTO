@@ -2,6 +2,9 @@ package com.dfg.semento.util;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.elasticsearch.client.indices.CreateIndexRequest;
+import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
@@ -80,6 +83,12 @@ public class ElasticsearchQueryUtil {
     public SearchResponse sendEsQuery(LocalDateTime startTime, LocalDateTime endTime, BoolQueryBuilder boolQueryBuilder, AggregationBuilder... aggregations) throws IOException {
         //인덱스 리스트 생성
         String[] indexArray = getIndexNameArray(startTime, endTime);
+
+        // index가 존재하지 않으면 생성하기
+        for (String indexName : indexArray) {
+            ensureIndexExists(indexName);
+        }
+
         //시간필터 생성
         RangeQueryBuilder timeFilter = generatedTimeFilter(startTime, endTime);
         boolQueryBuilder.must(timeFilter);
@@ -112,6 +121,12 @@ public class ElasticsearchQueryUtil {
     public SearchResponse sendEsQuery(LocalDateTime startTime, LocalDateTime endTime, AggregationBuilder... aggregations) throws IOException {
         //인덱스 리스트 생성
         String[] indexArray = getIndexNameArray(startTime, endTime);
+
+        // index가 존재하지 않으면 생성하기
+        for (String indexName : indexArray) {
+            ensureIndexExists(indexName);
+        }
+
         //시간필터 생성
         RangeQueryBuilder timeFilter = generatedTimeFilter(startTime, endTime);
 
@@ -128,5 +143,19 @@ public class ElasticsearchQueryUtil {
         //log.debug("[ES response] : "+searchResponse.toString());
 
         return searchResponse;
+    }
+
+    /**
+     * 인덱스가 존재하는지 확인 후 없으면 생성
+     */
+    public void ensureIndexExists(String indexName) throws IOException {
+        GetIndexRequest getIndexRequest = new GetIndexRequest(indexName);
+        boolean exists = client.indices().exists(getIndexRequest, RequestOptions.DEFAULT);
+
+        if (!exists) {
+            // 인덱스가 존재하지 않으면 생성
+            CreateIndexRequest createIndexRequest = new CreateIndexRequest(indexName);
+            client.indices().create(createIndexRequest, RequestOptions.DEFAULT);
+        }
     }
 }

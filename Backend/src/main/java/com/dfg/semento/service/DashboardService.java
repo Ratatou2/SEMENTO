@@ -16,12 +16,7 @@ import com.dfg.semento.util.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.client.indices.CreateIndexRequest;
-import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -47,6 +42,7 @@ import org.elasticsearch.script.Script;
 
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -65,8 +61,11 @@ import java.util.StringTokenizer;
 @RequiredArgsConstructor
 @Slf4j
 public class DashboardService {
+
+    @Value("${elasticsearch.bucket-size}")
+    private int BUKET_SIZE;
     private final DashboardRepository dashboardRepository;
-    private final RestHighLevelClient client;
+    private final ElasticsearchQueryUtil elasticsearchQueryUtil;
 
     public List<LogDocument> test() {
         return dashboardRepository.findAll();
@@ -83,13 +82,13 @@ public class DashboardService {
         // 기간동안 전체 OHT 작업량
         int totalWork = getOhtTotalWorkByStartTimeAndEndTime(startTime, endTime);
         int lastTotalWork = getOhtTotalWorkByStartTimeAndEndTime(lastPeriod.getStartTime(), lastPeriod.getEndTime());
-        double totalWorkPercentage = CalculateOhtData.getDifferencePercentage(totalWork, lastTotalWork);
+        double totalWorkPercentage = CalculateData.getDifferencePercentage(totalWork, lastTotalWork);
 
 
         // 기간동안 각 OHT별 작업량 평균
         double averageWork = getOhtAverageWorkByStartTimeAndTime(startTime, endTime);
         double lastAverageWork = getOhtAverageWorkByStartTimeAndTime(lastPeriod.getStartTime(), lastPeriod.getEndTime());
-        double averageWorkPercentage = CalculateOhtData.getDifferencePercentage(averageWork, lastAverageWork);
+        double averageWorkPercentage = CalculateData.getDifferencePercentage(averageWork, lastAverageWork);
 
         return OhtJobAnalysisResponse.builder()
             .ohtCount(new IntegerDataDto(ohtCount, 0))
@@ -133,7 +132,7 @@ public class DashboardService {
     }
 
     /**
-     * 실패한
+     * [Elasticsearch 검색] 실패한 작업 중 에러 발생 작업 카운트
      */
     private JobResultAnalysisResponse getJobErrorCount(LocalDateTime startTime, LocalDateTime endTime) throws IOException {
         //ES의 질의 생성
@@ -160,15 +159,10 @@ public class DashboardService {
                     new TermsValuesSourceBuilder("start_time").field("start_time").missingBucket(true)
 
                 ))
-            .size(1000);
-
-        //Request 만들기
-        searchSourceBuilder.query(boolQuery);
-        searchSourceBuilder.aggregation(compositeAgg);
-        searchSourceBuilder.size(0);  // Document 반환 없음
+            .size(BUKET_SIZE);
 
         // 검색 요청
-        SearchResponse searchResponse = sendElasticsearchQuery(startTime, endTime, searchSourceBuilder);
+        SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime, boolQuery, compositeAgg);
 
         // 결과에서 집계 데이터 추출
         CompositeAggregation compositeAggregation = searchResponse.getAggregations().get("unique_combinations");
@@ -204,8 +198,8 @@ public class DashboardService {
             .totalError(totalError)
             .facilityError(facilityError)
             .ohtError(ohtError)
-            .facilityErrorPercentage(CalculateOhtData.getPercentage(facilityError, totalError))
-            .ohtErrorPercentage(CalculateOhtData.getPercentage(ohtError, totalError))
+            .facilityErrorPercentage(CalculateData.getPercentage(facilityError, totalError))
+            .ohtErrorPercentage(CalculateData.getPercentage(ohtError, totalError))
             .build();
 
         // 로그 Response로 변환
@@ -235,33 +229,22 @@ public class DashboardService {
     */
     private int getOhtCount(LocalDateTime startTime, LocalDateTime endTime) throws IOException {
         //ES의 질의 생성
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 
         // ==== 쿼리 검색 ====
-        // startTime과 endTime 사이에 있는 로그만 검색하도록 설정
-        //시간 포맷 변환
         FormattedTime FormattedTime = TimeConverter.convertElasticsearchTime(startTime, endTime);
         RangeQueryBuilder timeFilter = QueryBuilders.rangeQuery("curr_time")
             .gte(FormattedTime.getStartTime())
             .lte(FormattedTime.getEndTime());
-
-        // 질의 추가
-        searchSourceBuilder.query(timeFilter);
-
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
+            .filter(timeFilter);
 
         // ==== 집계 검색 ====
         CardinalityAggregationBuilder cardinalityAggregation = AggregationBuilders.cardinality("oht_count")
             .field("oht_id");
 
-        // 질의 추가
-        searchSourceBuilder.aggregation(cardinalityAggregation);
-
-
-        // 집계반환만 원하고 Document는 반환X
-        searchSourceBuilder.size(0);
 
         // ==== 질의 ====
-        SearchResponse searchResponse = sendElasticsearchQuery(startTime, endTime, searchSourceBuilder);
+        SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime, boolQueryBuilder, cardinalityAggregation);
 
         // 결과에서 작업량 추출
         Cardinality ohtCount  = searchResponse.getAggregations().get("oht_count");
@@ -274,9 +257,6 @@ public class DashboardService {
      */
     public int getOhtTotalWorkByStartTimeAndEndTime(LocalDateTime startTime, LocalDateTime endTime) throws
         IOException {
-        //ES의 질의 생성
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-
         // ==== 쿼리 검색 ====
         // startTime과 endTime 사이에 있는 로그만 검색하도록 설정
         //시간 포맷 변환
@@ -292,9 +272,6 @@ public class DashboardService {
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
             .filter(timeFilter)
             .filter(statusFilter);
-
-        // 질의 추가
-        searchSourceBuilder.query(boolQueryBuilder);
 
 
         // ==== 집계 검색 ====
@@ -314,15 +291,10 @@ public class DashboardService {
                         }
                         return result;
                         """));
-        // 질의 추가
-        searchSourceBuilder.aggregation(aggregationBuilder);
 
-
-        // 집계반환만 원하고 Document는 반환X
-        searchSourceBuilder.size(0);
 
         // ==== 질의 ====
-        SearchResponse searchResponse = sendElasticsearchQuery(startTime, endTime, searchSourceBuilder);
+        SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime, boolQueryBuilder, aggregationBuilder);
 
         // 결과에서 작업량 추출
         ScriptedMetric totalWork = searchResponse.getAggregations().get("total_work");
@@ -334,9 +306,6 @@ public class DashboardService {
      */
     private double getOhtAverageWorkByStartTimeAndTime(LocalDateTime startTime, LocalDateTime endTime) throws
         IOException {
-        //ES의 질의 생성
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-
         // ==== 쿼리 검색 ====
         // startTime과 endTime 사이에 있는 로그만 검색하도록 설정
         //시간 포맷 변환
@@ -353,10 +322,6 @@ public class DashboardService {
             .filter(timeFilter)
             .filter(statusFilter);
 
-        // 질의 추가
-        searchSourceBuilder.query(boolQueryBuilder);
-
-
         // ==== 집계 검색 ====
         TermsAggregationBuilder termsAggregation = AggregationBuilders.terms("by_oht_id")
             .field("oht_id");
@@ -367,15 +332,9 @@ public class DashboardService {
         // oht_id 별 start_time 개수세는 쿼리 추가
         termsAggregation.subAggregation(cardinalityAggregation);
 
-        // 질의 추가
-        searchSourceBuilder.aggregation(termsAggregation);
-
-
-        // 집계반환만 원하고 Document는 반환X
-        searchSourceBuilder.size(0);
 
         // ==== 질의 ====
-        SearchResponse searchResponse = sendElasticsearchQuery(startTime, endTime, searchSourceBuilder);
+        SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime, boolQueryBuilder, termsAggregation);
 
         // 결과에서 작업량 추출
         Terms termsAgg  = searchResponse.getAggregations().get("by_oht_id");
@@ -394,9 +353,6 @@ public class DashboardService {
      * [Elasticsearch 검색] 기간동안 시간대별 작업량
      */
     public Map getOhtJobHourly(LocalDateTime startTime, LocalDateTime endTime) throws IOException {
-        //ES의 질의 생성
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-
         // ==== 쿼리 검색 ====
         // 쿼리에 필요한 필터 만들기
         //시간 포맷 변환
@@ -417,10 +373,6 @@ public class DashboardService {
             .filter(carrierFilter)
             .filter(scriptFilter);
 
-        // 질의 추가
-        searchSourceBuilder.query(boolQueryBuilder);
-
-
         // ==== 집계 검색 ====
         MaxAggregationBuilder maxAggregation = AggregationBuilders.max("max_curr_time").field("curr_time");
         TermsAggregationBuilder termsAggregation = AggregationBuilders.terms("group_by_oht_id_start_time")
@@ -429,15 +381,8 @@ public class DashboardService {
             ).size(Integer.MAX_VALUE)
             .subAggregation(maxAggregation);
 
-        // 질의 추가
-        searchSourceBuilder.aggregation(termsAggregation);
-
-
-        // 집계반환만 원하고 Document는 반환X
-        searchSourceBuilder.size(0);
-
         // ==== 질의 ====
-        SearchResponse searchResponse = sendElasticsearchQuery(startTime, endTime, searchSourceBuilder);
+        SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime, boolQueryBuilder, termsAggregation);
 
 
         // ==== 결과에서 시간 추출 ====
@@ -465,9 +410,6 @@ public class DashboardService {
      */
     private JobResultAnalysisRatioResponse getJobResultCount(LocalDateTime startTime, LocalDateTime endTime) throws
         IOException {
-        //ES의 질의 생성
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-
         // ==== 쿼리 검색 ====
         // 쿼리에 필요한 필터 만들기
         //시간 포맷 변환
@@ -486,10 +428,6 @@ public class DashboardService {
             .filter(scriptFilter)
             .filter(statusFilter);
 
-        // 질의 추가
-        searchSourceBuilder.query(boolQueryBuilder);
-
-
         // ==== 집계 검색 ====
         TopHitsAggregationBuilder topHitsAggregation = AggregationBuilders.topHits("latest_record")
             .size(1)
@@ -501,16 +439,8 @@ public class DashboardService {
             ).size(Integer.MAX_VALUE)
             .subAggregation(topHitsAggregation);
 
-
-        // 질의 추가
-        searchSourceBuilder.aggregation(termsAggregation);
-
-
-        // 집계반환만 원하고 Document는 반환X
-        searchSourceBuilder.size(0);
-
         // ==== 질의 ====
-        SearchResponse searchResponse = sendElasticsearchQuery(startTime, endTime, searchSourceBuilder);
+        SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime, boolQueryBuilder, termsAggregation);
 
         // ==== 결과에서 개수 추출 ====
         Terms termsAgg  = searchResponse.getAggregations().get("group_by_oht_id_start_time");
@@ -530,49 +460,11 @@ public class DashboardService {
             .totalWork(totalWork)
             .successWork(successWork)
             .failedWork(failedWork)
-            .successPercentage(CalculateOhtData.getPercentage(successWork, totalWork))
-            .failedPercentage(CalculateOhtData.getPercentage(failedWork, totalWork))
+            .successPercentage(CalculateData.getPercentage(successWork, totalWork))
+            .failedPercentage(CalculateData.getPercentage(failedWork, totalWork))
             .build();
     }
 
-    /**
-     * elasticsearch로 검색을 요청하고 응답받는 common 함수
-     */
-    public  SearchResponse sendElasticsearchQuery(LocalDateTime startTime, LocalDateTime endTime, SearchSourceBuilder searchSourceBuilder) throws
-        IOException {
-        // index 리스트를 만든다.
-        String[] indexArray = ElasticsearchQueryUtil.getIndexNameArray(startTime, endTime);
-
-        // index가 존재하지 않으면 생성하기
-        for (String indexName : indexArray) {
-            ensureIndexExists(indexName);
-        }
-
-        //검색 요청객체 생성 및 인덱스이름 설정 및 검색소스 설정
-        SearchRequest searchRequest = new SearchRequest(indexArray); // 실제 인덱스 이름 사용
-        searchRequest.source(searchSourceBuilder);
-
-        //요청 및 응답받음
-        log.debug("[ES request] : "+ searchSourceBuilder);
-        SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
-        log.debug("[ES response] : "+searchResponse.toString());
-
-        return searchResponse;
-    }
-
-    /**
-     * 인덱스가 존재하는지 확인 후 없으면 생성
-     */
-    public void ensureIndexExists(String indexName) throws IOException {
-        GetIndexRequest getIndexRequest = new GetIndexRequest(indexName);
-        boolean exists = client.indices().exists(getIndexRequest, RequestOptions.DEFAULT);
-
-        if (!exists) {
-            // 인덱스가 존재하지 않으면 생성
-            CreateIndexRequest createIndexRequest = new CreateIndexRequest(indexName);
-            client.indices().create(createIndexRequest, RequestOptions.DEFAULT);
-        }
-    }
 
     /**
      * startTime, endTime을 기준으로 지난 기간의 시작, 종료 시간 계산하기

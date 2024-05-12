@@ -127,7 +127,7 @@ public class SimulationService {
             ohtTotalWork += cardinality.getValue();
         }
 
-        double differencePercentage = CalculateOhtData.getDifferencePercentage(ohtTotalWork, overallTotalWorkAvg);
+        double differencePercentage = CalculateData.getDifferencePercentage(ohtTotalWork, overallTotalWorkAvg);
         return IntegerDataDto.builder().data(ohtTotalWork).percent(differencePercentage).build();
     }
 
@@ -168,7 +168,7 @@ public class SimulationService {
             if((int) bucketKey.get("oht_id") == ohtId.intValue()) ohtError++;
         }
 
-        double differencePercentage = CalculateOhtData.getDifferencePercentage(ohtError, overallErrorAvg);
+        double differencePercentage = CalculateData.getDifferencePercentage(ohtError, overallErrorAvg);
         return IntegerDataDto.builder().data(ohtError).percent(differencePercentage).build();
     }
 
@@ -216,7 +216,7 @@ public class SimulationService {
         int overallCntAvg = overallCnt/runningOhtCnt.intValue();
 
         //차이 퍼센티지 구함
-        double differencePercentage = CalculateOhtData.getDifferencePercentage(ohtCnt, overallCntAvg);
+        double differencePercentage = CalculateData.getDifferencePercentage(ohtCnt, overallCntAvg);
         return IntegerDataDto.builder().data(ohtCnt).percent(differencePercentage).build();
     }
 
@@ -245,7 +245,7 @@ public class SimulationService {
         Avg ohtAvg = filter.getAggregations().get("oht_"+String.valueOf(ohtId)+"_average_speed");
 
         //차이 퍼센티지 구함
-        double differencePercentage = CalculateOhtData.getDifferencePercentage(ohtAvg.getValue(), overallAvg.getValue());
+        double differencePercentage = CalculateData.getDifferencePercentage(ohtAvg.getValue(), overallAvg.getValue());
         return DoubleDataDto.builder().data(ohtAvg.value()).percent(differencePercentage).build();
 
     }
