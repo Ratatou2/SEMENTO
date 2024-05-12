@@ -1,6 +1,6 @@
 package com.dfg.semento.util;
 
-/** OHT 데이터에 대해 다양한 통계를 만드는 클래스
+/** 통계를 만드는 클래스
  */
 public class CalculateOhtData {
 
@@ -13,5 +13,15 @@ public class CalculateOhtData {
     public static double getDifferencePercentage(double ohtValue, double overallValue){
         if(overallValue == 0) return 100;
         return  ((ohtValue - overallValue) / overallValue) * 100;
+    }
+
+    /**
+     * 전체 데이터에 대해 value가 몇 퍼센트인지 계산
+     * @param value
+     * @param overallValue
+     * @return
+     */
+    public static double getPercentage(double value, double overallValue) {
+        return value / overallValue * 100;
     }
 }
