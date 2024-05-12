@@ -2,6 +2,7 @@ package com.dfg.semento.controller;
 
 import com.dfg.semento.document.LogDocument;
 import com.dfg.semento.dto.request.SearchTimeRequest;
+import com.dfg.semento.dto.response.JobResultAnalysisResponse;
 import com.dfg.semento.dto.response.OhtJobAnalysisResponse;
 import com.dfg.semento.dto.response.OhtJobHourlyResponse;
 import com.dfg.semento.service.DashboardService;
@@ -44,6 +45,13 @@ public class DashboardController {
         IOException {
         List<OhtJobHourlyResponse> ohtJobHourlyResponse = dashboardService.ohtJobHourly(request.getStartTime(), request.getEndTime());
         return ResponseEntity.ok(ohtJobHourlyResponse);
+    }
+
+    @PostMapping("/job-result-analysis")
+    public ResponseEntity<JobResultAnalysisResponse> jobResultAnalysis(@Valid @RequestBody SearchTimeRequest request) throws
+        IOException {
+        JobResultAnalysisResponse response = dashboardService.jobResultAnalysis(request.getStartTime(), request.getEndTime());
+        return ResponseEntity.ok(response);
     }
 
 }
