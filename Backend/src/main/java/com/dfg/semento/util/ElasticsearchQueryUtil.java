@@ -129,9 +129,11 @@ public class ElasticsearchQueryUtil {
 
         //시간필터 생성
         RangeQueryBuilder timeFilter = generatedTimeFilter(startTime, endTime);
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery().must(timeFilter);
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
-                .size(0);  // 문서 반환 없이 집계 결과만 반환
+            .query(boolQueryBuilder)
+            .size(0);  // 문서 반환 없이 집계 결과만 반환
 
         for(AggregationBuilder aggregation : aggregations) searchSourceBuilder.aggregation(aggregation);
 

@@ -10,6 +10,9 @@ import com.dfg.semento.dto.response.JobResultAnalysisRatioResponse;
 import com.dfg.semento.dto.response.JobResultAnalysisResponse;
 import com.dfg.semento.dto.response.OhtJobAnalysisResponse;
 import com.dfg.semento.dto.response.OhtJobHourlyResponse;
+import com.dfg.semento.dto.response.StateAnalysisResponse;
+import com.dfg.semento.dto.response.StateHourlyAnalysisResponse;
+import com.dfg.semento.dto.response.StateHourlyResponse;
 import com.dfg.semento.repository.DashboardRepository;
 import com.dfg.semento.util.*;
 
@@ -46,13 +49,18 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -64,6 +72,10 @@ public class DashboardService {
 
     @Value("${elasticsearch.bucket-size}")
     private int BUKET_SIZE;
+
+    @Value("200")
+    private int OHT_DEADLINE;
+
     private final DashboardRepository dashboardRepository;
     private final ElasticsearchQueryUtil elasticsearchQueryUtil;
 
@@ -132,21 +144,288 @@ public class DashboardService {
     }
 
     /**
+     * 전체 OHT 상태 분석 (데드라인, 평균 작업 시간, 평균 유휴 시간)
+     */
+    public StateAnalysisResponse stateAnalysis(LocalDateTime startTime, LocalDateTime endTime) throws IOException {
+        SearchTimeRequest lastPeriod = calculateLastPeriod(startTime, endTime);
+        // this month
+        int ohtCount = getOhtCount(startTime, endTime);
+        int workingTime = getWorkingTime(startTime, endTime);
+        int idleTime = getIdleTime(startTime, endTime);
+
+        // last month
+        int lastOhtCount = getOhtCount(lastPeriod.getStartTime(), lastPeriod.getEndTime());
+        int lastWorkingTime = getWorkingTime(lastPeriod.getStartTime(), lastPeriod.getEndTime());
+        int lastIdleTime = getIdleTime(lastPeriod.getStartTime(), lastPeriod.getEndTime());
+
+        // 평균 작업/유휴 시간 계산
+        int averageWorkingTime = workingTime/ohtCount;
+        int averageIdleTime = idleTime/ohtCount;
+        int lastAverageWorkingTime = lastWorkingTime/lastOhtCount;
+        int lastAverageIdleTime = lastIdleTime/lastOhtCount;
+
+        return StateAnalysisResponse.builder()
+            .deadline(new IntegerDataDto(OHT_DEADLINE, 0))
+            .averageWorkTime(new IntegerDataDto(
+                averageWorkingTime,
+                CalculateData.getDifferencePercentage(averageWorkingTime, lastAverageWorkingTime)))
+            .averageIdleTime(new IntegerDataDto(
+                averageIdleTime,
+                CalculateData.getDifferencePercentage(averageIdleTime, lastAverageIdleTime)))
+            .build();
+    }
+
+    /**
+     * 기간동안 평균적으로 시간대별 작업/유휴 상태 OHT 수 계산 및 집계(작업이 많은, OHT가 활발한, 유휴상태가 많은)
+     */
+    public StateHourlyAnalysisResponse stateHourlyAnalysis(LocalDateTime startTime, LocalDateTime endTime) throws
+        IOException {
+        // 기간동안 시간대별 총 작업/유휴 상태 OHT 수
+        Map<Integer, Integer> workHourCount = getWorkStateHourly(startTime, endTime);
+        Map<Integer, Integer> idleHourCount = getIdleStateHourly(startTime, endTime);
+
+        // 평균 계산을 위한 기간동안 일수
+        long day = ChronoUnit.DAYS.between(startTime, endTime) + 1;
+
+        // workHourCount -> response 변환
+        List<StateHourlyResponse> workHourCountResponse = new ArrayList<>();
+        int maxWorkHour = 0;
+        for (Map.Entry<Integer, Integer> entry : workHourCount.entrySet()) {
+            if(workHourCount.get(maxWorkHour) < entry.getValue()) maxWorkHour = entry.getKey();
+            workHourCountResponse.add(StateHourlyResponse.builder()
+                .hour(entry.getKey())
+                .count((entry.getValue() / day))
+                .build());
+        }
+
+        // idleHourCount -> response 변환
+        List<StateHourlyResponse> idleHourCountResponse = new ArrayList<>();
+        int maxIdleHour = 0;
+        for (Map.Entry<Integer, Integer> entry : idleHourCount.entrySet()) {
+            if(idleHourCount.get(maxIdleHour) < entry.getValue()) maxIdleHour = entry.getKey();
+            idleHourCountResponse.add(StateHourlyResponse.builder()
+                .hour(entry.getKey())
+                .count(entry.getValue() / day)
+                .build());
+        }
+
+        // 시간대 분석
+        Map<Integer, Integer> jobHourly = getOhtJobHourly(startTime, endTime);
+        List<Map.Entry<Integer, Integer>> jobHourlySorted = new LinkedList<>(jobHourly.entrySet());
+        jobHourlySorted.sort(Map.Entry.<Integer, Integer>comparingByValue().reversed());
+
+        return StateHourlyAnalysisResponse.builder()
+            .workHourCount(workHourCountResponse)
+            .idleHourCount(idleHourCountResponse)
+            .maxJobTime(jobHourlySorted.getFirst().getKey())
+            .maxWorkTime(maxWorkHour)
+            .maxIdleTime(maxIdleHour)
+            .build();
+    }
+
+    /**
+     * [Elasticsearch 검색] 기간동안 운행했던 OHT 대수 계산 함수
+    */
+    private int getOhtCount(LocalDateTime startTime, LocalDateTime endTime) throws IOException {
+        // ==== 집계 검색 ====
+        CardinalityAggregationBuilder cardinalityAggregation = AggregationBuilders.cardinality("oht_count")
+            .field("oht_id");
+
+        // ==== 질의 ====
+        SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime, cardinalityAggregation);
+
+        // 결과에서 작업량 추출
+        Cardinality ohtCount  = searchResponse.getAggregations().get("oht_count");
+
+        return (int) ohtCount.getValue();
+    }
+
+    /**
+     * [Elasticsearch 검색] 기간동안 전체 작업량 계산 함수
+     */
+    public int getOhtTotalWorkByStartTimeAndEndTime(LocalDateTime startTime, LocalDateTime endTime) throws
+        IOException {
+        // ==== 쿼리 검색 ====
+        // 작업 중인 로그만 검색하도록 설정
+        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status.keyword", "W");
+
+        // Bool Query로  두 filter 적용
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
+            .filter(statusFilter);
+
+        // ==== 집계 검색 ====
+        ScriptedMetricAggregationBuilder aggregationBuilder = AggregationBuilders.scriptedMetric("total_work")
+            .initScript(new Script("""
+                    state.unique_combinations = [:];
+                    """))
+            .mapScript(new Script("""
+                        def combination = doc['oht_id'].value + '|' + doc['start_time'].value;
+                        state.unique_combinations.put(combination, true);
+                        """))
+            .combineScript(new Script("return state.unique_combinations.size();"))
+            .reduceScript(new Script("""
+                        def result = 0;
+                        for (state in states) {
+                            result += state;
+                        }
+                        return result;
+                        """));
+
+        // ==== 질의 ====
+        SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime, boolQueryBuilder, aggregationBuilder);
+
+        // 결과에서 작업량 추출
+        ScriptedMetric totalWork = searchResponse.getAggregations().get("total_work");
+        return (int) totalWork.aggregation();
+    }
+
+    /**
+     * [Elasticsearch 검색] 기간동안 OHT별 평균 작업량 계산 함수
+     */
+    private double getOhtAverageWorkByStartTimeAndTime(LocalDateTime startTime, LocalDateTime endTime) throws
+        IOException {
+        // ==== 쿼리 검색 ====
+        // 작업 중인 로그만 검색하도록 설정
+        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status.keyword", "W");
+
+        // Bool Query로  두 filter 적용
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
+            .filter(statusFilter);
+
+        // ==== 집계 검색 ====
+        TermsAggregationBuilder termsAggregation = AggregationBuilders.terms("by_oht_id")
+            .field("oht_id");
+
+        CardinalityAggregationBuilder cardinalityAggregation = AggregationBuilders.cardinality("count_by_oht_id")
+            .field("start_time");
+
+        // oht_id 별 start_time 개수세는 쿼리 추가
+        termsAggregation.subAggregation(cardinalityAggregation);
+
+        // ==== 질의 ====
+        SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime, boolQueryBuilder, termsAggregation);
+
+        // 결과에서 작업량 추출
+        Terms termsAgg  = searchResponse.getAggregations().get("by_oht_id");
+
+        // 평균 계산
+        if(termsAgg.getBuckets().isEmpty()) return 0;
+        double sum = 0;
+        for(Terms.Bucket bucket: termsAgg.getBuckets()) {
+            Cardinality cardinality = bucket.getAggregations().get("count_by_oht_id");
+            sum += cardinality.getValue();
+        }
+        return sum / termsAgg.getBuckets().size();
+    }
+
+    /**
+     * [Elasticsearch 검색] 기간동안 시간대별 작업량
+     */
+    public Map<Integer, Integer> getOhtJobHourly(LocalDateTime startTime, LocalDateTime endTime) throws IOException {
+        // ==== 쿼리 검색 ====
+        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status.keyword", "W");
+        MatchQueryBuilder carrierFilter = QueryBuilders.matchQuery("carrier", false);
+        ScriptQueryBuilder scriptFilter = QueryBuilders.scriptQuery(
+            new Script("doc['current_node.keyword'].value == doc['target_node.keyword'].value")
+        );
+
+        // Bool Query로  두 filter 적용
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
+            .filter(statusFilter)
+            .filter(carrierFilter)
+            .filter(scriptFilter);
+
+        // ==== 집계 검색 ====
+        MaxAggregationBuilder maxAggregation = AggregationBuilders.max("max_curr_time").field("curr_time");
+        TermsAggregationBuilder termsAggregation = AggregationBuilders.terms("group_by_oht_id_start_time")
+            .script(
+                new Script("doc['oht_id'].value + ' ' + doc['start_time'].value")
+            ).size(Integer.MAX_VALUE)
+            .subAggregation(maxAggregation);
+
+        // ==== 질의 ====
+        SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime, boolQueryBuilder, termsAggregation);
+
+
+        // ==== 결과에서 시간 추출 ====
+        // 각 Terms의 bucket에서 max_curr_time을 추출하고 카운트
+        Terms terms = searchResponse.getAggregations().get("group_by_oht_id_start_time");
+        Map<Integer, Integer> hourCounts = new HashMap<>();
+
+        // 시간 포맷터 설정
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        for(int i=0; i<=23; i++) {
+            hourCounts.put(i, 0);
+        }
+        for (Terms.Bucket bucket : terms.getBuckets()) {
+            Max maxCurrTime = bucket.getAggregations().get("max_curr_time");
+            long maxTime = (long) maxCurrTime.getValue();
+            // timezone 변경
+            ZonedDateTime dateTime = Instant.ofEpochMilli(maxTime).atZone(ZoneId.of("Asia/Seoul"));
+            hourCounts.put(dateTime.getHour(), dateTime.getHour() + 1);
+        }
+        return hourCounts;
+    }
+
+    /**
+     * [Elasticsearch 검색] 전체 작업량 중 성공, 실패량 및 퍼센테이지
+     */
+    private JobResultAnalysisRatioResponse getJobResultCount(LocalDateTime startTime, LocalDateTime endTime) throws
+        IOException {
+        // ==== 쿼리 검색 ====
+        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status", "W");
+        ScriptQueryBuilder scriptFilter = QueryBuilders.scriptQuery(
+            new Script("doc['current_node'] == doc['target_node']")
+        );
+
+        // Bool Query로  두 filter 적용
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
+            .filter(scriptFilter)
+            .filter(statusFilter);
+
+        // ==== 집계 검색 ====
+        TopHitsAggregationBuilder topHitsAggregation = AggregationBuilders.topHits("latest_record")
+            .size(1)
+            .sort(SortBuilders.fieldSort("curr_time").order(SortOrder.DESC))
+            .fetchSource("is_fail", null);
+        TermsAggregationBuilder termsAggregation = AggregationBuilders.terms("group_by_oht_id_start_time")
+            .script(
+                new Script("doc['oht_id'].value + ' ' + doc['start_time'].value")
+            ).size(Integer.MAX_VALUE)
+            .subAggregation(topHitsAggregation);
+
+        // ==== 질의 ====
+        SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime, boolQueryBuilder, termsAggregation);
+
+        // ==== 결과에서 개수 추출 ====
+        Terms termsAgg  = searchResponse.getAggregations().get("group_by_oht_id_start_time");
+
+        int totalWork = termsAgg.getBuckets().size();
+        int successWork = 0;
+        int failedWork = 0;
+
+        for(Terms.Bucket bucket: termsAgg.getBuckets()) {
+            TopHits topHits = bucket.getAggregations().get("latest_record");
+            boolean isFail = (boolean) topHits.getHits().getHits()[0].getSourceAsMap().get("is_fail");
+            if(isFail) failedWork++;
+            else successWork++;
+        }
+
+        return JobResultAnalysisRatioResponse.builder()
+            .totalWork(totalWork)
+            .successWork(successWork)
+            .failedWork(failedWork)
+            .successPercentage(CalculateData.getPercentage(successWork, totalWork))
+            .failedPercentage(CalculateData.getPercentage(failedWork, totalWork))
+            .build();
+    }
+
+    /**
      * [Elasticsearch 검색] 실패한 작업 중 에러 발생 작업 카운트
      */
     private JobResultAnalysisResponse getJobErrorCount(LocalDateTime startTime, LocalDateTime endTime) throws IOException {
-        //ES의 질의 생성
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-
-        // 시간 필터 생성
-        FormattedTime FormattedTime = TimeConverter.convertElasticsearchTime(startTime, endTime);
-        RangeQueryBuilder timeFilter = QueryBuilders.rangeQuery("curr_time")
-            .gte(FormattedTime.getStartTime())
-            .lte(FormattedTime.getEndTime());
-
         //Composite(집계) 설정
         BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-        boolQuery.must(timeFilter);  // 시간 필터를 bool 쿼리에 추가
         boolQuery.mustNot(QueryBuilders.matchQuery("error", 0));
 
         //Composite Source 설정
@@ -211,11 +490,11 @@ public class DashboardService {
             int error = Integer.parseInt(st.nextToken());
             int count = entry.getValue();
             logResponses.add(
-                    JobResultAnalysisErrorLogResponse.builder()
-                        .ohtId(ohtId)
-                        .error(error)
-                        .count(count)
-                        .build()
+                JobResultAnalysisErrorLogResponse.builder()
+                    .ohtId(ohtId)
+                    .error(error)
+                    .count(count)
+                    .build()
             );
         }
         return JobResultAnalysisResponse.builder()
@@ -224,170 +503,86 @@ public class DashboardService {
             .build();
     }
 
-    /**
-     * 기간동안 운행했던 OHT 대수 계산 함수
-    */
-    private int getOhtCount(LocalDateTime startTime, LocalDateTime endTime) throws IOException {
-        //ES의 질의 생성
 
+    /**
+     * [Elasticsearch 검색] OHT가 Idle인 시간 합산
+     */
+    private int getIdleTime(LocalDateTime startTime, LocalDateTime endTime) throws IOException {
         // ==== 쿼리 검색 ====
-        FormattedTime FormattedTime = TimeConverter.convertElasticsearchTime(startTime, endTime);
-        RangeQueryBuilder timeFilter = QueryBuilders.rangeQuery("curr_time")
-            .gte(FormattedTime.getStartTime())
-            .lte(FormattedTime.getEndTime());
+        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status", "I");
+
+        // Bool Query로  두 filter 적용
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
-            .filter(timeFilter);
+            .must(statusFilter);
 
         // ==== 집계 검색 ====
-        CardinalityAggregationBuilder cardinalityAggregation = AggregationBuilders.cardinality("oht_count")
-            .field("oht_id");
-
+        CardinalityAggregationBuilder cardinalityAggregation = AggregationBuilders
+            .cardinality("count_working")
+            .field("doc_id");
 
         // ==== 질의 ====
         SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime, boolQueryBuilder, cardinalityAggregation);
 
-        // 결과에서 작업량 추출
-        Cardinality ohtCount  = searchResponse.getAggregations().get("oht_count");
+        // ==== 결과에서 개수 추출 ====
+        Cardinality workingCount  = searchResponse.getAggregations().get("count_working");
 
-        return (int) ohtCount.getValue();
+        return (int) workingCount.getValue();
     }
 
     /**
-     * [Elasticsearch 검색] 기간동안 전체 작업량 계산 함수
+     * [Elasticsearch 검색] OHT가 작업 중인(Arrived, Working, Going) 시간 합산
      */
-    public int getOhtTotalWorkByStartTimeAndEndTime(LocalDateTime startTime, LocalDateTime endTime) throws
-        IOException {
+    private int getWorkingTime(LocalDateTime startTime, LocalDateTime endTime) throws IOException {
         // ==== 쿼리 검색 ====
-        // startTime과 endTime 사이에 있는 로그만 검색하도록 설정
-        //시간 포맷 변환
-        FormattedTime FormattedTime = TimeConverter.convertElasticsearchTime(startTime, endTime);
-        RangeQueryBuilder timeFilter = QueryBuilders.rangeQuery("curr_time")
-            .gte(FormattedTime.getStartTime())
-            .lte(FormattedTime.getEndTime());
-
-        // 작업 중인 로그만 검색하도록 설정
-        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status.keyword", "W");
+        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status", "I");
 
         // Bool Query로  두 filter 적용
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
-            .filter(timeFilter)
-            .filter(statusFilter);
-
+            .mustNot(statusFilter);
 
         // ==== 집계 검색 ====
-        ScriptedMetricAggregationBuilder aggregationBuilder = AggregationBuilders.scriptedMetric("total_work")
-            .initScript(new Script("""
-                    state.unique_combinations = [:];
-                    """))
-            .mapScript(new Script("""
-                        def combination = doc['oht_id'].value + '|' + doc['start_time'].value;
-                        state.unique_combinations.put(combination, true);
-                        """))
-            .combineScript(new Script("return state.unique_combinations.size();"))
-            .reduceScript(new Script("""
-                        def result = 0;
-                        for (state in states) {
-                            result += state;
-                        }
-                        return result;
-                        """));
-
+        CardinalityAggregationBuilder cardinalityAggregation = AggregationBuilders
+            .cardinality("count_working")
+            .field("doc_id");
 
         // ==== 질의 ====
-        SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime, boolQueryBuilder, aggregationBuilder);
+        SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime, boolQueryBuilder, cardinalityAggregation);
 
-        // 결과에서 작업량 추출
-        ScriptedMetric totalWork = searchResponse.getAggregations().get("total_work");
-        return (int) totalWork.aggregation();
+        // ==== 결과에서 개수 추출 ====
+        Cardinality workingCount  = searchResponse.getAggregations().get("count_working");
+
+        return (int) workingCount.getValue();
     }
 
-    /**
-     * [Elasticsearch 검색] 기간동안 OHT별 평균 작업량 계산 함수
-     */
-    private double getOhtAverageWorkByStartTimeAndTime(LocalDateTime startTime, LocalDateTime endTime) throws
-        IOException {
-        // ==== 쿼리 검색 ====
-        // startTime과 endTime 사이에 있는 로그만 검색하도록 설정
-        //시간 포맷 변환
-        FormattedTime FormattedTime = TimeConverter.convertElasticsearchTime(startTime, endTime);
-        RangeQueryBuilder timeFilter = QueryBuilders.rangeQuery("curr_time")
-            .gte(FormattedTime.getStartTime())
-            .lte(FormattedTime.getEndTime());
-
-        // 작업 중인 로그만 검색하도록 설정
-        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status.keyword", "W");
-
-        // Bool Query로  두 filter 적용
-        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
-            .filter(timeFilter)
-            .filter(statusFilter);
-
-        // ==== 집계 검색 ====
-        TermsAggregationBuilder termsAggregation = AggregationBuilders.terms("by_oht_id")
-            .field("oht_id");
-
-        CardinalityAggregationBuilder cardinalityAggregation = AggregationBuilders.cardinality("count_by_oht_id")
-            .field("start_time");
-
-        // oht_id 별 start_time 개수세는 쿼리 추가
-        termsAggregation.subAggregation(cardinalityAggregation);
-
-
-        // ==== 질의 ====
-        SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime, boolQueryBuilder, termsAggregation);
-
-        // 결과에서 작업량 추출
-        Terms termsAgg  = searchResponse.getAggregations().get("by_oht_id");
-
-        // 평균 계산
-        if(termsAgg.getBuckets().isEmpty()) return 0;
-        double sum = 0;
-        for(Terms.Bucket bucket: termsAgg.getBuckets()) {
-            Cardinality cardinality = bucket.getAggregations().get("count_by_oht_id");
-            sum += cardinality.getValue();
-        }
-        return sum / termsAgg.getBuckets().size();
-    }
 
     /**
-     * [Elasticsearch 검색] 기간동안 시간대별 작업량
+     * [Elasticsearch 검색] 시간대별 작업 상태 OHT 개수 계산
      */
-    public Map getOhtJobHourly(LocalDateTime startTime, LocalDateTime endTime) throws IOException {
+    private Map<Integer, Integer> getWorkStateHourly(LocalDateTime startTime, LocalDateTime endTime) throws IOException {
         // ==== 쿼리 검색 ====
-        // 쿼리에 필요한 필터 만들기
-        //시간 포맷 변환
-        FormattedTime FormattedTime = TimeConverter.convertElasticsearchTime(startTime, endTime);
-        RangeQueryBuilder timeFilter = QueryBuilders.rangeQuery("curr_time")
-            .gte(FormattedTime.getStartTime())
-            .lte(FormattedTime.getEndTime());
-        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status.keyword", "W");
-        MatchQueryBuilder carrierFilter = QueryBuilders.matchQuery("carrier", false);
-        ScriptQueryBuilder scriptFilter = QueryBuilders.scriptQuery(
-            new Script("doc['current_node.keyword'].value == doc['target_node.keyword'].value")
-        );
+        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status", "I");
 
-        // Bool Query로  두 filter 적용
+        // Bool Query로  두 filter
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
-            .filter(timeFilter)
-            .filter(statusFilter)
-            .filter(carrierFilter)
-            .filter(scriptFilter);
+            .mustNot(statusFilter);
 
         // ==== 집계 검색 ====
         MaxAggregationBuilder maxAggregation = AggregationBuilders.max("max_curr_time").field("curr_time");
-        TermsAggregationBuilder termsAggregation = AggregationBuilders.terms("group_by_oht_id_start_time")
+        TermsAggregationBuilder termsAggregation = AggregationBuilders.terms("group_by_oht_id_curr_time_hour")
             .script(
-                new Script("doc['oht_id'].value + ' ' + doc['start_time'].value")
-            ).size(Integer.MAX_VALUE)
+                new Script("""
+                    def dateStr = doc['curr_time'].value.toInstant().atZone(ZoneId.of('Asia/Seoul')).format(DateTimeFormatter.ofPattern('yyyy-MM-dd HH'));
+                    return doc['oht_id'].value + ' ' + dateStr;
+                """)
+            ).size(BUKET_SIZE)
             .subAggregation(maxAggregation);
 
         // ==== 질의 ====
         SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime, boolQueryBuilder, termsAggregation);
 
-
         // ==== 결과에서 시간 추출 ====
         // 각 Terms의 bucket에서 max_curr_time을 추출하고 카운트
-        Terms terms = searchResponse.getAggregations().get("group_by_oht_id_start_time");
+        Terms terms = searchResponse.getAggregations().get("group_by_oht_id_curr_time_hour");
         Map<Integer, Integer> hourCounts = new HashMap<>();
 
         // 시간 포맷터 설정
@@ -397,72 +592,57 @@ public class DashboardService {
         }
         for (Terms.Bucket bucket : terms.getBuckets()) {
             Max maxCurrTime = bucket.getAggregations().get("max_curr_time");
-            String maxTime = maxCurrTime.getValueAsString();
-            // 날짜 파싱 및 시간으로 잘라내기
-            LocalDateTime dateTime = LocalDateTime.parse(maxTime, formatter);
-            hourCounts.put(dateTime.getHour(), dateTime.getHour() + 1);
+            long maxTime = (long) maxCurrTime.getValue();
+            // timezone 변경
+            ZonedDateTime dateTime = Instant.ofEpochMilli(maxTime).atZone(ZoneId.of("Asia/Seoul"));
+            hourCounts.put(dateTime.getHour(), hourCounts.get(dateTime.getHour()) + 1);
         }
         return hourCounts;
     }
 
     /**
-     * [Elasticsearch 검색] 전체 작업량 중 성공, 실패량 및 퍼센테이지
+     * [Elasticsearch 검색] 시간대별 유휴 상태 OHT 개수 계산
      */
-    private JobResultAnalysisRatioResponse getJobResultCount(LocalDateTime startTime, LocalDateTime endTime) throws
-        IOException {
+    private Map<Integer, Integer> getIdleStateHourly(LocalDateTime startTime, LocalDateTime endTime) throws IOException {
         // ==== 쿼리 검색 ====
-        // 쿼리에 필요한 필터 만들기
-        //시간 포맷 변환
-        FormattedTime FormattedTime = TimeConverter.convertElasticsearchTime(startTime, endTime);
-        RangeQueryBuilder timeFilter = QueryBuilders.rangeQuery("curr_time")
-            .gte(FormattedTime.getStartTime())
-            .lte(FormattedTime.getEndTime());
-        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status", "W");
-        ScriptQueryBuilder scriptFilter = QueryBuilders.scriptQuery(
-            new Script("doc['current_node'] == doc['target_node']")
-        );
+        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status", "I");
 
-        // Bool Query로  두 filter 적용
+        // Bool Query로  두 filter
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
-            .filter(timeFilter)
-            .filter(scriptFilter)
-            .filter(statusFilter);
+            .must(statusFilter);
 
         // ==== 집계 검색 ====
-        TopHitsAggregationBuilder topHitsAggregation = AggregationBuilders.topHits("latest_record")
-            .size(1)
-            .sort(SortBuilders.fieldSort("curr_time").order(SortOrder.DESC))
-            .fetchSource("is_fail", null);
-        TermsAggregationBuilder termsAggregation = AggregationBuilders.terms("group_by_oht_id_start_time")
+        MaxAggregationBuilder maxAggregation = AggregationBuilders.max("max_curr_time").field("curr_time");
+        TermsAggregationBuilder termsAggregation = AggregationBuilders.terms("group_by_oht_id_curr_time_hour")
             .script(
-                new Script("doc['oht_id'].value + ' ' + doc['start_time'].value")
-            ).size(Integer.MAX_VALUE)
-            .subAggregation(topHitsAggregation);
+                new Script("""
+                    def dateStr = doc['curr_time'].value.toInstant().atZone(ZoneId.of('Asia/Seoul')).format(DateTimeFormatter.ofPattern('yyyy-MM-dd HH'));
+                    return doc['oht_id'].value + ' ' + dateStr;
+                """)
+            ).size(BUKET_SIZE)
+            .subAggregation(maxAggregation);
 
         // ==== 질의 ====
         SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime, boolQueryBuilder, termsAggregation);
 
-        // ==== 결과에서 개수 추출 ====
-        Terms termsAgg  = searchResponse.getAggregations().get("group_by_oht_id_start_time");
+        // ==== 결과에서 시간 추출 ====
+        // 각 Terms의 bucket에서 max_curr_time을 추출하고 카운트
+        Terms terms = searchResponse.getAggregations().get("group_by_oht_id_curr_time_hour");
+        Map<Integer, Integer> hourCounts = new HashMap<>();
 
-        int totalWork = termsAgg.getBuckets().size();
-        int successWork = 0;
-        int failedWork = 0;
-
-        for(Terms.Bucket bucket: termsAgg.getBuckets()) {
-            TopHits topHits = bucket.getAggregations().get("latest_record");
-            boolean isFail = (boolean) topHits.getHits().getHits()[0].getSourceAsMap().get("is_fail");
-            if(isFail) failedWork++;
-            else successWork++;
+        // 시간 포맷터 설정
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        for(int i=0; i<=23; i++) {
+            hourCounts.put(i, 0);
         }
-
-        return JobResultAnalysisRatioResponse.builder()
-            .totalWork(totalWork)
-            .successWork(successWork)
-            .failedWork(failedWork)
-            .successPercentage(CalculateData.getPercentage(successWork, totalWork))
-            .failedPercentage(CalculateData.getPercentage(failedWork, totalWork))
-            .build();
+        for (Terms.Bucket bucket : terms.getBuckets()) {
+            Max maxCurrTime = bucket.getAggregations().get("max_curr_time");
+            long maxTime = (long) maxCurrTime.getValue();
+            // timezone 변경
+            ZonedDateTime dateTime = Instant.ofEpochMilli(maxTime).atZone(ZoneId.of("Asia/Seoul"));
+            hourCounts.put(dateTime.getHour(), hourCounts.get(dateTime.getHour()) + 1);
+        }
+        return hourCounts;
     }
 
 
@@ -479,6 +659,4 @@ public class DashboardService {
         LocalDateTime lastDayOfLastMonth = LocalDateTime.of(LocalDate.of(lastMonthYear, lastMonth, 1).withDayOfMonth(1).plusMonths(1).minusDays(1), LocalTime.MAX);
         return new SearchTimeRequest(firstDayOfLastMonth, lastDayOfLastMonth);
     }
-
-
 }
