@@ -1,6 +1,7 @@
 package com.dfg.semento.controller;
 
 import com.dfg.semento.dto.request.DateAndOhtRequest;
+import com.dfg.semento.dto.response.ClassificationLogResponse;
 import com.dfg.semento.dto.response.ComparedDataResponse;
 import com.dfg.semento.dto.response.ComparedWorkPerTimeResponse;
 import com.dfg.semento.service.SimulationService;
@@ -42,5 +43,14 @@ public class SimulationController {
     public ResponseEntity<ComparedWorkPerTimeResponse> compareWork(@Valid @RequestBody DateAndOhtRequest request) throws IOException {
         log.debug("[request] : "+request.toString());
         return ResponseEntity.ok(simulationService.getCompareWork(request));
+    }
+
+    /** 작업단위로 조회
+     * @author 최서현
+     */
+    @PostMapping("/classification-log")
+    public ResponseEntity<ClassificationLogResponse> classificationLog(@Valid @RequestBody DateAndOhtRequest request) throws IOException {
+        log.debug("[request] : "+request.toString());
+        return ResponseEntity.ok(simulationService.getClassificationLog(request));
     }
 }
