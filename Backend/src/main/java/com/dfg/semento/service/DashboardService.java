@@ -176,26 +176,63 @@ public class DashboardService {
     }
 
     /**
+     * 기간동안 평균적으로 시간대별 작업/유휴 상태 OHT 수 계산 및 집계(작업이 많은, OHT가 활발한, 유휴상태가 많은)
+     */
+    public StateHourlyAnalysisResponse stateHourlyAnalysis(LocalDateTime startTime, LocalDateTime endTime) throws
+        IOException {
+        // 기간동안 시간대별 총 작업/유휴 상태 OHT 수
+        Map<Integer, Integer> workHourCount = getWorkStateHourly(startTime, endTime);
+        Map<Integer, Integer> idleHourCount = getIdleStateHourly(startTime, endTime);
+
+        // 평균 계산을 위한 기간동안 일수
+        long day = ChronoUnit.DAYS.between(startTime, endTime) + 1;
+
+        // workHourCount -> response 변환
+        List<StateHourlyResponse> workHourCountResponse = new ArrayList<>();
+        int maxWorkHour = 0;
+        for (Map.Entry<Integer, Integer> entry : workHourCount.entrySet()) {
+            if(workHourCount.get(maxWorkHour) < entry.getValue()) maxWorkHour = entry.getKey();
+            workHourCountResponse.add(StateHourlyResponse.builder()
+                .hour(entry.getKey())
+                .count((entry.getValue() / day))
+                .build());
+        }
+
+        // idleHourCount -> response 변환
+        List<StateHourlyResponse> idleHourCountResponse = new ArrayList<>();
+        int maxIdleHour = 0;
+        for (Map.Entry<Integer, Integer> entry : idleHourCount.entrySet()) {
+            if(idleHourCount.get(maxIdleHour) < entry.getValue()) maxIdleHour = entry.getKey();
+            idleHourCountResponse.add(StateHourlyResponse.builder()
+                .hour(entry.getKey())
+                .count(entry.getValue() / day)
+                .build());
+        }
+
+        // 시간대 분석
+        Map<Integer, Integer> jobHourly = getOhtJobHourly(startTime, endTime);
+        List<Map.Entry<Integer, Integer>> jobHourlySorted = new LinkedList<>(jobHourly.entrySet());
+        jobHourlySorted.sort(Map.Entry.<Integer, Integer>comparingByValue().reversed());
+
+        return StateHourlyAnalysisResponse.builder()
+            .workHourCount(workHourCountResponse)
+            .idleHourCount(idleHourCountResponse)
+            .maxJobTime(jobHourlySorted.getFirst().getKey())
+            .maxWorkTime(maxWorkHour)
+            .maxIdleTime(maxIdleHour)
+            .build();
+    }
+
+    /**
      * [Elasticsearch 검색] 기간동안 운행했던 OHT 대수 계산 함수
     */
     private int getOhtCount(LocalDateTime startTime, LocalDateTime endTime) throws IOException {
-        //ES의 질의 생성
-
-        // ==== 쿼리 검색 ====
-        FormattedTime FormattedTime = TimeConverter.convertElasticsearchTime(startTime, endTime);
-        RangeQueryBuilder timeFilter = QueryBuilders.rangeQuery("curr_time")
-            .gte(FormattedTime.getStartTime())
-            .lte(FormattedTime.getEndTime());
-        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
-            .filter(timeFilter);
-
         // ==== 집계 검색 ====
         CardinalityAggregationBuilder cardinalityAggregation = AggregationBuilders.cardinality("oht_count")
             .field("oht_id");
 
-
         // ==== 질의 ====
-        SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime, boolQueryBuilder, cardinalityAggregation);
+        SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime, cardinalityAggregation);
 
         // 결과에서 작업량 추출
         Cardinality ohtCount  = searchResponse.getAggregations().get("oht_count");
@@ -209,21 +246,12 @@ public class DashboardService {
     public int getOhtTotalWorkByStartTimeAndEndTime(LocalDateTime startTime, LocalDateTime endTime) throws
         IOException {
         // ==== 쿼리 검색 ====
-        // startTime과 endTime 사이에 있는 로그만 검색하도록 설정
-        //시간 포맷 변환
-        FormattedTime FormattedTime = TimeConverter.convertElasticsearchTime(startTime, endTime);
-        RangeQueryBuilder timeFilter = QueryBuilders.rangeQuery("curr_time")
-            .gte(FormattedTime.getStartTime())
-            .lte(FormattedTime.getEndTime());
-
         // 작업 중인 로그만 검색하도록 설정
         TermQueryBuilder statusFilter = QueryBuilders.termQuery("status.keyword", "W");
 
         // Bool Query로  두 filter 적용
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
-            .filter(timeFilter)
             .filter(statusFilter);
-
 
         // ==== 집계 검색 ====
         ScriptedMetricAggregationBuilder aggregationBuilder = AggregationBuilders.scriptedMetric("total_work")
@@ -243,7 +271,6 @@ public class DashboardService {
                         return result;
                         """));
 
-
         // ==== 질의 ====
         SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime, boolQueryBuilder, aggregationBuilder);
 
@@ -258,19 +285,11 @@ public class DashboardService {
     private double getOhtAverageWorkByStartTimeAndTime(LocalDateTime startTime, LocalDateTime endTime) throws
         IOException {
         // ==== 쿼리 검색 ====
-        // startTime과 endTime 사이에 있는 로그만 검색하도록 설정
-        //시간 포맷 변환
-        FormattedTime FormattedTime = TimeConverter.convertElasticsearchTime(startTime, endTime);
-        RangeQueryBuilder timeFilter = QueryBuilders.rangeQuery("curr_time")
-            .gte(FormattedTime.getStartTime())
-            .lte(FormattedTime.getEndTime());
-
         // 작업 중인 로그만 검색하도록 설정
         TermQueryBuilder statusFilter = QueryBuilders.termQuery("status.keyword", "W");
 
         // Bool Query로  두 filter 적용
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
-            .filter(timeFilter)
             .filter(statusFilter);
 
         // ==== 집계 검색 ====
@@ -282,7 +301,6 @@ public class DashboardService {
 
         // oht_id 별 start_time 개수세는 쿼리 추가
         termsAggregation.subAggregation(cardinalityAggregation);
-
 
         // ==== 질의 ====
         SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime, boolQueryBuilder, termsAggregation);
@@ -305,12 +323,6 @@ public class DashboardService {
      */
     public Map<Integer, Integer> getOhtJobHourly(LocalDateTime startTime, LocalDateTime endTime) throws IOException {
         // ==== 쿼리 검색 ====
-        // 쿼리에 필요한 필터 만들기
-        //시간 포맷 변환
-        FormattedTime FormattedTime = TimeConverter.convertElasticsearchTime(startTime, endTime);
-        RangeQueryBuilder timeFilter = QueryBuilders.rangeQuery("curr_time")
-            .gte(FormattedTime.getStartTime())
-            .lte(FormattedTime.getEndTime());
         TermQueryBuilder statusFilter = QueryBuilders.termQuery("status.keyword", "W");
         MatchQueryBuilder carrierFilter = QueryBuilders.matchQuery("carrier", false);
         ScriptQueryBuilder scriptFilter = QueryBuilders.scriptQuery(
@@ -319,7 +331,6 @@ public class DashboardService {
 
         // Bool Query로  두 filter 적용
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
-            .filter(timeFilter)
             .filter(statusFilter)
             .filter(carrierFilter)
             .filter(scriptFilter);
@@ -362,12 +373,6 @@ public class DashboardService {
     private JobResultAnalysisRatioResponse getJobResultCount(LocalDateTime startTime, LocalDateTime endTime) throws
         IOException {
         // ==== 쿼리 검색 ====
-        // 쿼리에 필요한 필터 만들기
-        //시간 포맷 변환
-        FormattedTime FormattedTime = TimeConverter.convertElasticsearchTime(startTime, endTime);
-        RangeQueryBuilder timeFilter = QueryBuilders.rangeQuery("curr_time")
-            .gte(FormattedTime.getStartTime())
-            .lte(FormattedTime.getEndTime());
         TermQueryBuilder statusFilter = QueryBuilders.termQuery("status", "W");
         ScriptQueryBuilder scriptFilter = QueryBuilders.scriptQuery(
             new Script("doc['current_node'] == doc['target_node']")
@@ -375,7 +380,6 @@ public class DashboardService {
 
         // Bool Query로  두 filter 적용
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
-            .filter(timeFilter)
             .filter(scriptFilter)
             .filter(statusFilter);
 
@@ -420,18 +424,8 @@ public class DashboardService {
      * [Elasticsearch 검색] 실패한 작업 중 에러 발생 작업 카운트
      */
     private JobResultAnalysisResponse getJobErrorCount(LocalDateTime startTime, LocalDateTime endTime) throws IOException {
-        //ES의 질의 생성
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-
-        // 시간 필터 생성
-        FormattedTime FormattedTime = TimeConverter.convertElasticsearchTime(startTime, endTime);
-        RangeQueryBuilder timeFilter = QueryBuilders.rangeQuery("curr_time")
-            .gte(FormattedTime.getStartTime())
-            .lte(FormattedTime.getEndTime());
-
         //Composite(집계) 설정
         BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-        boolQuery.must(timeFilter);  // 시간 필터를 bool 쿼리에 추가
         boolQuery.mustNot(QueryBuilders.matchQuery("error", 0));
 
         //Composite Source 설정
@@ -560,68 +554,6 @@ public class DashboardService {
         return (int) workingCount.getValue();
     }
 
-    /**
-     * startTime, endTime을 기준으로 지난 기간의 시작, 종료 시간 계산하기
-     */
-    private SearchTimeRequest calculateLastPeriod(LocalDateTime startTime, LocalDateTime endTime) {
-        // 현재 시간에서 1달 전의 년도와 월 계산
-        int lastMonthYear = startTime.minusMonths(1).getYear();
-        int lastMonth = startTime.minusMonths(1).getMonthValue();
-
-        // 지난 달의 첫 번째 날과 마지막 날 구하기
-        LocalDateTime firstDayOfLastMonth = LocalDateTime.of(LocalDate.of(lastMonthYear, lastMonth, 1), LocalTime.MIN);
-        LocalDateTime lastDayOfLastMonth = LocalDateTime.of(LocalDate.of(lastMonthYear, lastMonth, 1).withDayOfMonth(1).plusMonths(1).minusDays(1), LocalTime.MAX);
-        return new SearchTimeRequest(firstDayOfLastMonth, lastDayOfLastMonth);
-    }
-
-    /**
-     * 기간동안 평균적으로 시간대별 작업/유휴 상태 OHT 수 계산 및 집계(작업이 많은, OHT가 활발한, 유휴상태가 많은)
-     */
-    public StateHourlyAnalysisResponse stateHourlyAnalysis(LocalDateTime startTime, LocalDateTime endTime) throws
-        IOException {
-        // 기간동안 시간대별 총 작업/유휴 상태 OHT 수
-        Map<Integer, Integer> workHourCount = getWorkStateHourly(startTime, endTime);
-        Map<Integer, Integer> idleHourCount = getIdleStateHourly(startTime, endTime);
-
-        // 평균 계산을 위한 기간동안 일수
-        long day = ChronoUnit.DAYS.between(startTime, endTime) + 1;
-
-        // workHourCount -> response 변환
-        List<StateHourlyResponse> workHourCountResponse = new ArrayList<>();
-        int maxWorkHour = 0;
-        for (Map.Entry<Integer, Integer> entry : workHourCount.entrySet()) {
-            if(workHourCount.get(maxWorkHour) < entry.getValue()) maxWorkHour = entry.getKey();
-            workHourCountResponse.add(StateHourlyResponse.builder()
-                    .hour(entry.getKey())
-                    .count((entry.getValue() / day))
-                    .build());
-        }
-
-        // idleHourCount -> response 변환
-        List<StateHourlyResponse> idleHourCountResponse = new ArrayList<>();
-        int maxIdleHour = 0;
-        for (Map.Entry<Integer, Integer> entry : idleHourCount.entrySet()) {
-            if(idleHourCount.get(maxIdleHour) < entry.getValue()) maxIdleHour = entry.getKey();
-            idleHourCountResponse.add(StateHourlyResponse.builder()
-                .hour(entry.getKey())
-                .count(entry.getValue() / day)
-                .build());
-        }
-
-
-        // 시간대 분석
-        Map<Integer, Integer> jobHourly = getOhtJobHourly(startTime, endTime);
-        List<Map.Entry<Integer, Integer>> jobHourlySorted = new LinkedList<>(jobHourly.entrySet());
-        jobHourlySorted.sort(Map.Entry.<Integer, Integer>comparingByValue().reversed());
-
-        return StateHourlyAnalysisResponse.builder()
-            .workHourCount(workHourCountResponse)
-            .idleHourCount(idleHourCountResponse)
-            .maxJobTime(jobHourlySorted.getFirst().getKey())
-            .maxWorkTime(maxWorkHour)
-            .maxIdleTime(maxIdleHour)
-            .build();
-    }
 
     /**
      * [Elasticsearch 검색] 시간대별 작업 상태 OHT 개수 계산
@@ -711,5 +643,20 @@ public class DashboardService {
             hourCounts.put(dateTime.getHour(), hourCounts.get(dateTime.getHour()) + 1);
         }
         return hourCounts;
+    }
+
+
+    /**
+     * startTime, endTime을 기준으로 지난 기간의 시작, 종료 시간 계산하기
+     */
+    private SearchTimeRequest calculateLastPeriod(LocalDateTime startTime, LocalDateTime endTime) {
+        // 현재 시간에서 1달 전의 년도와 월 계산
+        int lastMonthYear = startTime.minusMonths(1).getYear();
+        int lastMonth = startTime.minusMonths(1).getMonthValue();
+
+        // 지난 달의 첫 번째 날과 마지막 날 구하기
+        LocalDateTime firstDayOfLastMonth = LocalDateTime.of(LocalDate.of(lastMonthYear, lastMonth, 1), LocalTime.MIN);
+        LocalDateTime lastDayOfLastMonth = LocalDateTime.of(LocalDate.of(lastMonthYear, lastMonth, 1).withDayOfMonth(1).plusMonths(1).minusDays(1), LocalTime.MAX);
+        return new SearchTimeRequest(firstDayOfLastMonth, lastDayOfLastMonth);
     }
 }
