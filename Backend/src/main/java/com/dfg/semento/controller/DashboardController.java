@@ -5,6 +5,9 @@ import com.dfg.semento.dto.request.SearchTimeRequest;
 import com.dfg.semento.dto.response.JobResultAnalysisResponse;
 import com.dfg.semento.dto.response.OhtJobAnalysisResponse;
 import com.dfg.semento.dto.response.OhtJobHourlyResponse;
+import com.dfg.semento.dto.response.StateAnalysisResponse;
+import com.dfg.semento.dto.response.StateHourlyAnalysisResponse;
+import com.dfg.semento.dto.response.StateHourlyResponse;
 import com.dfg.semento.service.DashboardService;
 
 import jakarta.validation.Valid;
@@ -54,4 +57,17 @@ public class DashboardController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/state-analysis")
+    public ResponseEntity<StateAnalysisResponse> stateAnalysis(@Valid @RequestBody SearchTimeRequest request) throws
+        IOException {
+        StateAnalysisResponse response = dashboardService.stateAnalysis(request.getStartTime(), request.getEndTime());
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/state-hourly-analysis")
+    public ResponseEntity<StateHourlyAnalysisResponse> stateHourlyAnalysis(@Valid @RequestBody SearchTimeRequest request) throws
+        IOException {
+        StateHourlyAnalysisResponse response = dashboardService.stateHourlyAnalysis(request.getStartTime(), request.getEndTime());
+        return ResponseEntity.ok(response);
+    }
 }
