@@ -12,15 +12,11 @@ import lombok.ToString;
 @Builder
 @ToString
 public class ComparedDataResponse {
-    @JsonProperty(value = "total-work")
     private IntegerDataDto totalWork;
 
-    @JsonProperty(value = "out-of-deadline")
     private IntegerDataDto outOfDeadLine;
 
-    @JsonProperty(value = "average-speed")
     private DoubleDataDto averageSpeed;
 
-    @JsonProperty(value = "oht-error")
     private IntegerDataDto ohtError;
 }
