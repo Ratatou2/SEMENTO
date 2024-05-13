@@ -1,9 +1,11 @@
 package com.dfg.semento.controller;
 
 import com.dfg.semento.dto.request.DateAndOhtRequest;
+import com.dfg.semento.dto.request.SimulationRequest;
 import com.dfg.semento.dto.response.ClassificationLogResponse;
 import com.dfg.semento.dto.response.ComparedDataResponse;
 import com.dfg.semento.dto.response.ComparedWorkPerTimeResponse;
+import com.dfg.semento.dto.response.SimulationLogResponse;
 import com.dfg.semento.service.SimulationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -52,5 +54,15 @@ public class SimulationController {
     public ResponseEntity<ClassificationLogResponse> classificationLog(@Valid @RequestBody DateAndOhtRequest request) throws IOException {
         log.debug("[request] : "+request.toString());
         return ResponseEntity.ok(simulationService.getClassificationLog(request));
+    }
+
+
+    /** OHT 시뮬레이션 정보 조회
+     * @author 최서현
+     */
+    @PostMapping("/simulation-log")
+    public ResponseEntity<SimulationLogResponse> simulationLog(@Valid @RequestBody SimulationRequest request) throws IOException {
+        log.debug("[request] : "+request.toString());
+        return ResponseEntity.ok(simulationService.getSimulationLog(request));
     }
 }

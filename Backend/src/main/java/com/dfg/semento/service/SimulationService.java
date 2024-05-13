@@ -1,19 +1,20 @@
 package com.dfg.semento.service;
 
-import com.dfg.semento.dto.DoubleDataDto;
-import com.dfg.semento.dto.IntegerDataDto;
-import com.dfg.semento.dto.LogPerWork;
-import com.dfg.semento.dto.WorkPerTime;
+import com.dfg.semento.dto.*;
 import com.dfg.semento.dto.request.DateAndOhtRequest;
+import com.dfg.semento.dto.request.SimulationRequest;
 import com.dfg.semento.dto.response.ClassificationLogResponse;
 import com.dfg.semento.dto.response.ComparedDataResponse;
 import com.dfg.semento.dto.response.ComparedWorkPerTimeResponse;
+import com.dfg.semento.dto.response.SimulationLogResponse;
 import com.dfg.semento.util.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.index.query.*;
 import org.elasticsearch.script.Script;
+import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.BucketOrder;
@@ -30,6 +31,8 @@ import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.aggregations.metrics.*;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -373,5 +376,66 @@ public class SimulationService {
         }
 
         return ClassificationLogResponse.builder().totalCnt(terms.getBuckets().size()).logPerWork(logPerWorkList).build();
+    }
+
+    public SimulationLogResponse getSimulationLog(SimulationRequest simulationRequest) throws IOException {
+        LocalDateTime startTime = simulationRequest.getStartDate();
+        LocalDateTime endTime = simulationRequest.getEndDate();
+        List<Long> ohtList = simulationRequest.getOhtId();
+
+        // Query
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        TermsQueryBuilder termsQueryBuilder = QueryBuilders.termsQuery("oht_id", ohtList);
+        boolQueryBuilder.must(termsQueryBuilder);
+
+        // Aggregations
+        TermsAggregationBuilder logsByCurrTime = AggregationBuilders.terms("logs_by_curr_time")
+                .field("curr_time").size(10000);
+
+        TopHitsAggregationBuilder ohtDetails = AggregationBuilders.topHits("oht_details")
+                .fetchSource(new String[]{"oht_id", "path", "curr_node", "point_x", "point_y", "status", "error", "carrier", "speed", "is_fail"}, null)
+                .size(100) // Fetch the most recent 100 hits per curr_time
+                .sort("curr_time", SortOrder.DESC); // Sort by curr_time in descending order
+
+        logsByCurrTime.subAggregation(ohtDetails);
+
+        SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime,
+                boolQueryBuilder, logsByCurrTime);
+
+        List<SimulationPerDate> simulationPerDates = new ArrayList<>();
+        Terms logsByCurrTimeAgg = searchResponse.getAggregations().get("logs_by_curr_time");
+
+        for (Terms.Bucket bucket : logsByCurrTimeAgg.getBuckets()) {
+            List<SimulationPerOhtDto> simulationPerOhtDtoList = new ArrayList<>();
+            TopHits topHits = bucket.getAggregations().get("oht_details");
+
+            for (SearchHit hit : topHits.getHits().getHits()) {
+                Map<String, Object> sourceAsMap = hit.getSourceAsMap();
+                LocationDto locationDto = LocationDto.builder()
+                        .path((String) sourceAsMap.get("path"))
+                        .currNode((String) sourceAsMap.get("curr_node"))
+                        .pointX((Double) sourceAsMap.get("point_x"))
+                        .pointY((Double) sourceAsMap.get("point_y"))
+                        .build();
+
+                SimulationPerOhtDto simulationPerOhtDto = SimulationPerOhtDto.builder()
+                        .ohtId(Long.parseLong(sourceAsMap.get("oht_id").toString()))
+                        .location(locationDto)
+                        .status((String) sourceAsMap.get("status"))
+                        .carrier((Boolean) sourceAsMap.get("carrier"))
+                        .error((Integer) sourceAsMap.get("error"))
+                        .speed((Double) sourceAsMap.get("speed"))
+                        .isFail((Boolean) sourceAsMap.get("is_fail"))
+                        .build();
+
+                simulationPerOhtDtoList.add(simulationPerOhtDto);
+            }
+            LocalDateTime currTime = TimeConverter.convertUtcToAsia(bucket.getKeyAsString());
+            simulationPerDates.add(SimulationPerDate.builder()
+                    .time(currTime)
+                    .data(simulationPerOhtDtoList)
+                    .build());
+        }
+        return SimulationLogResponse.builder().simulationLog(simulationPerDates).build();
     }
 }
