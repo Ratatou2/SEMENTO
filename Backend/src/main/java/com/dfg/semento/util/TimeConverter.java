@@ -1,6 +1,7 @@
 package com.dfg.semento.util;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -27,5 +28,18 @@ public class TimeConverter {
         String formattedEndTime = formatter.format(zonedEndTime);
 
         return new FormattedTime(formattedStartTime, formattedEndTime);
+    }
+
+    /** String타입의 시간을 LocalDateTime으로 변환
+     * @author 최서현
+     * @param dateTimeStr 시간문자열
+     * @return LocalDateTime
+     */
+    public static LocalDateTime convertStringToLocalDateTime(String dateTimeStr){
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+
+        OffsetDateTime odt = OffsetDateTime.parse(dateTimeStr, formatter);
+        LocalDateTime ldt = odt.toLocalDateTime();
+        return ldt;
     }
 }

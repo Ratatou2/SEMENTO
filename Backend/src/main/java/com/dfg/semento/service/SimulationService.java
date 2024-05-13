@@ -2,8 +2,10 @@ package com.dfg.semento.service;
 
 import com.dfg.semento.dto.DoubleDataDto;
 import com.dfg.semento.dto.IntegerDataDto;
+import com.dfg.semento.dto.WorkPerTime;
 import com.dfg.semento.dto.request.DateAndOhtRequest;
 import com.dfg.semento.dto.response.ComparedDataResponse;
+import com.dfg.semento.dto.response.ComparedWorkPerTimeResponse;
 import com.dfg.semento.util.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +21,9 @@ import org.elasticsearch.search.aggregations.bucket.composite.TermsValuesSourceB
 import org.elasticsearch.search.aggregations.bucket.filter.Filter;
 import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.filter.ParsedFilter;
+import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
+import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.aggregations.metrics.Avg;
@@ -30,6 +35,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +51,58 @@ public class SimulationService {
     private final DashboardService dashboardService;
     private final ElasticsearchQueryUtil elasticsearchQueryUtil;
     private Long runningOhtCnt;
+
+    /** 시간대별 작업량 평균 비교하는 메소드
+     * @author 최서현
+     */
+    public ComparedWorkPerTimeResponse getCompareWork(DateAndOhtRequest dateAndOht) throws IOException {
+        LocalDateTime startTime = dateAndOht.getStartDate();
+        LocalDateTime endTime = dateAndOht.getEndDate();
+        Long ohtId = dateAndOht.getOhtId();
+
+        FilterAggregationBuilder specificOhtCount = AggregationBuilders.filter("specific_oht_count",
+                QueryBuilders.boolQuery()
+                        .must(QueryBuilders.termQuery("oht_id", ohtId))
+                        .must(QueryBuilders.termQuery("status.keyword", "W"))
+        ).subAggregation(
+                AggregationBuilders.cardinality("unique_starts").field("start_time")
+        );
+
+        FilterAggregationBuilder overallOhtCount = AggregationBuilders.filter("overall_oht_count",
+                QueryBuilders.termQuery("status.keyword", "W")
+        ).subAggregation(
+                AggregationBuilders.cardinality("unique_starts").field("start_time")
+        );
+
+        DateHistogramAggregationBuilder dateAgg = AggregationBuilders.dateHistogram("hours")
+                .field("curr_time")
+                .calendarInterval(DateHistogramInterval.HOUR) // 시간 간격 설정
+                .timeZone(ZoneId.of("Asia/Seoul"))
+                .subAggregation(specificOhtCount)
+                .subAggregation(overallOhtCount);
+
+        SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime, dateAgg);
+        Histogram histogram = searchResponse.getAggregations().get("hours");
+
+
+        List<WorkPerTime> list = new ArrayList<>();
+        for (Histogram.Bucket bucket : histogram.getBuckets()) {
+            String keyAsString = bucket.getKeyAsString();
+
+            Aggregations specificAggs = ((Filter) bucket.getAggregations().get("specific_oht_count")).getAggregations();
+            long specificCount = ((Cardinality) specificAggs.get("unique_starts")).getValue();
+
+            Aggregations overallAggs = ((Filter) bucket.getAggregations().get("overall_oht_count")).getAggregations();
+            long overallCount = ((Cardinality) overallAggs.get("unique_starts")).getValue();
+
+            list.add(WorkPerTime.builder()
+                    .time(TimeConverter.convertStringToLocalDateTime(keyAsString))
+                    .me((int) specificCount)
+                    .average((int) overallCount).build());
+        }
+
+        return ComparedWorkPerTimeResponse.builder().workPerTime(list).build();
+    }
 
     /** 개별OHT와 모든OHT의 비교데이터를 구하는 메소드
      * @author 최서현
@@ -249,5 +308,6 @@ public class SimulationService {
         return DoubleDataDto.builder().data(ohtAvg.value()).percent(differencePercentage).build();
 
     }
+
 
 }

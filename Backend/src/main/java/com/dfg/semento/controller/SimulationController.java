@@ -2,6 +2,7 @@ package com.dfg.semento.controller;
 
 import com.dfg.semento.dto.request.DateAndOhtRequest;
 import com.dfg.semento.dto.response.ComparedDataResponse;
+import com.dfg.semento.dto.response.ComparedWorkPerTimeResponse;
 import com.dfg.semento.service.SimulationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,5 +33,14 @@ public class SimulationController {
     public ResponseEntity<ComparedDataResponse> workInfomation(@Valid @RequestBody DateAndOhtRequest request) throws IOException {
         log.debug("[request] : "+request.toString());
         return ResponseEntity.ok(simulationService.getComparedDate(request));
+    }
+
+    /** 시간대별 작업량평균 비교
+     * @author 최서현
+     */
+    @PostMapping("/compare-work")
+    public ResponseEntity<ComparedWorkPerTimeResponse> compareWork(@Valid @RequestBody DateAndOhtRequest request) throws IOException {
+        log.debug("[request] : "+request.toString());
+        return ResponseEntity.ok(simulationService.getCompareWork(request));
     }
 }
