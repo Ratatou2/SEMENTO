@@ -1,5 +1,4 @@
 from fastapi import HTTPException, APIRouter
-from models.threads import ThreadAssistantIdResponse
 import numpy as np
 import pandas as pd
 import category_encoders as ce
@@ -13,7 +12,7 @@ from multiprocessing import Pool
 
 conan = load_model('./ai_models/jh_conv2D_by_path')
 conan.summary()
-print("root.py")
+
 root_router = APIRouter()
 
 @root_router.get('/analytics/analysation')
