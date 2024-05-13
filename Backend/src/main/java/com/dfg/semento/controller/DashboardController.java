@@ -31,12 +31,6 @@ import java.util.List;
 public class DashboardController {
     private final DashboardService dashboardService;
 
-    @GetMapping("/test")
-    public ResponseEntity<List<LogDocument>> test(){
-        List<LogDocument> logs = dashboardService.test();
-        return ResponseEntity.ok(logs);
-    }
-
     @PostMapping ("/oht-job-analysis")
     public ResponseEntity<OhtJobAnalysisResponse> ohtJobAnalysis(@Valid @RequestBody SearchTimeRequest request) throws IOException {
         OhtJobAnalysisResponse ohtJobAnalysis = dashboardService.ohtJobAnalysis(request.getStartTime(), request.getEndTime());

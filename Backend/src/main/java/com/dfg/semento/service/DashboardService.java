@@ -76,12 +76,8 @@ public class DashboardService {
     @Value("200")
     private int OHT_DEADLINE;
 
-    private final DashboardRepository dashboardRepository;
     private final ElasticsearchQueryUtil elasticsearchQueryUtil;
 
-    public List<LogDocument> test() {
-        return dashboardRepository.findAll();
-    }
 
     /** 기간동안 OHT 작업량 분석(oht대수, 전체 작업량, oht별 작업량 평균)
      */
