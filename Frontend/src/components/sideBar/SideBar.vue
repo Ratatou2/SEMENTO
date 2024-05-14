@@ -15,7 +15,7 @@ function setActive(item, path) {
   <div class="side-bar-container">
     <div class="logo-container">
       <div class="logo">Semento<span class="logo-dot">.</span></div>
-      <div class="logo-subheading">Modern Admin Dashboard</div>
+      <div class="logo-subheading">OHT AI-Analytics System</div>
     </div>
     <div class="nav-bar-container">
       <div
