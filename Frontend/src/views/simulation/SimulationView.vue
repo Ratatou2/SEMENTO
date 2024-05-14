@@ -12,6 +12,9 @@ import StickChart from "./components/StickChart.vue";
 import BlackDataCard from "@/components/card/BlackDataCard.vue";
 import SimulationSideTapView from "./SimulationSideTapView.vue";
 import Table from "@/components/table/Table.vue";
+import Loading from "@/components/loading/Loading.vue";
+
+const nowLoading = ref(false); //로딩창 기본 비활성화
 
 const value = ref();
 const options = [
@@ -40,6 +43,7 @@ function toggleSidePageHandler(data) {
 </script>
 
 <template>
+  <div v-if="nowLoading"><Loading /></div>
   <div class="body-container">
     <!-- 설명 및 검색창 -->
     <section class="input">
