@@ -1,9 +1,9 @@
 <script setup>
 import Text from "@/components/Text/Text.vue";
 import Table from "@/components/table/Table.vue";
-import SmallSimulation from "./SmallSimulation.vue";
 import Simulation from "@/components/simulation/Simulation.vue";
 import Line from "@/components/line/Line.vue";
+import SmallSimulation from "./SmallSimulation.vue";
 const props = defineProps({
   location: {
     type: Boolean,
