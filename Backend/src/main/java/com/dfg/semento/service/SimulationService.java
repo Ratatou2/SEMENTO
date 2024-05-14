@@ -51,9 +51,12 @@ public class SimulationService {
 
     @Value("${elasticsearch.bucket-size}")
     private int bucketSize;
+    @Value("${oht.cnt}")
+    private int ohtCnt;
     private final DashboardService dashboardService;
     private final ElasticsearchQueryUtil elasticsearchQueryUtil;
     private Long runningOhtCnt;
+    private int minuteRange = 300; //페이징해서 가져올 시뮬레이션 데이터 범위, 분당 60
 
     /** 시간대별 작업량 평균 비교하는 메소드
      * @author 최서현
@@ -390,11 +393,11 @@ public class SimulationService {
 
         // Aggregations
         TermsAggregationBuilder logsByCurrTime = AggregationBuilders.terms("logs_by_curr_time")
-                .field("curr_time").size(10000);
+                .field("curr_time").size(minuteRange);//1분에 60개, 5분에 300개
 
         TopHitsAggregationBuilder ohtDetails = AggregationBuilders.topHits("oht_details")
                 .fetchSource(new String[]{"oht_id", "path", "curr_node", "point_x", "point_y", "status", "error", "carrier", "speed", "is_fail"}, null)
-                .size(100) // Fetch the most recent 100 hits per curr_time
+                .size(ohtCnt) //OHT 최대갯수
                 .sort("curr_time", SortOrder.DESC); // Sort by curr_time in descending order
 
         logsByCurrTime.subAggregation(ohtDetails);
