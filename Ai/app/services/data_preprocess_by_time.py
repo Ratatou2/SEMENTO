@@ -49,7 +49,8 @@ async def data_preprocessing_by_time(
         path_count_arr = []
         second_arr = []
         prev_deadlock_second = 0
-
+        congestion_idx = 0
+        congestion_time = 0
 
         # 탐지 판단
         for now_second, ohts_arr in enumerate(SNAPSHOT_MATRIX):
@@ -94,8 +95,13 @@ async def data_preprocessing_by_time(
 
                             if is_deadlock:
                                 if abs(prev_deadlock_second - now_second) <= 1:
+                                    congestion_time+=1
                                     prev_deadlock_second = now_second
                                     continue
+                                elif congestion_time > 10:
+                                        error_info[congestion_idx]["congestion_time"] = congestion_time
+                                        congestion_time = 10
+                                        congestion_idx+=1
 
                                 prev_deadlock_second = now_second
                                 second_arr.append(now_second)
@@ -137,5 +143,6 @@ async def data_preprocessing_by_time(
 
         return {"dataset": dataset, "error_info": error_info}
     except Exception as e:
+        print(e)
         raise e(status_code=500, detail=str(e))
  
