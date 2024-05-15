@@ -4,7 +4,6 @@ from routes.root import root_router
 import config
 import uvicorn
 
-
 app = FastAPI()
 app.include_router(root_router,  prefix="/ai")
 

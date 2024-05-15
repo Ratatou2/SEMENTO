@@ -23,7 +23,6 @@ length_info = {}
 facility_length_info = {}
 
 for row in path_and_before_path_info.iterrows():
-    if row[1]['path'] == "path25": print(row[1]['path'])
     length_info[row[1]['path']] = row[1]['length']
     
 for row in facility_length_info_excel.iterrows():
