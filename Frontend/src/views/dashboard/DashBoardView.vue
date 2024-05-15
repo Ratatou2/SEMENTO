@@ -52,13 +52,35 @@ console.log(startTime, endTime);
 const errorLog = ref([]);
 const averageWork = ref("");
 const averageIdle = ref("");
+const maxJobTime = ref({
+  "startTime":"",
+  "endTime":""
+});
+const maxWorkTime = ref({
+  "startTime":"",
+  "endTime":""
+});
+const maxIdleTime = ref({
+  "startTime":"",
+  "endTime":""
+});
+
 
 onMounted(async() => {
   await dashboardStore.getOhtJobAnalysis(startTime, endTime);
   await dashboardStore.getJobResultAnalysis(startTime, endTime);
   await dashboardStore.getStateAnalysis(startTime, endTime);
+  await dashboardStore.getStateHourlyAnalysis(startTime, endTime);
+  // 상태 분석 데이터 전처리
   averageWork.value = Math.floor(dashboardStore.stateAnalysisData['average-work-time'].data/60) +"m "+dashboardStore.stateAnalysisData['average-work-time'].data%60+"s";
   averageIdle.value = Math.floor(dashboardStore.stateAnalysisData['average-idle-time'].data/60) +"m "+dashboardStore.stateAnalysisData['average-idle-time'].data%60+"s";
+
+  // 상태 시간대 분석 데이터 전처리
+  timeDataFormatting(dashboardStore.stateHourlyAnalysisData['max-job-time'], maxJobTime);
+  timeDataFormatting(dashboardStore.stateHourlyAnalysisData['max-work-time'], maxWorkTime);
+  timeDataFormatting(dashboardStore.stateHourlyAnalysisData['max-idle-time'], maxIdleTime);
+
+   
   console.log("함수 호출됨")
 });
 
@@ -68,6 +90,17 @@ watch(() => dashboardStore.watchedJobResultAnalysisData, (oldValue, newValue) =>
   console.log(errorLog.value)
 },{ deep: true }); 
 
+function timeDataFormatting(temp, refData) {
+  if(temp < 10) {
+    refData.value.startTime = "0"+temp+":00";
+    if(temp + 1 == 24) refData.value.endTime = "00:00";
+    else refData.value.endTime = "0"+(temp+1)+":00";
+  } else {
+    refData.value.startTime = temp+":00";
+    if(temp + 1 == 24) refData.value.endTime = "00:00";
+    else refData.value.endTime = "0"+(temp+1)+":00";
+  }
+}
 
 </script>
 <template>
@@ -202,22 +235,22 @@ watch(() => dashboardStore.watchedJobResultAnalysisData, (oldValue, newValue) =>
           <div class="row" style="width: 100%">
             <WhiteCard
               title="작업이 가장 많은 시간대"
-              startTime="14:00"
-              endTime="16:00"
+              :startTime="maxJobTime.startTime"
+              :endTime="maxJobTime.endTime"
               width="33%"
               height="70px"
             />
             <WhiteCard
               title="OHT가 가장 활발한 시간대"
-              startTime="14:00"
-              endTime="16:00"
+              :startTime="maxWorkTime.startTime"
+              :endTime="maxWorkTime.endTime"
               width="33%"
               height="70px"
             />
             <WhiteCard
               title="유휴 상태가 많은 시간대"
-              startTime="14:00"
-              endTime="16:00"
+              :startTime="maxIdleTime.startTime"
+              :endTime="maxIdleTime.endTime"
               width="33%"
               height="70px"
             />
