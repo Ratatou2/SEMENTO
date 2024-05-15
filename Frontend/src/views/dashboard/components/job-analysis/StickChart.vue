@@ -1,8 +1,11 @@
 <script setup>
-import { reactive, onMounted } from 'vue';
+import { reactive, onMounted, ref, watchEffect, watch } from 'vue';
 import { Chart, registerables } from 'chart.js';
 import { Bar } from 'vue-chartjs';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+
+import { useDashboardStore } from "@/stores/dashboard";
+const dashboardStore = useDashboardStore();
 
 const props = defineProps({
   width: {
@@ -13,6 +16,12 @@ const props = defineProps({
     type: String,
     default: "300px",
   },
+  startTime: {
+    type: String
+  },
+  endTime: {
+    type: String
+  }
 });
 
 // 시간
@@ -22,13 +31,13 @@ const labels = [
     "12h", '13h', '14h', '15h', '16h', '17h', 
     '18h', '19h', '20h', '21h', '22h', '23h'
 ];
-// 값
-const data = [40, 20, 12, 39, 10, 40, 39, 80, 40, 20, 12, 11, 40, 20, 12, 39, 10, 40, 39, 80, 40, 20, 12, 11];
-
 
 // Chart.js 컴포넌트 등록
 Chart.register(...registerables);
 Chart.register(ChartDataLabels);
+const ohtJobHourlyCount = ref([]);
+const chartRef = ref(null);
+let chart = null;
 
 // char 데이터
 const chartData = reactive({
@@ -43,7 +52,7 @@ const chartData = reactive({
           '#BCE0F2', '#BCE0F2','#BCE0F2', '#BCE0F2', '#BCE0F2',
           '#003CB0', // 마지막 막대만 색깔 다르게
       ],
-      data,
+      data: ohtJobHourlyCount.value,
       borderRadius: 5,
       barThickness: 20
     }
@@ -71,6 +80,7 @@ const chartOptions = reactive({
             align: 'top',
             offset: -1,
             formatter: function(value, context) {
+                if(value == 0) return "";
                 return context.dataset.data[context.dataIndex];// 각 막대 위에 데이터 값을 표시
             }
         },
@@ -105,17 +115,27 @@ const chartOptions = reactive({
 
 });
 
-// Chart.js가 반응형 데이터를 제대로 처리하도록 setup
-onMounted(() => {
-  chartData.datasets.forEach(dataset => {
-    dataset.data = [...dataset.data]; // 데이터 배열을 새로운 배열로 교체
-  });
+function drawChart() {
+    const ctx = chartRef.value.getContext("2d");
+    chart = new Chart(ctx, {
+        type: "bar",
+        data: chartData,
+        options: chartOptions
+    });
+}
+
+onMounted(async() => {
+    await dashboardStore.getOhtJobHourly(props.startTime, props.endTime);
+    ohtJobHourlyCount.value = dashboardStore.ohtJobHourlyData.map(item => item.work);
+    chartData.datasets[0].data = [...ohtJobHourlyCount.value];
+    drawChart();
 });
+
 </script>
 
 <template>
     <div :style="{ width: width, height: height}">
-        <Bar :data="chartData" :options="chartOptions"/>
+        <canvas ref="chartRef"> </canvas>
     </div>
 </template>
 
