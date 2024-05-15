@@ -38,6 +38,8 @@ export const useDashboardStore = defineStore('dashboard', () => {
     jobResultAnalysisData.value = data;
   }
 
+  const watchedJobResultAnalysisData = computed(() => jobResultAnalysisData.value)
+
   return { 
     ohtJobAnalysisData, 
     getOhtJobAnalysis,
@@ -45,5 +47,6 @@ export const useDashboardStore = defineStore('dashboard', () => {
     getOhtJobHourly, 
     jobResultAnalysisData,
     getJobResultAnalysis,
+    watchedJobResultAnalysisData
   }
 })

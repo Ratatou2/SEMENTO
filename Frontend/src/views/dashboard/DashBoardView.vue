@@ -15,7 +15,7 @@ import LineChart from "./components/state-analysis/LineChart.vue";
 // vue
 import { useDashboardStore } from "@/stores/dashboard";
 const dashboardStore = useDashboardStore();
-import { onMounted } from 'vue';
+import { onMounted, watch, ref } from 'vue';
 
 
 // 날짜 계산
@@ -47,10 +47,21 @@ const endTime = dateFormatter.format(lastDayOfMonth).replace(/(\d{4})\. (\d{2})\
 
 console.log(startTime, endTime);
 
+// ===========================
+// 실패 에러 로그
+const errorLog = ref([]);
+
 onMounted(async() => {
   await dashboardStore.getOhtJobAnalysis(startTime, endTime);
   await dashboardStore.getJobResultAnalysis(startTime, endTime);
+  console.log("함수 호출됨")
 });
+
+watch(() => dashboardStore.watchedJobResultAnalysisData, (oldValue, newValue) => {
+  errorLog.value = [];
+  errorLog.value = dashboardStore.jobResultAnalysisData['job-result-error-log'].map((item, index) => [index+1, String(item['oht-id']), String(item['error']), String(item['count'])])
+  console.log(errorLog.value)
+},{ deep: true }); 
 
 
 </script>
@@ -120,8 +131,8 @@ onMounted(async() => {
           <div class="white-box job-chart">
             <div class="title">
               <Cardhead
-                header-text="작업 실패 원인 별 비율"
-                content-text="실패한 작업에 대해 실패 원인에 대한 비율을 보여줍니다."
+                header-text="작업 실패 중 에러 비율"
+                content-text="실패한 작업 중 에러가 발생한 비율을 보여줍니다."
               />
             </div>
             <DoughnutChart width="200px" height="200px" />
@@ -130,44 +141,15 @@ onMounted(async() => {
         <div class="white-box job-table">
           <div class="title">
             <Cardhead
-              header-text="실패한 작업 로그(198건)"
-              content-text="데드라인까지 도착하지 못한 OHT에 대한 원인을 보여줍니다."
+              header-text="에러로 실패한 작업 로그(198건)"
+              content-text="데드라인까지 도착하지 못한 OHT에 대한 에러를 보여줍니다."
             />
           </div>
           <div class="padding-left-20">
             <Table
               width="100%"
               :columns="['No.', 'OHT ID', 'ERROR', 'COUNT']"
-              :data="[
-                ['1', '1923', '300', '23회'],
-                ['2', '1932', '300', '2회'],
-                ['3', '1932', '300', '2회'],
-                ['4', '1932', '300', '2회'],
-                ['5', '1932', '300', '2회'],
-                ['6', '1932', '300', '2회'],
-                ['7', '1932', '300', '2회'],
-                ['1', '1923', '300', '23회'],
-                ['2', '1932', '300', '2회'],
-                ['3', '1932', '300', '2회'],
-                ['4', '1932', '300', '2회'],
-                ['5', '1932', '300', '2회'],
-                ['6', '1932', '300', '2회'],
-                ['7', '1932', '300', '2회'],
-                ['1', '1923', '300', '23회'],
-                ['2', '1932', '300', '2회'],
-                ['3', '1932', '300', '2회'],
-                ['4', '1932', '300', '2회'],
-                ['5', '1932', '300', '2회'],
-                ['6', '1932', '300', '2회'],
-                ['7', '1932', '300', '2회'],
-                ['1', '1923', '300', '23회'],
-                ['2', '1932', '300', '2회'],
-                ['3', '1932', '300', '2회'],
-                ['4', '1932', '300', '2회'],
-                ['5', '1932', '300', '2회'],
-                ['6', '1932', '300', '2회'],
-                ['7', '1932', '300', '2회'],
-              ]"
+              :data="errorLog"
             />
           </div>
         </div>

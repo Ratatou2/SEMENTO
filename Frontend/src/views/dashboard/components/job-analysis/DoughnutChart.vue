@@ -1,8 +1,10 @@
 <script setup>
-import { reactive, onMounted } from 'vue';
+import { reactive, onMounted, ref, watch } from 'vue';
 import { Chart, registerables } from 'chart.js';
-import { Doughnut } from 'vue-chartjs';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+
+import { useDashboardStore } from "@/stores/dashboard";
+const dashboardStore = useDashboardStore();
 
 const props = defineProps({
   width: {
@@ -16,16 +18,20 @@ const props = defineProps({
 });
 
 const data = [10, 30, 60];
+const error = ref([]); // Success, Fail 순 퍼센트
+const errorCount = ref([]);
+const chartRef = ref(null);
+let chart = null;
 
 Chart.register(...registerables);
 Chart.register(ChartDataLabels);
 
 const chartData = reactive({
-  labels: ['Scheduling Error', 'OHT Error', 'Facility Error'],
+  labels: ['OHT Error', 'Facility Error'],
   datasets: [
     {
-      backgroundColor: ['#BCE0F2', '#59A7FF', '#292D30'],
-      data,
+      backgroundColor: ['#59A7FF', '#292D30'],
+      data: error,
       borderWidth: 0
     }
   ]
@@ -53,6 +59,11 @@ const chartOptions = reactive({
                 lineHeight: 1.5
             },
             displayColors: false, // 색상 제거
+            callbacks: {
+                label: function(context) {
+                    return errorCount.value[context.dataIndex] + '건';
+                }
+            }
         },
         datalabels: {
             color: '#ffffff',
@@ -69,17 +80,48 @@ const chartOptions = reactive({
     }, 
 })
 
-// Chart.js가 반응형 데이터를 제대로 처리하도록 setup
-onMounted(() => {
-  chartData.datasets.forEach(dataset => {
-    dataset.data = [...dataset.data]; // 데이터 배열을 새로운 배열로 교체
-  });
-});
+function drawChart() {
+    if (chart !== null) {
+        chart.destroy();
+    }
+    const ctx = chartRef.value.getContext("2d");
+    chart = new Chart(ctx, {
+        type: "doughnut",
+        data: chartData,
+        options: chartOptions
+    });
+}
+
+// onMounted(async() => {
+//   dataUpdate();
+//   drawChart();
+// });
+
+
+watch(() => dashboardStore.watchedJobResultAnalysisData, (oldValue, newValue) => {
+  dataUpdate();
+  drawChart();
+},{ deep: true }); 
+
+function dataUpdate() {
+  let newData = []
+  newData.push(dashboardStore.jobResultAnalysisData["job-result-error"]["oht-error-percentage"].toFixed(2));
+  newData.push(dashboardStore.jobResultAnalysisData["job-result-error"]["facility-error-percentage"].toFixed(2));
+  error.value = newData;
+  chartData.datasets[0].data = [...error.value];
+
+  newData = []
+  newData.push(dashboardStore.jobResultAnalysisData["job-result-error"]["oht-error"]);
+  newData.push(dashboardStore.jobResultAnalysisData["job-result-error"]["facility-error"]);
+  errorCount.value = newData;
+}
+
 </script>
 
 <template>
     <div :style="{width:width, height:height}">
-        <Doughnut :data="chartData" :options="chartOptions" />
+      <canvas ref="chartRef"> </canvas>
+        <!-- <Doughnut :data="chartData" :options="chartOptions" /> -->
     </div>
 </template>
 

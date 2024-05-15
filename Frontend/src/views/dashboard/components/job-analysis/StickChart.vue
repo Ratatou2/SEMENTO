@@ -1,7 +1,6 @@
 <script setup>
 import { reactive, onMounted, ref, watchEffect, watch } from 'vue';
 import { Chart, registerables } from 'chart.js';
-import { Bar } from 'vue-chartjs';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 import { useDashboardStore } from "@/stores/dashboard";
@@ -112,7 +111,6 @@ const chartOptions = reactive({
             },
         }
     },
-
 });
 
 function drawChart() {
