@@ -54,6 +54,7 @@ const nowLoading = ref(true); //로딩창 기본 비활성화
 // ===========================
 // 실패 에러 로그
 const errorLog = ref([]);
+const deadline = ref("");
 const averageWork = ref("");
 const averageIdle = ref("");
 const maxJobTime = ref({
@@ -76,6 +77,7 @@ onMounted(async() => {
   await dashboardStore.getStateAnalysis(startTime, endTime);
   await dashboardStore.getStateHourlyAnalysis(startTime, endTime);
   // 상태 분석 데이터 전처리
+  deadline.value = Math.floor(dashboardStore.stateAnalysisData['deadline'].data/60) +"m "+dashboardStore.stateAnalysisData['deadline'].data%60+"s";
   averageWork.value = Math.floor(dashboardStore.stateAnalysisData['average-work-time'].data/60) +"m "+dashboardStore.stateAnalysisData['average-work-time'].data%60+"s";
   averageIdle.value = Math.floor(dashboardStore.stateAnalysisData['average-idle-time'].data/60) +"m "+dashboardStore.stateAnalysisData['average-idle-time'].data%60+"s";
 
@@ -206,7 +208,7 @@ function timeDataFormatting(temp, refData) {
           <div class="col">
             <BlackDataCard
               title="OHT Deadline"
-              :content="dashboardStore.stateAnalysisData['deadline'].data"
+              :content="deadline"
               :width="'320px'"
               :height="'130px'"
             />
