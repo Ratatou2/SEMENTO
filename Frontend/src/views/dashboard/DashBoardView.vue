@@ -50,10 +50,15 @@ console.log(startTime, endTime);
 // ===========================
 // 실패 에러 로그
 const errorLog = ref([]);
+const averageWork = ref("");
+const averageIdle = ref("");
 
 onMounted(async() => {
   await dashboardStore.getOhtJobAnalysis(startTime, endTime);
   await dashboardStore.getJobResultAnalysis(startTime, endTime);
+  await dashboardStore.getStateAnalysis(startTime, endTime);
+  averageWork.value = Math.floor(dashboardStore.stateAnalysisData['average-work-time'].data/60) +"m "+dashboardStore.stateAnalysisData['average-work-time'].data%60+"s";
+  averageIdle.value = Math.floor(dashboardStore.stateAnalysisData['average-idle-time'].data/60) +"m "+dashboardStore.stateAnalysisData['average-idle-time'].data%60+"s";
   console.log("함수 호출됨")
 });
 
@@ -89,14 +94,14 @@ watch(() => dashboardStore.watchedJobResultAnalysisData, (oldValue, newValue) =>
           <BlackDataCard
             title="Total Work"
             :content="dashboardStore.ohtJobAnalysisData['total-work'].data"
-            :percentage="dashboardStore.ohtJobAnalysisData['total-work'].percent + '%'"
+            :percentage="dashboardStore.ohtJobAnalysisData['total-work'].percent"
             :width="'320px'"
             :height="'130px'"
           />
           <BlackDataCard
             title="Average Daily Work per OHT"
             :content="dashboardStore.ohtJobAnalysisData['average-work'].data"
-            :percentage="dashboardStore.ohtJobAnalysisData['average-work'].percent + '%'"
+            :percentage="dashboardStore.ohtJobAnalysisData['average-work'].percent"
             :width="'320px'"
             :height="'130px'"
           />
@@ -163,21 +168,21 @@ watch(() => dashboardStore.watchedJobResultAnalysisData, (oldValue, newValue) =>
         <div class="col">
           <BlackDataCard
             title="OHT Deadline"
-            content="30m 20s"
+            :content="dashboardStore.stateAnalysisData['deadline'].data"
             :width="'320px'"
             :height="'130px'"
           />
           <BlackDataCard
             title="Average Working Hours"
-            content="4m 35s"
-            percentage="+1.43%"
+            :content="averageWork"
+            :percentage="dashboardStore.stateAnalysisData['average-work-time'].percent"
             :width="'320px'"
             :height="'130px'"
           />
           <BlackDataCard
             title="Average Idle Hours"
-            content="15m 24s"
-            percentage="-4.43%"
+            :content="averageIdle"
+            :percentage="dashboardStore.stateAnalysisData['average-idle-time'].percent"
             :width="'320px'"
             :height="'130px'"
           />

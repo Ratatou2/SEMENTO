@@ -40,6 +40,27 @@ export const useDashboardStore = defineStore('dashboard', () => {
 
   const watchedJobResultAnalysisData = computed(() => jobResultAnalysisData.value)
 
+  const stateAnalysisData = ref({
+    "deadline": {
+        "data": 0,
+        "percent": 0.0
+    },
+    "average-work-time": {
+        "data": 0,
+        "percent": 0.0
+    },
+    "average-idle-time": {
+        "data": 0,
+        "percent": 0.0
+    }
+});
+
+  const getStateAnalysis = async(startTime, endTime) => {
+    const {data} = await instance.post("/dashboard/state-analysis", {"start-time":startTime, "end-time":endTime});
+    stateAnalysisData.value = data;
+  }
+
+
   return { 
     ohtJobAnalysisData, 
     getOhtJobAnalysis,
@@ -47,6 +68,8 @@ export const useDashboardStore = defineStore('dashboard', () => {
     getOhtJobHourly, 
     jobResultAnalysisData,
     getJobResultAnalysis,
-    watchedJobResultAnalysisData
+    watchedJobResultAnalysisData,
+    stateAnalysisData,
+    getStateAnalysis,
   }
 })
