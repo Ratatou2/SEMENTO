@@ -104,7 +104,7 @@ public class SimulationService {
             list.add(WorkPerTime.builder()
                     .time(TimeConverter.convertStringToLocalDateTime(keyAsString))
                     .me((int) specificCount)
-                    .average((int) overallCount).build());
+                    .average((int) ((int) overallCount/runningOhtCnt)).build());
         }
 
         return ComparedWorkPerTimeResponse.builder().workPerTime(list).build();
