@@ -5,14 +5,26 @@ import Text from "@/components/Text/Text.vue";
 import SearchInput from "@/components/searchBar/SearchInput.vue";
 import Button from "@/components/button/Button.vue";
 import Line from "@/components/line/Line.vue";
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import Multiselect from "vue-multiselect";
 import "vue-multiselect/dist/vue-multiselect.css";
 import StickChart from "./components/StickChart.vue";
 import BlackDataCard from "@/components/card/BlackDataCard.vue";
 import SimulationSideTapView from "./SimulationSideTapView.vue";
 import Table from "@/components/table/Table.vue";
+import Loading from "@/components/loading/Loading.vue";
+import { simulationStore } from "@/stores/simulation";
+import moment from "moment";
+const {
+  startDate,
+  endDate,
+  getComparedData,
+  getChartData,
+  getSimulation,
+  getClassificationLog,
+} = simulationStore();
 
+const nowLoading = ref(true); //로딩창 기본 비활성화
 const value = ref();
 const options = [
   { name: "1호기" },
@@ -23,24 +35,105 @@ const options = [
   { name: "6호기" },
   { name: "7호기" },
 ];
-
+const selectOhtId = ref(2600);
 const isSidePageOpen = ref(false);
 
-function toggleSidePage(date) {
-  //emit으로 받은 date정보를 통해 사이드페이지의 내용을 load
+// 날짜 변환 함수
+function transformatDate(date) {
+  return [
+    moment(date).format("YYYY-MM-DD") + " " + moment(date).format("HH:mm:ss"),
+  ];
+}
 
-  //show상태로 변경
+//==시뮬레이션 관련 데이터
+const simulationData = ref([null]);
+//== 비교 관련 데이터
+const comparedData = ref(null);
+function formattedComparedDate(data) {
+  const formattedData = {};
+  for (const key in data) {
+    if (data.hasOwnProperty(key)) {
+      formattedData[key] = {
+        data: formatNumber(data[key].data),
+        percent: formatNumber(data[key].percent),
+      };
+    }
+  }
+  return formattedData;
+}
+const formatNumber = (value) => {
+  const formattedValue = parseFloat(value).toFixed(2);
+  return formattedValue.endsWith(".00")
+    ? parseInt(formattedValue)
+    : formattedValue;
+};
+//==차트 관련 데이터
+const timeArray = ref([null]);
+const meArray = ref([null]);
+const averageArray = ref([null]);
+function setChart(chartData) {
+  timeArray.value = chartData["work-per-time"].map((item) => item.time);
+  meArray.value = chartData["work-per-time"].map((item) => item.me);
+  averageArray.value = chartData["work-per-time"].map((item) => item.average);
+}
+
+//== 작업별 분류 관련 데이터
+const logPerWork = ref(null);
+const totalCnt = ref(null);
+function setclassificationLogData(data) {
+  totalCnt.value = data["total-cnt"];
+  logPerWork.value = formatLogPerWork(data["log-per-work"]);
+
+  console.log(totalCnt.value);
+  console.log(logPerWork.value);
+}
+const formatLogPerWork = (logs) => {
+  return logs.map((log, index) => [
+    index + 1,
+    `${transformatDate(log["start-time"])} - ${transformatDate(
+      log["end-time"]
+    )}`,
+    `${
+      new Date(log["end-time"]).getTime() -
+      new Date(log["start-time"]).getTime()
+    } ms`,
+    log.errors.join(", "),
+    `${log["average-speed"].toFixed(2)} m/s`,
+    log["out-of-deadline"].toString().toUpperCase(),
+  ]);
+};
+
+//== axios 통신 ==
+onMounted(async () => {
+  //== 시뮬레이션 데이터 로드 : 시간단위로 잘라서 연속적으로 요청해야함
+  //simulationData.value = await getSimulation();
+
+  //== 기타데이터 로드
+  comparedData.value = formattedComparedDate(await getComparedData());
+
+  //== 작업량 평균 비교 로드
+  setChart(await getChartData());
+
+  //== 작업별로 분류된 로그 로드
+  setclassificationLogData(await getClassificationLog());
+
+  nowLoading.value = false;
+});
+
+//== 이벤트 핸들러 ==
+function toggleSidePage(date) {
   isSidePageOpen.value = !isSidePageOpen.value;
 }
 
-//emit 받는 핸들러
 function toggleSidePageHandler(data) {
+  //emit 받는 핸들러
   toggleSidePage(data);
 }
 </script>
 
 <template>
-  <div class="body-container">
+  <div v-if="nowLoading"><Loading /></div>
+  <div v-else="!nowLoading" class="body-container">
     <!-- 설명 및 검색창 -->
     <section class="input">
       <Text
@@ -88,7 +181,14 @@ function toggleSidePageHandler(data) {
             ></Cardhead>
           </section>
           <div class="bar-chart">
-            <div class="bar-chart-content"><StickChart /></div>
+            <div class="bar-chart-content">
+              <StickChart
+                :labels="timeArray"
+                :work-per-all="averageArray"
+                :work-per-one="meArray"
+                :oht-id="selectOhtId"
+              />
+            </div>
           </div>
         </div>
         <!-- 블랙데이터카드 -->
@@ -96,17 +196,21 @@ function toggleSidePageHandler(data) {
           <div class="black-card-content">
             <BlackDataCard
               title="Total Work"
-              content="1,986"
-              percentage="-1.43%"
-              fontColor="red"
+              :content="comparedData['total-work'].data"
+              :percentage="comparedData['total-work'].percent + '%'"
+              :fontColor="
+                comparedData['total-work'].percent >= 0 ? 'red' : 'blue'
+              "
               :height="'130px'"
               width="250px"
             />
             <BlackDataCard
               title="Out Of DeadLine"
-              content="20"
-              percentage="-1%"
-              fontColor="red"
+              :content="comparedData['out-of-deadline'].data"
+              :percentage="comparedData['out-of-deadline'].percent + '%'"
+              :fontColor="
+                comparedData['out-of-deadline'].percent >= 0 ? 'red' : 'blue'
+              "
               :height="'130px'"
               width="250px"
             />
@@ -114,17 +218,21 @@ function toggleSidePageHandler(data) {
           <div class="black-card-content">
             <BlackDataCard
               title="Average Speed"
-              content="4.2m/s"
-              percentage="+10%"
-              fontColor="blue"
+              :content="comparedData['average-speed'].data"
+              :percentage="comparedData['average-speed'].percent + '%'"
+              :fontColor="
+                comparedData['average-speed'].percent >= 0 ? 'red' : 'blue'
+              "
               :height="'130px'"
               width="250px"
             />
             <BlackDataCard
               title="OHT ERROR"
-              content="12"
-              percentage="+1.6%"
-              fontColor="blue"
+              :content="comparedData['oht-error'].data"
+              :percentage="comparedData['oht-error'].percent + '%'"
+              :fontColor="
+                comparedData['oht-error'].percent >= 0 ? 'red' : 'blue'
+              "
               :height="'130px'"
               width="250px"
             />
@@ -135,7 +243,7 @@ function toggleSidePageHandler(data) {
       <div class="white-box log-table-box">
         <section class="title">
           <Cardhead
-            headerText="Log By Total Work(1986건)"
+            :headerText="'Log By Total Work(' + totalCnt + '건)'"
             contentText="각 작업을 클릭하여 해당하는 로그를 시뮬레이션과 함께 확인하실 수 있습니다."
           />
         </section>
@@ -153,32 +261,7 @@ function toggleSidePageHandler(data) {
               'Average Speed',
               'Out of DeadLine',
             ]"
-            :data="[
-              [
-                '1',
-                '2024.01.07 12:03:21 - 2024.01.07 12:10:30',
-                '7m 9',
-                '300',
-                '2.3m/s',
-                'FALSE',
-              ],
-              [
-                '1',
-                '2024.01.07 12:03:21 - 2024.01.07 12:10:30',
-                '7m 9',
-                '300',
-                '2.3m/s',
-                'FALSE',
-              ],
-              [
-                '1',
-                '2024.01.07 12:03:21 - 2024.01.07 12:10:30',
-                '7m 9',
-                '300',
-                '2.3m/s',
-                'FALSE',
-              ],
-            ]"
+            :data="logPerWork"
           />
         </section>
       </div>

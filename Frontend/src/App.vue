@@ -1,6 +1,6 @@
 <script setup>
 import { RouterLink, RouterView } from "vue-router";
-
+import Loading from "@/components/loading/Loading.vue";
 import SideBar from "@/components/sideBar/SideBar.vue";
 import Header from "@/components/header/Header.vue";
 </script>

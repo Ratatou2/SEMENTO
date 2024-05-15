@@ -6,7 +6,7 @@ import SearchInput from "@/components/searchBar/SearchInput.vue";
 import Button from "@/components/button/Button.vue";
 import Line from "@/components/line/Line.vue";
 import "vue-multiselect/dist/vue-multiselect.css";
-import SmallSimulation from "./components/detection-report/SmallSimulation.vue";
+import Map from "./components/summary/Map.vue";
 import Info from "@/components/info/Info.vue";
 // chart
 import DurationChart from "./components/summary/DurationChart.vue";
@@ -54,7 +54,7 @@ const detectionReportText = "# Detection Report (" + cnt.value + ")";
           <Info />
         </div>
         <div class="content">
-          <SmallSimulation />
+          <Map />
         </div>
       </div>
     </section>
