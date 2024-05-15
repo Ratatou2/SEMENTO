@@ -1,8 +1,10 @@
 <script setup>
-import { reactive, onMounted } from 'vue';
+import { reactive, onMounted, ref, watch } from 'vue';
 import { Chart, registerables } from 'chart.js';
-import { Pie } from 'vue-chartjs';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+
+import { useDashboardStore } from "@/stores/dashboard";
+const dashboardStore = useDashboardStore();
 
 const props = defineProps({
   width: {
@@ -18,7 +20,11 @@ const props = defineProps({
 Chart.register(...registerables);
 Chart.register(ChartDataLabels);
 
-const data = [87, 13]; // Success, Fail 순 퍼센트
+
+const jobResult = ref([]); // Success, Fail 순 퍼센트
+const jobResultCount = ref([]);
+const chartRef = ref(null);
+let chart = null;
 
 const chartData = reactive({
   labels: [
@@ -26,7 +32,7 @@ const chartData = reactive({
     'Fail'
   ],
   datasets: [{
-    data,
+    data: jobResult.value,
     backgroundColor: [
       '#003CB0',
       '#9AC8FC'
@@ -40,7 +46,7 @@ const chartData = reactive({
 const chartOptions = reactive({
     responsive: true,
     maintainAspectRatio: false,
-    rotation: 360 * (data[1] / 100) + 45, // 파이차트 시작 위치 조정
+    // rotation: 360 * (jobResult.value[1] / 100) + 45, // 파이차트 시작 위치 조정
     plugins: {
         tooltip: {
             backgroundColor: '#ffffff',
@@ -60,11 +66,17 @@ const chartOptions = reactive({
                 lineHeight: 1.5
             },
             displayColors: false, // 색상 제거
+            callbacks: {
+                label: function(context) {
+                    return jobResultCount.value[context.dataIndex] + '건';
+                }
+            }
         },
         datalabels: {
             formatter: function(value, context) {
-                return '';
+                return value +' %';
             },
+            color: '#ffffff'
         },
         legend: {
             labels: {
@@ -75,17 +87,49 @@ const chartOptions = reactive({
     }, 
 });
 
-// Chart.js가 반응형 데이터를 제대로 처리하도록 setup
-onMounted(() => {
-  chartData.datasets.forEach(dataset => {
-    dataset.data = [...dataset.data]; // 데이터 배열을 새로운 배열로 교체
-  });
+function drawChart() {
+    if (chart !== null) {
+        chart.destroy();
+    }
+    const ctx = chartRef.value.getContext("2d");
+    chart = new Chart(ctx, {
+        type: "pie",
+        data: chartData,
+        options: chartOptions
+    });
+}
+
+onMounted(async() => {
+  dataUpdate();
+  drawChart();
 });
+
+
+watch(() => dashboardStore.watchedJobResultAnalysisData, (oldValue, newValue) => {
+  dataUpdate();
+  drawChart();
+},{ deep: true }); 
+
+function dataUpdate() {
+  let newData = []
+  newData.push(dashboardStore.jobResultAnalysisData["job-result-ratio"]["success-percentage"].toFixed(2));
+  newData.push(dashboardStore.jobResultAnalysisData["job-result-ratio"]["failed-percentage"].toFixed(2));
+  jobResult.value = newData;
+  chartData.datasets[0].data = [...jobResult.value];
+
+  newData = []
+  newData.push(dashboardStore.jobResultAnalysisData["job-result-ratio"]["success-work"]);
+  newData.push(dashboardStore.jobResultAnalysisData["job-result-ratio"]["failed-work"]);
+  jobResultCount.value = newData;
+}
+
+
 </script>
 
 <template>
     <div :style="{width: width, height: height}">
-        <Pie :data="chartData" :options="chartOptions" />
+      <canvas ref="chartRef"> </canvas>
+        <!-- <Pie :data="chartData" :options="chartOptions" /> -->
     </div>
 </template>
 
