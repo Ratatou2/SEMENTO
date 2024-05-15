@@ -27,18 +27,26 @@ async def analyze_by_Conan(
         conan.summary()
         logs = get_logs(start_date, end_date)
 
+        if len(logs) == 0:
+            return {"congestion-info": []}
+
+
         # 정체 path 조회 - 데이터 전처리 
         preprocess_result = await data_preprocessing_for_Conan(logs)    
         deadlock_paths = preprocess_result["dataset"]    
         x_input = [path_matrix for (path_name, path_matrix) in deadlock_paths]
+
+        if len(x_input) == 0:
+            return {"congestion-info": []}
+        
         analyse_results = conan.predict(tf.convert_to_tensor(np.array(x_input, dtype=np.float32), dtype=tf.float32))
         
         error_info = preprocess_result["error_info"]
 
         for idx, info in enumerate(error_info):
-            info["analyse_result"] = float(analyse_results[idx][0])
+            info["analyse-result"] = float(analyse_results[idx][0])
     
-        return {"congestion_info" : error_info}
+        return {"congestion-info" : error_info}
         
     except Exception as e:
         print(e)
@@ -54,23 +62,31 @@ async def analyze_by_Conan(
     #     데이터 조회
         time_model.summary()
         logs = get_logs(start_date, end_date)
+
+        if len(logs) == 0:
+            return {"congestion-info": []}
+
         
         deadlock_paths_and_error_info = await data_preprocessing_by_time(logs)        
+
+        if len(deadlock_paths_and_error_info["dataset"]) == 0:
+            return {"congestion-info": []}
+        
         analyse_results = time_model.predict(tf.convert_to_tensor(np.array(deadlock_paths_and_error_info["dataset"], dtype=np.float32), dtype=tf.float32))
         results = []
         for analyse_result in analyse_results:
             result_obj = {}
-            result_obj["etc error probability"] = float(analyse_result[0])
-            result_obj["facility error probability"] = float(analyse_result[1])
-            result_obj["oht error probability"] = float(analyse_result[2])
+            result_obj["etc-error-probability"] = float(analyse_result[0])
+            result_obj["facility-error-probability"] = float(analyse_result[1])
+            result_obj["oht-error-probability"] = float(analyse_result[2])
             results.append(result_obj)
         
         error_info = deadlock_paths_and_error_info["error_info"]
 
         for idx, info in enumerate(error_info):
-            info["analyse_result"] = results[idx]
+            info["analyse-result"] = results[idx]
     
-        return {"congestion_info" : error_info}
+        return {"congestion-info" : error_info}
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail=str(e))
