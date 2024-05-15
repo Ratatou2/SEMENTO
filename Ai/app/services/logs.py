@@ -35,7 +35,7 @@ def get_logs(start_date, end_date):
 
     # 스크롤 세션 시작
     scroll = '1m'  # 스크롤 유지 시간
-    response = es.search(index=index_name, body=query, scroll=scroll, size=1000)
+    response = es.search(index=index_name, body=query, scroll=scroll, size=10000)
 
     arr = []
     # 스크롤을 통해 모든 결과 탐색

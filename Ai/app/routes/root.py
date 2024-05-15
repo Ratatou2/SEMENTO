@@ -32,10 +32,14 @@ async def analyze_by_Conan(
         deadlock_paths = preprocess_result["dataset"]    
         x_input = [path_matrix for (path_name, path_matrix) in deadlock_paths]
         analyse_results = conan.predict(tf.convert_to_tensor(np.array(x_input, dtype=np.float32), dtype=tf.float32))
-        paths = [path_name for (path_name, path_matrix) in deadlock_paths]
-        results = [float(analyse_result[0]) for analyse_result in analyse_results]
         
-        return {"analyse_result": results, "error_info": preprocess_result["error_info"]}
+        error_info = preprocess_result["error_info"]
+
+        for idx, info in enumerate(error_info):
+            info["analyse_result"] = float(analyse_results[idx][0])
+    
+        return {"congestion_info" : error_info}
+        
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail=str(e))
@@ -60,8 +64,13 @@ async def analyze_by_Conan(
             result_obj["facility error probability"] = float(analyse_result[1])
             result_obj["oht error probability"] = float(analyse_result[2])
             results.append(result_obj)
+        
+        error_info = deadlock_paths_and_error_info["error_info"]
+
+        for idx, info in enumerate(error_info):
+            info["analyse_result"] = results[idx]
     
-        return {"error_info" : deadlock_paths_and_error_info["error_info"], "analyse_result": results}
+        return {"congestion_info" : error_info}
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail=str(e))
