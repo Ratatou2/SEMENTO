@@ -11,7 +11,7 @@ async def data_preprocessing_for_Conan(
     df: pd.DataFrame,
 ):
     try:
-
+        
         # MinMaxScailing
         df["speed"] = df["speed"] / 5
         df["point_x"] = (df["point_x"] - 60) / (2040 - 60)
@@ -49,6 +49,8 @@ async def data_preprocessing_for_Conan(
         oht_visited = {}
 
         error_info = []
+        congestion_idx = 0
+        congestion_time = 0
 
         for path_info in path_and_before_path_info.iloc[:, 0]:
             path_visited[path_info] = False
@@ -116,15 +118,15 @@ async def data_preprocessing_for_Conan(
                         path_visited[path_name] = True
                         path_and_second_arr.append((now_second, path_name))
                         info_dict = {
-                                    "oht_id": int(oht["oht_id"]),
+                                    "oht-id": int(oht["oht_id"]),
                                     "time": int(now_second),
                                     "path": path_name,
-                                    "error_code": int(oht['error']),
+                                    "error-code": int(oht['error']),
                                     "status": oht["status"],
                                     "carrier": bool(oht["carrier"]),
                                     "error": int(oht["error"]),
                                     "speed": float(oht["speed"]),
-                                    "is_fail": bool(oht["is_fail"])
+                                    "is-fail": bool(oht["is_fail"])
                                     }
                         error_info.append(info_dict)
                         
@@ -149,20 +151,21 @@ async def data_preprocessing_for_Conan(
                             path_visited[path_name] = True
                             path_and_second_arr.append((now_second, path_name))
                             info_dict = {
-                                    "oht_id": int(oht["oht_id"]),
+                                    "oht-id": int(oht["oht_id"]),
                                     "time": int(now_second),
                                     "path": path_name,
-                                    "error_code": int(oht['error']),
+                                    "error-code": int(oht['error']),
                                     "status": oht["status"],
                                     "carrier": bool(oht["carrier"]),
                                     "error": int(oht["error"]),
                                     "speed": float(oht["speed"]),
-                                    "is_fail": bool(oht["is_fail"])
+                                    "is-fail": bool(oht["is_fail"])
                                     }
 
                             error_info.append(info_dict)
-
+        
                 else:
+                        
                     oht_visited[oht_id] = False
 
             path_count_arr.append(path_count)

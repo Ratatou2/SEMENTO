@@ -99,7 +99,7 @@ async def data_preprocessing_by_time(
                                     prev_deadlock_second = now_second
                                     continue
                                 elif congestion_time > 10:
-                                        error_info[congestion_idx]["congestion_time"] = congestion_time
+                                        error_info[congestion_idx]["congestion-time"] = congestion_time
                                         congestion_time = 10
                                         congestion_idx+=1
 
@@ -108,15 +108,15 @@ async def data_preprocessing_by_time(
                                 # dataset.append(SNAPSHOT_MATRIX[now_second-FAILURE_DEADLINE:now_second])
                                 
                                 info_dict = {
-                                    "oht_id": int(oht["oht_id"]),
+                                    "oht-id": int(oht["oht_id"]),
                                     "time": int(now_second),
                                     "path": path_name,
-                                    "error_code": int(oht['error']),
+                                    "error-code": int(oht['error']),
                                     "status": oht["status"],
                                     "carrier": bool(oht["carrier"]),
                                     "error": int(oht["error"]),
                                     "speed": float(oht["speed"]),
-                                    "is_fail": bool(oht["is_fail"])
+                                    "is-fail": bool(oht["is_fail"])
                                     }
 
                                 error_info.append(info_dict)
