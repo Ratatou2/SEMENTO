@@ -92,10 +92,10 @@ function drawChart() {
     });
 }
 
-// onMounted(async() => {
-//   dataUpdate();
-//   drawChart();
-// });
+onMounted(async() => {
+  dataUpdate();
+  drawChart();
+});
 
 
 watch(() => dashboardStore.watchedJobResultAnalysisData, (oldValue, newValue) => {

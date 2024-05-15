@@ -38,15 +38,8 @@ const lineChart = ref(null);
 let lineChartRef = null;
 
 onMounted(async () => {
-  //라인차트
-  // drawLine();
-  //실시간 변화시 차트 업데이트
-  // watchEffect(() => {
-  //   //라인차트 업데이트
-  //   lineChartRef.data.datasets[0].data = working_ohts;
-  //   lineChartRef.data.datasets[1].data = idle_ohts;
-  //   lineChartRef.update();
-  // });
+  dataUpdate();
+  drawLine();
 });
 
 watch(() => dashboardStore.watchedStateHourlyAnalysisData, (oldValue, newValue) => {

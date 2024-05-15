@@ -99,10 +99,10 @@ function drawChart() {
     });
 }
 
-// onMounted(async() => {
-//   if(dashboardStore.jobResultAnalysisData != "{}") dataUpdate();
-//   drawChart();
-// });
+onMounted(async() => {
+  dataUpdate();
+  drawChart();
+});
 
 
 watch(() => dashboardStore.watchedJobResultAnalysisData, (oldValue, newValue) => {
