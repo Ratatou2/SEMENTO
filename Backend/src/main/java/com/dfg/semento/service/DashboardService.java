@@ -454,7 +454,10 @@ public class DashboardService {
         for (CompositeAggregation.Bucket bucket : compositeAggregation.getBuckets()) {
             Map<String, Object> bucketKey = bucket.getKey();
             int ohtId = (int) bucketKey.get("oht_id");
-            int error = Integer.parseInt((String) bucketKey.get("error"));
+            Object errorObj = bucketKey.get("error");
+            int error = 0;
+            if(errorObj instanceof Integer) error = (int) errorObj;
+            else if(errorObj instanceof String) error = Integer.parseInt((String) errorObj);
             switch (error) {
                 case 200:
                     ohtError++;
