@@ -48,6 +48,7 @@ import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.awt.*;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -59,6 +60,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -190,7 +192,7 @@ public class DashboardService {
             if(workHourCount.get(maxWorkHour) < entry.getValue()) maxWorkHour = entry.getKey();
             workHourCountResponse.add(StateHourlyResponse.builder()
                 .hour(entry.getKey())
-                .count((entry.getValue() / day))
+                .count((double)entry.getValue() / (double)day)
                 .build());
         }
 
@@ -201,7 +203,7 @@ public class DashboardService {
             if(idleHourCount.get(maxIdleHour) < entry.getValue()) maxIdleHour = entry.getKey();
             idleHourCountResponse.add(StateHourlyResponse.builder()
                 .hour(entry.getKey())
-                .count(entry.getValue() / day)
+                .count((double)entry.getValue() / (double)day)
                 .build());
         }
 
@@ -242,47 +244,53 @@ public class DashboardService {
     public int getOhtTotalWorkByStartTimeAndEndTime(LocalDateTime startTime, LocalDateTime endTime) throws
         IOException {
         // ==== 쿼리 검색 ====
-        // 작업 중인 로그만 검색하도록 설정
-        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status.keyword", "W");
+        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status", "W");
 
         // Bool Query로  두 filter 적용
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
             .filter(statusFilter);
 
         // ==== 집계 검색 ====
-        ScriptedMetricAggregationBuilder aggregationBuilder = AggregationBuilders.scriptedMetric("total_work")
-            .initScript(new Script("""
-                    state.unique_combinations = [:];
-                    """))
-            .mapScript(new Script("""
-                        def combination = doc['oht_id'].value + '|' + doc['start_time'].value;
-                        state.unique_combinations.put(combination, true);
-                        """))
-            .combineScript(new Script("return state.unique_combinations.size();"))
-            .reduceScript(new Script("""
-                        def result = 0;
-                        for (state in states) {
-                            result += state;
-                        }
-                        return result;
-                        """));
+        MaxAggregationBuilder maxAggregation = AggregationBuilders.max("max_curr_time").field("curr_time");
+
+        CompositeAggregationBuilder compositeAgg = AggregationBuilders
+            .composite(
+                "composite_agg",
+                Arrays.asList(
+                    new TermsValuesSourceBuilder("oht_id")
+                        .field("oht_id"),
+                    new TermsValuesSourceBuilder("start_time")
+                        .field("start_time")
+                ))
+            .subAggregation(maxAggregation)
+            .size(BUKET_SIZE);
+
+        // ==== 데이터 저장할 자료구조 ====
+        int totalWork = 0;
 
         // ==== 질의 ====
-        SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime, boolQueryBuilder, aggregationBuilder);
+        Map<String, Object> afterKey = null;
+        do {
+            if(afterKey != null) {
+                compositeAgg.aggregateAfter(afterKey);
+            }
+            SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime, boolQueryBuilder, compositeAgg);
+            CompositeAggregation composite = searchResponse.getAggregations().get("composite_agg");
+            afterKey = composite.afterKey();
 
-        // 결과에서 작업량 추출
-        ScriptedMetric totalWork = searchResponse.getAggregations().get("total_work");
-        return (int) totalWork.aggregation();
+            totalWork += composite.getBuckets().size();
+        } while (afterKey != null);
+        return totalWork;
     }
 
     /**
-     * [Elasticsearch 검색] 기간동안 OHT별 평균 작업량 계산 함수
+     * [Elasticsearch 검색] 기간동안 OHT별 평균 작업량 계산 함수 (사용 X)
      */
     private double getOhtAverageWorkByStartTimeAndTime(LocalDateTime startTime, LocalDateTime endTime) throws
         IOException {
         // ==== 쿼리 검색 ====
         // 작업 중인 로그만 검색하도록 설정
-        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status.keyword", "W");
+        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status", "W");
 
         // Bool Query로  두 filter 적용
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
@@ -319,10 +327,10 @@ public class DashboardService {
      */
     public Map<Integer, Integer> getOhtJobHourly(LocalDateTime startTime, LocalDateTime endTime) throws IOException {
         // ==== 쿼리 검색 ====
-        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status.keyword", "W");
+        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status", "W");
         MatchQueryBuilder carrierFilter = QueryBuilders.matchQuery("carrier", false);
         ScriptQueryBuilder scriptFilter = QueryBuilders.scriptQuery(
-            new Script("doc['current_node.keyword'].value == doc['target_node.keyword'].value")
+            new Script("doc['current_node'] == doc['target_node']")
         );
 
         // Bool Query로  두 filter 적용
@@ -333,33 +341,45 @@ public class DashboardService {
 
         // ==== 집계 검색 ====
         MaxAggregationBuilder maxAggregation = AggregationBuilders.max("max_curr_time").field("curr_time");
-        TermsAggregationBuilder termsAggregation = AggregationBuilders.terms("group_by_oht_id_start_time")
-            .script(
-                new Script("doc['oht_id'].value + ' ' + doc['start_time'].value")
-            ).size(Integer.MAX_VALUE)
-            .subAggregation(maxAggregation);
 
-        // ==== 질의 ====
-        SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime, boolQueryBuilder, termsAggregation);
+        CompositeAggregationBuilder compositeAgg = AggregationBuilders
+            .composite(
+                "composite_agg",
+                Arrays.asList(
+                    new TermsValuesSourceBuilder("oht_id")
+                        .field("oht_id"),
+                    new TermsValuesSourceBuilder("start_time")
+                        .field("start_time")
+                ))
+            .subAggregation(maxAggregation)
+            .size(BUKET_SIZE);
 
-
-        // ==== 결과에서 시간 추출 ====
-        // 각 Terms의 bucket에서 max_curr_time을 추출하고 카운트
-        Terms terms = searchResponse.getAggregations().get("group_by_oht_id_start_time");
+        // ==== 데이터 저장할 자료구조 ====
         Map<Integer, Integer> hourCounts = new HashMap<>();
-
-        // 시간 포맷터 설정
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         for(int i=0; i<=23; i++) {
             hourCounts.put(i, 0);
         }
-        for (Terms.Bucket bucket : terms.getBuckets()) {
-            Max maxCurrTime = bucket.getAggregations().get("max_curr_time");
-            long maxTime = (long) maxCurrTime.getValue();
-            // timezone 변경
-            ZonedDateTime dateTime = Instant.ofEpochMilli(maxTime).atZone(ZoneId.of("Asia/Seoul"));
-            hourCounts.put(dateTime.getHour(), dateTime.getHour() + 1);
-        }
+
+        // ==== 질의 ====
+        Map<String, Object> afterKey = null;
+        do {
+            if(afterKey != null) {
+                compositeAgg.aggregateAfter(afterKey);
+            }
+            SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime, boolQueryBuilder, compositeAgg);
+            CompositeAggregation composite = searchResponse.getAggregations().get("composite_agg");
+            afterKey = composite.afterKey();
+
+            for (CompositeAggregation.Bucket bucket : composite.getBuckets()) {
+                Max maxCurrTime = bucket.getAggregations().get("max_curr_time");
+                long maxTime = (long) maxCurrTime.getValue();
+                // timezone 변경
+                ZonedDateTime dateTime = Instant.ofEpochMilli(maxTime).atZone(ZoneId.of("Asia/Seoul"));
+                System.out.println("dateTime = " + dateTime);
+                hourCounts.put(dateTime.getHour(), hourCounts.get(dateTime.getHour()) + 1);
+            }
+        } while (afterKey != null);
+
         return hourCounts;
     }
 
@@ -436,39 +456,52 @@ public class DashboardService {
                 ))
             .size(BUKET_SIZE);
 
-        // 검색 요청
-        SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime, boolQuery, compositeAgg);
+        // // 검색 요청
+        // SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime, boolQuery, compositeAgg);
 
-        // 결과에서 집계 데이터 추출
-        CompositeAggregation compositeAggregation = searchResponse.getAggregations().get("unique_combinations");
+        // // 결과에서 집계 데이터 추출
+        // CompositeAggregation compositeAggregation = searchResponse.getAggregations().get("unique_combinations");
 
+        // ==== 데이터 저장할 자료구조 ====
         // 에러 수 집계용
         int ohtError = 0;
         int facilityError = 0;
-        int totalError = compositeAggregation.getBuckets().size();
+        int totalError = 0;
 
         // oht_id 별 에러 수 집계
         Map<String, Integer> countErrorPerOht = new HashMap<>();
 
-        // 각 버킷에서 에러 수 추출
-        for (CompositeAggregation.Bucket bucket : compositeAggregation.getBuckets()) {
-            Map<String, Object> bucketKey = bucket.getKey();
-            int ohtId = (int) bucketKey.get("oht_id");
-            Object errorObj = bucketKey.get("error");
-            int error = 0;
-            if(errorObj instanceof Integer) error = (int) errorObj;
-            else if(errorObj instanceof String) error = Integer.parseInt((String) errorObj);
-            switch (error) {
-                case 200:
-                    ohtError++;
-                    break;
-                case 300:
-                    facilityError++;
-                    break;
+        // ==== 질의 ====
+        Map<String, Object> afterKey = null;
+        do {
+            if(afterKey != null) {
+                compositeAgg.aggregateAfter(afterKey);
             }
-            String key = ohtId+" "+error;
-            countErrorPerOht.put(key, countErrorPerOht.getOrDefault(key,  0)+1);
-        }
+            SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime, boolQuery, compositeAgg);
+            CompositeAggregation compositeAggregation = searchResponse.getAggregations().get("unique_combinations");
+            afterKey = compositeAggregation.afterKey();
+
+            totalError += compositeAggregation.getBuckets().size();
+            // 각 버킷에서 에러 수 추출
+            for (CompositeAggregation.Bucket bucket : compositeAggregation.getBuckets()) {
+                Map<String, Object> bucketKey = bucket.getKey();
+                int ohtId = (int) bucketKey.get("oht_id");
+                Object errorObj = bucketKey.get("error");
+                int error = 0;
+                if(errorObj instanceof Integer) error = (int) errorObj;
+                else if(errorObj instanceof String) error = Integer.parseInt((String) errorObj);
+                switch (error) {
+                    case 200:
+                        ohtError++;
+                        break;
+                    case 300:
+                        facilityError++;
+                        break;
+                }
+                String key = ohtId+" "+error;
+                countErrorPerOht.put(key, countErrorPerOht.getOrDefault(key,  0)+1);
+            }
+        } while (afterKey != null);
 
         // 에러 집계 Response로 변환
         JobResultAnalysisErrorResponse errorResponse = JobResultAnalysisErrorResponse
@@ -567,35 +600,43 @@ public class DashboardService {
 
         // ==== 집계 검색 ====
         MaxAggregationBuilder maxAggregation = AggregationBuilders.max("max_curr_time").field("curr_time");
-        TermsAggregationBuilder termsAggregation = AggregationBuilders.terms("group_by_oht_id_curr_time_hour")
-            .script(
-                new Script("""
-                    def dateStr = doc['curr_time'].value.toInstant().atZone(ZoneId.of('Asia/Seoul')).format(DateTimeFormatter.ofPattern('yyyy-MM-dd HH'));
-                    return doc['oht_id'].value + ' ' + dateStr;
-                """)
-            ).size(BUKET_SIZE)
-            .subAggregation(maxAggregation);
+        CompositeAggregationBuilder compositeAgg = AggregationBuilders
+            .composite(
+                "composite_agg",
+                Arrays.asList(
+                    new TermsValuesSourceBuilder("oht_id")
+                        .field("oht_id"),
+                    new TermsValuesSourceBuilder("curr_time")
+                        .script(new Script("doc['curr_time'].value.toInstant().atZone(ZoneId.of('Asia/Seoul')).format(DateTimeFormatter.ofPattern('yyyy-MM-dd HH'))"))
+                ))
+            .subAggregation(maxAggregation)
+            .size(BUKET_SIZE);
 
-        // ==== 질의 ====
-        SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime, boolQueryBuilder, termsAggregation);
-
-        // ==== 결과에서 시간 추출 ====
-        // 각 Terms의 bucket에서 max_curr_time을 추출하고 카운트
-        Terms terms = searchResponse.getAggregations().get("group_by_oht_id_curr_time_hour");
+        // ==== 데이터 저장할 자료구조 ====
         Map<Integer, Integer> hourCounts = new HashMap<>();
-
-        // 시간 포맷터 설정
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         for(int i=0; i<=23; i++) {
             hourCounts.put(i, 0);
         }
-        for (Terms.Bucket bucket : terms.getBuckets()) {
-            Max maxCurrTime = bucket.getAggregations().get("max_curr_time");
-            long maxTime = (long) maxCurrTime.getValue();
-            // timezone 변경
-            ZonedDateTime dateTime = Instant.ofEpochMilli(maxTime).atZone(ZoneId.of("Asia/Seoul"));
-            hourCounts.put(dateTime.getHour(), hourCounts.get(dateTime.getHour()) + 1);
-        }
+
+        // ==== 질의 ====
+        Map<String, Object> afterKey = null;
+        do {
+            if(afterKey != null) {
+                compositeAgg.aggregateAfter(afterKey);
+            }
+            SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime, boolQueryBuilder, compositeAgg);
+            CompositeAggregation composite = searchResponse.getAggregations().get("composite_agg");
+            afterKey = composite.afterKey();
+
+            for (CompositeAggregation.Bucket bucket : composite.getBuckets()) {
+                Max maxCurrTime = bucket.getAggregations().get("max_curr_time");
+                long maxTime = (long) maxCurrTime.getValue();
+                // timezone 변경
+                ZonedDateTime dateTime = Instant.ofEpochMilli(maxTime).atZone(ZoneId.of("Asia/Seoul"));
+                hourCounts.put(dateTime.getHour(), hourCounts.get(dateTime.getHour()) + 1);
+            }
+        } while (afterKey != null);
+
         return hourCounts;
     }
 
@@ -612,35 +653,43 @@ public class DashboardService {
 
         // ==== 집계 검색 ====
         MaxAggregationBuilder maxAggregation = AggregationBuilders.max("max_curr_time").field("curr_time");
-        TermsAggregationBuilder termsAggregation = AggregationBuilders.terms("group_by_oht_id_curr_time_hour")
-            .script(
-                new Script("""
-                    def dateStr = doc['curr_time'].value.toInstant().atZone(ZoneId.of('Asia/Seoul')).format(DateTimeFormatter.ofPattern('yyyy-MM-dd HH'));
-                    return doc['oht_id'].value + ' ' + dateStr;
-                """)
-            ).size(BUKET_SIZE)
-            .subAggregation(maxAggregation);
+        CompositeAggregationBuilder compositeAgg = AggregationBuilders
+            .composite(
+                "composite_agg",
+                Arrays.asList(
+                    new TermsValuesSourceBuilder("oht_id")
+                        .field("oht_id"),
+                    new TermsValuesSourceBuilder("curr_time")
+                        .script(new Script("doc['curr_time'].value.toInstant().atZone(ZoneId.of('Asia/Seoul')).format(DateTimeFormatter.ofPattern('yyyy-MM-dd HH'))"))
+                ))
+            .subAggregation(maxAggregation)
+            .size(BUKET_SIZE);
 
-        // ==== 질의 ====
-        SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime, boolQueryBuilder, termsAggregation);
-
-        // ==== 결과에서 시간 추출 ====
-        // 각 Terms의 bucket에서 max_curr_time을 추출하고 카운트
-        Terms terms = searchResponse.getAggregations().get("group_by_oht_id_curr_time_hour");
+        // ==== 데이터 저장할 자료구조 ====
         Map<Integer, Integer> hourCounts = new HashMap<>();
-
-        // 시간 포맷터 설정
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         for(int i=0; i<=23; i++) {
             hourCounts.put(i, 0);
         }
-        for (Terms.Bucket bucket : terms.getBuckets()) {
-            Max maxCurrTime = bucket.getAggregations().get("max_curr_time");
-            long maxTime = (long) maxCurrTime.getValue();
-            // timezone 변경
-            ZonedDateTime dateTime = Instant.ofEpochMilli(maxTime).atZone(ZoneId.of("Asia/Seoul"));
-            hourCounts.put(dateTime.getHour(), hourCounts.get(dateTime.getHour()) + 1);
-        }
+
+        // ==== 질의 ====
+        Map<String, Object> afterKey = null;
+        do {
+            if(afterKey != null) {
+                compositeAgg.aggregateAfter(afterKey);
+            }
+            SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime, boolQueryBuilder, compositeAgg);
+            CompositeAggregation composite = searchResponse.getAggregations().get("composite_agg");
+            afterKey = composite.afterKey();
+
+            for (CompositeAggregation.Bucket bucket : composite.getBuckets()) {
+                Max maxCurrTime = bucket.getAggregations().get("max_curr_time");
+                long maxTime = (long) maxCurrTime.getValue();
+                // timezone 변경
+                ZonedDateTime dateTime = Instant.ofEpochMilli(maxTime).atZone(ZoneId.of("Asia/Seoul"));
+                hourCounts.put(dateTime.getHour(), hourCounts.get(dateTime.getHour()) + 1);
+            }
+        } while (afterKey != null);
+
         return hourCounts;
     }
 
