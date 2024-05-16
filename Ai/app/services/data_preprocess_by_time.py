@@ -116,7 +116,8 @@ async def data_preprocessing_by_time(
                                     "carrier": bool(oht["carrier"]),
                                     "error": int(oht["error"]),
                                     "speed": float(oht["speed"]),
-                                    "is-fail": bool(oht["is_fail"])
+                                    "is-fail": bool(oht["is_fail"]),
+                                    "congestion-time": int(10)
                                     }
 
                                 error_info.append(info_dict)
