@@ -186,7 +186,7 @@ function timeDataFormatting(temp, refData) {
           <div class="white-box job-table">
             <div class="title">
               <Cardhead
-                header-text="에러로 실패한 작업 로그(198건)"
+                :header-text="`에러로 실패한 작업 로그(${errorLog.length}건)`"
                 content-text="데드라인까지 도착하지 못한 OHT에 대한 에러를 보여줍니다."
               />
             </div>
