@@ -1,19 +1,23 @@
 package com.dfg.semento.service;
 
-import com.dfg.semento.dto.DoubleDataDto;
-import com.dfg.semento.dto.IntegerDataDto;
-import com.dfg.semento.dto.WorkPerTime;
+import com.dfg.semento.dto.*;
 import com.dfg.semento.dto.request.DateAndOhtRequest;
+import com.dfg.semento.dto.request.SimulationRequest;
+import com.dfg.semento.dto.response.ClassificationLogResponse;
 import com.dfg.semento.dto.response.ComparedDataResponse;
 import com.dfg.semento.dto.response.ComparedWorkPerTimeResponse;
+import com.dfg.semento.dto.response.SimulationLogResponse;
 import com.dfg.semento.util.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.index.query.*;
 import org.elasticsearch.script.Script;
+import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.Aggregations;
+import org.elasticsearch.search.aggregations.BucketOrder;
 import org.elasticsearch.search.aggregations.bucket.composite.CompositeAggregation;
 import org.elasticsearch.search.aggregations.bucket.composite.CompositeAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.composite.ParsedComposite;
@@ -26,10 +30,9 @@ import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInter
 import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.Avg;
-import org.elasticsearch.search.aggregations.metrics.AvgAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.Cardinality;
-import org.elasticsearch.search.aggregations.metrics.CardinalityAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.*;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -48,9 +51,12 @@ public class SimulationService {
 
     @Value("${elasticsearch.bucket-size}")
     private int bucketSize;
+    @Value("${oht.cnt}")
+    private int ohtCnt;
     private final DashboardService dashboardService;
     private final ElasticsearchQueryUtil elasticsearchQueryUtil;
     private Long runningOhtCnt;
+    private int minuteRange = 300; //페이징해서 가져올 시뮬레이션 데이터 범위, 분당 60
 
     /** 시간대별 작업량 평균 비교하는 메소드
      * @author 최서현
@@ -96,9 +102,9 @@ public class SimulationService {
             long overallCount = ((Cardinality) overallAggs.get("unique_starts")).getValue();
 
             list.add(WorkPerTime.builder()
-                    .time(TimeConverter.convertStringToLocalDateTime(keyAsString))
+                    .time(TimeConverter.convertUtcToAsia(keyAsString))
                     .me((int) specificCount)
-                    .average((int) overallCount).build());
+                    .average((int) ((int) overallCount/runningOhtCnt)).build());
         }
 
         return ComparedWorkPerTimeResponse.builder().workPerTime(list).build();
@@ -309,5 +315,130 @@ public class SimulationService {
 
     }
 
+    /** 개별 OHT 작업별로 분류
+     * @author 최서현
+     */
+    public ClassificationLogResponse getClassificationLog(DateAndOhtRequest dateAndOht) throws IOException {
+        LocalDateTime startTime = dateAndOht.getStartDate();
+        LocalDateTime endTime = dateAndOht.getEndDate();
+        Long ohtId = dateAndOht.getOhtId();
 
+        //==bool Query==
+        ExistsQueryBuilder existsQuery = QueryBuilders.existsQuery("start_time");
+        TermQueryBuilder termQuery = QueryBuilders.termQuery("oht_id", ohtId);
+
+        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery()
+                .must(existsQuery)
+                .must(termQuery);
+
+        //==TermsAggregationBuilder==
+        TermsAggregationBuilder byStartTime = AggregationBuilders.terms("by_start_time")
+                .field("start_time")
+                .size(10000)
+                .order(BucketOrder.key(true));
+        MaxAggregationBuilder maxCurrTime = AggregationBuilders.max("max_curr_time").field("curr_time");
+        TermsAggregationBuilder errors = AggregationBuilders.terms("errors")
+                                                            .field("error")
+                                                            .size(10000)
+                                                            .order(BucketOrder.key(true));
+        AvgAggregationBuilder averageSpeed = AggregationBuilders.avg("average_speed").field("speed");
+        MaxAggregationBuilder maxIsFail = AggregationBuilders.max("max_is_fail").field("is_fail");
+
+        byStartTime.subAggregation(maxCurrTime)
+                .subAggregation(errors)
+                .subAggregation(averageSpeed)
+                .subAggregation(maxIsFail);
+
+        //요청 및 응답받음
+        SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime,
+                boolQuery, byStartTime);
+
+        Terms terms = searchResponse.getAggregations().get("by_start_time");
+
+        List<LogPerWork> logPerWorkList = new ArrayList<>();
+        for (Terms.Bucket bucket : terms.getBuckets()) {
+            String resultStartTime = bucket.getKeyAsString();
+            Max resultEndTime = bucket.getAggregations().get("max_curr_time");
+            Avg resultAverageSpeed = bucket.getAggregations().get("average_speed");
+            Max resultMaxIsFail = bucket.getAggregations().get("max_is_fail");
+            Terms resultErrors = bucket.getAggregations().get("errors");
+
+            List<Integer> errorList = new ArrayList<>();
+            for (Terms.Bucket errorBucket : resultErrors.getBuckets()) {
+                errorList.add(Integer.parseInt(errorBucket.getKeyAsString()));
+            }
+
+            logPerWorkList.add(LogPerWork.builder()
+                                        .startTime(TimeConverter.convertUtcToAsia(resultStartTime))
+                                        .endTime(TimeConverter.convertUtcToAsia(resultEndTime.getValueAsString()))
+                                        .ohtId(ohtId)
+                                        .errors(errorList)
+                                        .averageSpeed(resultAverageSpeed.getValue())
+                                        .outOfDeadline(Boolean.parseBoolean(resultMaxIsFail.getValueAsString()))
+                                        .build());
+        }
+
+        return ClassificationLogResponse.builder().totalCnt(terms.getBuckets().size()).logPerWork(logPerWorkList).build();
+    }
+
+    public SimulationLogResponse getSimulationLog(SimulationRequest simulationRequest) throws IOException {
+        LocalDateTime startTime = simulationRequest.getStartDate();
+        LocalDateTime endTime = simulationRequest.getEndDate();
+        List<Long> ohtList = simulationRequest.getOhtId();
+
+        // Query
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        TermsQueryBuilder termsQueryBuilder = QueryBuilders.termsQuery("oht_id", ohtList);
+        boolQueryBuilder.must(termsQueryBuilder);
+
+        // Aggregations
+        TermsAggregationBuilder logsByCurrTime = AggregationBuilders.terms("logs_by_curr_time")
+                .field("curr_time").size(minuteRange);//1분에 60개, 5분에 300개
+
+        TopHitsAggregationBuilder ohtDetails = AggregationBuilders.topHits("oht_details")
+                .fetchSource(new String[]{"oht_id", "path", "curr_node", "point_x", "point_y", "status", "error", "carrier", "speed", "is_fail"}, null)
+                .size(ohtCnt) //OHT 최대갯수
+                .sort("curr_time", SortOrder.DESC); // Sort by curr_time in descending order
+
+        logsByCurrTime.subAggregation(ohtDetails);
+
+        SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime,
+                boolQueryBuilder, logsByCurrTime);
+
+        List<SimulationPerDate> simulationPerDates = new ArrayList<>();
+        Terms logsByCurrTimeAgg = searchResponse.getAggregations().get("logs_by_curr_time");
+
+        for (Terms.Bucket bucket : logsByCurrTimeAgg.getBuckets()) {
+            List<SimulationPerOhtDto> simulationPerOhtDtoList = new ArrayList<>();
+            TopHits topHits = bucket.getAggregations().get("oht_details");
+
+            for (SearchHit hit : topHits.getHits().getHits()) {
+                Map<String, Object> sourceAsMap = hit.getSourceAsMap();
+                LocationDto locationDto = LocationDto.builder()
+                        .path((String) sourceAsMap.get("path"))
+                        .currNode((String) sourceAsMap.get("curr_node"))
+                        .pointX((Double) sourceAsMap.get("point_x"))
+                        .pointY((Double) sourceAsMap.get("point_y"))
+                        .build();
+
+                SimulationPerOhtDto simulationPerOhtDto = SimulationPerOhtDto.builder()
+                        .ohtId(Long.parseLong(sourceAsMap.get("oht_id").toString()))
+                        .location(locationDto)
+                        .status((String) sourceAsMap.get("status"))
+                        .carrier((Boolean) sourceAsMap.get("carrier"))
+                        .error((Integer) sourceAsMap.get("error"))
+                        .speed((Double) sourceAsMap.get("speed"))
+                        .isFail((Boolean) sourceAsMap.get("is_fail"))
+                        .build();
+
+                simulationPerOhtDtoList.add(simulationPerOhtDto);
+            }
+            LocalDateTime currTime = TimeConverter.convertUtcToAsia(bucket.getKeyAsString());
+            simulationPerDates.add(SimulationPerDate.builder()
+                    .time(currTime)
+                    .data(simulationPerOhtDtoList)
+                    .build());
+        }
+        return SimulationLogResponse.builder().simulationLog(simulationPerDates).build();
+    }
 }
