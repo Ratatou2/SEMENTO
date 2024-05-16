@@ -388,8 +388,11 @@ public class SimulationService {
 
         // Query
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
-        TermsQueryBuilder termsQueryBuilder = QueryBuilders.termsQuery("oht_id", ohtList);
-        boolQueryBuilder.must(termsQueryBuilder);
+
+        if (ohtList != null && !ohtList.isEmpty()) {
+            TermsQueryBuilder termsQueryBuilder = QueryBuilders.termsQuery("oht_id", ohtList);
+            boolQueryBuilder.must(termsQueryBuilder);
+        }
 
         // Aggregations
         TermsAggregationBuilder logsByCurrTime = AggregationBuilders.terms("logs_by_curr_time")
