@@ -134,14 +134,14 @@ function timeDataFormatting(temp, refData) {
             <BlackDataCard
               title="Total Work"
               :content="dashboardStore.ohtJobAnalysisData['total-work'].data"
-              :percentage="dashboardStore.ohtJobAnalysisData['total-work'].percent"
+              :percentage="dashboardStore.ohtJobAnalysisData['total-work'].percent.toFixed(2)"
               :width="'320px'"
               :height="'130px'"
             />
             <BlackDataCard
               title="Average Daily Work per OHT"
-              :content="dashboardStore.ohtJobAnalysisData['average-work'].data"
-              :percentage="dashboardStore.ohtJobAnalysisData['average-work'].percent"
+              :content="dashboardStore.ohtJobAnalysisData['average-work'].data.toFixed(2)"
+              :percentage="dashboardStore.ohtJobAnalysisData['average-work'].percent.toFixed(2)"
               :width="'320px'"
               :height="'130px'"
             />
@@ -215,14 +215,14 @@ function timeDataFormatting(temp, refData) {
             <BlackDataCard
               title="Average Working Hours"
               :content="averageWork"
-              :percentage="dashboardStore.stateAnalysisData['average-work-time'].percent"
+              :percentage="dashboardStore.stateAnalysisData['average-work-time'].percent.toFixed(2)"
               :width="'320px'"
               :height="'130px'"
             />
             <BlackDataCard
               title="Average Idle Hours"
               :content="averageIdle"
-              :percentage="dashboardStore.stateAnalysisData['average-idle-time'].percent"
+              :percentage="dashboardStore.stateAnalysisData['average-idle-time'].percent.toFixed(2)"
               :width="'320px'"
               :height="'130px'"
             />
