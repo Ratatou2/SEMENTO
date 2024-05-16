@@ -48,6 +48,7 @@ import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.awt.*;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -59,6 +60,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -333,33 +335,62 @@ public class DashboardService {
 
         // ==== 집계 검색 ====
         MaxAggregationBuilder maxAggregation = AggregationBuilders.max("max_curr_time").field("curr_time");
-        TermsAggregationBuilder termsAggregation = AggregationBuilders.terms("group_by_oht_id_start_time")
-            .script(
-                new Script("doc['oht_id'].value + ' ' + doc['start_time'].value")
-            ).size(Integer.MAX_VALUE)
-            .subAggregation(maxAggregation);
+
+        CompositeAggregationBuilder compositeAgg = AggregationBuilders
+            .composite(
+                "composite_agg",
+                Arrays.asList(
+                    new TermsValuesSourceBuilder("oht_id")
+                        .field("oht_id"),
+                    new TermsValuesSourceBuilder("start_time")
+                        .field("start_time")
+                ))
+            .subAggregation(maxAggregation)
+            .size(BUKET_SIZE);
+
+        // TermsAggregationBuilder termsAggregation = AggregationBuilders.terms("group_by_oht_id_start_time")
+        //     .script(
+        //         new Script("doc['oht_id'].value + ' ' + doc['start_time'].value")
+        //     ).size(Integer.MAX_VALUE)
+        //     .subAggregation(maxAggregation);
+
+        // ==== 데이터 저장할 자료구조 ====
+        Map<Integer, Integer> hourCounts = new HashMap<>();
+        for(int i=0; i<=23; i++) {
+            hourCounts.put(i, 0);
+        }
 
         // ==== 질의 ====
-        SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime, boolQueryBuilder, termsAggregation);
+        Map<String, Object> afterKey = null;
+        do {
+            if(afterKey != null) {
+                compositeAgg.aggregateAfter(afterKey);
+            }
+            SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime, boolQueryBuilder, compositeAgg);
+            CompositeAggregation composite = searchResponse.getAggregations().get("composite_agg");
+            afterKey = composite.afterKey();
+
+            for (CompositeAggregation.Bucket bucket : composite.getBuckets()) {
+                Max maxCurrTime = bucket.getAggregations().get("max_curr_time");
+                long maxTime = (long) maxCurrTime.getValue();
+                // timezone 변경
+                ZonedDateTime dateTime = Instant.ofEpochMilli(maxTime).atZone(ZoneId.of("Asia/Seoul"));
+                hourCounts.put(dateTime.getHour(), hourCounts.get(dateTime.getHour()) + 1);
+            }
+        } while (afterKey != null);
 
 
         // ==== 결과에서 시간 추출 ====
         // 각 Terms의 bucket에서 max_curr_time을 추출하고 카운트
-        Terms terms = searchResponse.getAggregations().get("group_by_oht_id_start_time");
-        Map<Integer, Integer> hourCounts = new HashMap<>();
-
-        // 시간 포맷터 설정
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-        for(int i=0; i<=23; i++) {
-            hourCounts.put(i, 0);
-        }
-        for (Terms.Bucket bucket : terms.getBuckets()) {
-            Max maxCurrTime = bucket.getAggregations().get("max_curr_time");
-            long maxTime = (long) maxCurrTime.getValue();
-            // timezone 변경
-            ZonedDateTime dateTime = Instant.ofEpochMilli(maxTime).atZone(ZoneId.of("Asia/Seoul"));
-            hourCounts.put(dateTime.getHour(), dateTime.getHour() + 1);
-        }
+        // Terms terms = searchResponse.getAggregations().get("group_by_oht_id_start_time");
+        //
+        // for (Terms.Bucket bucket : terms.getBuckets()) {
+        //     Max maxCurrTime = bucket.getAggregations().get("max_curr_time");
+        //     long maxTime = (long) maxCurrTime.getValue();
+        //     // timezone 변경
+        //     ZonedDateTime dateTime = Instant.ofEpochMilli(maxTime).atZone(ZoneId.of("Asia/Seoul"));
+        //     hourCounts.put(dateTime.getHour(), dateTime.getHour() + 1);
+        // }
         return hourCounts;
     }
 
