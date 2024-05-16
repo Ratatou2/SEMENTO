@@ -14,5 +14,5 @@ public class StateHourlyResponse {
 
 	private int hour;
 
-	private long count;
+	private double count;
 }
