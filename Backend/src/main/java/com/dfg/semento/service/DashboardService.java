@@ -155,10 +155,10 @@ public class DashboardService {
         int lastIdleTime = getIdleTime(lastPeriod.getStartTime(), lastPeriod.getEndTime());
 
         // 평균 작업/유휴 시간 계산
-        int averageWorkingTime = workingTime/totalWork;
-        int averageIdleTime = idleTime/totalWork;
-        int lastAverageWorkingTime = lastWorkingTime/lastTotalWork;
-        int lastAverageIdleTime = lastIdleTime/lastTotalWork;
+        int averageWorkingTime = totalWork == 0 ? 0 : workingTime/totalWork;
+        int averageIdleTime = totalWork == 0 ? 0 : idleTime/totalWork;
+        int lastAverageWorkingTime = lastTotalWork == 0 ? 0 : lastWorkingTime / lastTotalWork;
+        int lastAverageIdleTime = lastTotalWork == 0 ? 0 : lastIdleTime / lastTotalWork;
 
         return StateAnalysisResponse.builder()
             .deadline(new IntegerDataDto(OHT_DEADLINE, 0))
