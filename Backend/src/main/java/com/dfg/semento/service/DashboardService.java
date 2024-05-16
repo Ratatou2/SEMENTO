@@ -244,47 +244,53 @@ public class DashboardService {
     public int getOhtTotalWorkByStartTimeAndEndTime(LocalDateTime startTime, LocalDateTime endTime) throws
         IOException {
         // ==== 쿼리 검색 ====
-        // 작업 중인 로그만 검색하도록 설정
-        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status.keyword", "W");
+        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status", "W");
 
         // Bool Query로  두 filter 적용
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
             .filter(statusFilter);
 
         // ==== 집계 검색 ====
-        ScriptedMetricAggregationBuilder aggregationBuilder = AggregationBuilders.scriptedMetric("total_work")
-            .initScript(new Script("""
-                    state.unique_combinations = [:];
-                    """))
-            .mapScript(new Script("""
-                        def combination = doc['oht_id'].value + '|' + doc['start_time'].value;
-                        state.unique_combinations.put(combination, true);
-                        """))
-            .combineScript(new Script("return state.unique_combinations.size();"))
-            .reduceScript(new Script("""
-                        def result = 0;
-                        for (state in states) {
-                            result += state;
-                        }
-                        return result;
-                        """));
+        MaxAggregationBuilder maxAggregation = AggregationBuilders.max("max_curr_time").field("curr_time");
+
+        CompositeAggregationBuilder compositeAgg = AggregationBuilders
+            .composite(
+                "composite_agg",
+                Arrays.asList(
+                    new TermsValuesSourceBuilder("oht_id")
+                        .field("oht_id"),
+                    new TermsValuesSourceBuilder("start_time")
+                        .field("start_time")
+                ))
+            .subAggregation(maxAggregation)
+            .size(BUKET_SIZE);
+
+        // ==== 데이터 저장할 자료구조 ====
+        int totalWork = 0;
 
         // ==== 질의 ====
-        SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime, boolQueryBuilder, aggregationBuilder);
+        Map<String, Object> afterKey = null;
+        do {
+            if(afterKey != null) {
+                compositeAgg.aggregateAfter(afterKey);
+            }
+            SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime, boolQueryBuilder, compositeAgg);
+            CompositeAggregation composite = searchResponse.getAggregations().get("composite_agg");
+            afterKey = composite.afterKey();
 
-        // 결과에서 작업량 추출
-        ScriptedMetric totalWork = searchResponse.getAggregations().get("total_work");
-        return (int) totalWork.aggregation();
+            totalWork += composite.getBuckets().size();
+        } while (afterKey != null);
+        return totalWork;
     }
 
     /**
-     * [Elasticsearch 검색] 기간동안 OHT별 평균 작업량 계산 함수
+     * [Elasticsearch 검색] 기간동안 OHT별 평균 작업량 계산 함수 (사용 X)
      */
     private double getOhtAverageWorkByStartTimeAndTime(LocalDateTime startTime, LocalDateTime endTime) throws
         IOException {
         // ==== 쿼리 검색 ====
         // 작업 중인 로그만 검색하도록 설정
-        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status.keyword", "W");
+        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status", "W");
 
         // Bool Query로  두 filter 적용
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
@@ -321,10 +327,10 @@ public class DashboardService {
      */
     public Map<Integer, Integer> getOhtJobHourly(LocalDateTime startTime, LocalDateTime endTime) throws IOException {
         // ==== 쿼리 검색 ====
-        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status.keyword", "W");
+        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status", "W");
         MatchQueryBuilder carrierFilter = QueryBuilders.matchQuery("carrier", false);
         ScriptQueryBuilder scriptFilter = QueryBuilders.scriptQuery(
-            new Script("doc['current_node.keyword'].value == doc['target_node.keyword'].value")
+            new Script("doc['current_node'] == doc['target_node']")
         );
 
         // Bool Query로  두 filter 적용
@@ -348,12 +354,6 @@ public class DashboardService {
             .subAggregation(maxAggregation)
             .size(BUKET_SIZE);
 
-        // TermsAggregationBuilder termsAggregation = AggregationBuilders.terms("group_by_oht_id_start_time")
-        //     .script(
-        //         new Script("doc['oht_id'].value + ' ' + doc['start_time'].value")
-        //     ).size(Integer.MAX_VALUE)
-        //     .subAggregation(maxAggregation);
-
         // ==== 데이터 저장할 자료구조 ====
         Map<Integer, Integer> hourCounts = new HashMap<>();
         for(int i=0; i<=23; i++) {
@@ -375,22 +375,11 @@ public class DashboardService {
                 long maxTime = (long) maxCurrTime.getValue();
                 // timezone 변경
                 ZonedDateTime dateTime = Instant.ofEpochMilli(maxTime).atZone(ZoneId.of("Asia/Seoul"));
+                System.out.println("dateTime = " + dateTime);
                 hourCounts.put(dateTime.getHour(), hourCounts.get(dateTime.getHour()) + 1);
             }
         } while (afterKey != null);
 
-
-        // ==== 결과에서 시간 추출 ====
-        // 각 Terms의 bucket에서 max_curr_time을 추출하고 카운트
-        // Terms terms = searchResponse.getAggregations().get("group_by_oht_id_start_time");
-        //
-        // for (Terms.Bucket bucket : terms.getBuckets()) {
-        //     Max maxCurrTime = bucket.getAggregations().get("max_curr_time");
-        //     long maxTime = (long) maxCurrTime.getValue();
-        //     // timezone 변경
-        //     ZonedDateTime dateTime = Instant.ofEpochMilli(maxTime).atZone(ZoneId.of("Asia/Seoul"));
-        //     hourCounts.put(dateTime.getHour(), dateTime.getHour() + 1);
-        // }
         return hourCounts;
     }
 
