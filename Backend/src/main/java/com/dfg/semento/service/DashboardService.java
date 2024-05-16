@@ -145,20 +145,20 @@ public class DashboardService {
     public StateAnalysisResponse stateAnalysis(LocalDateTime startTime, LocalDateTime endTime) throws IOException {
         SearchTimeRequest lastPeriod = calculateLastPeriod(startTime, endTime);
         // this month
-        int ohtCount = getOhtCount(startTime, endTime);
+        int totalWork = getOhtTotalWorkByStartTimeAndEndTime(startTime, endTime);
         int workingTime = getWorkingTime(startTime, endTime);
         int idleTime = getIdleTime(startTime, endTime);
 
         // last month
-        int lastOhtCount = getOhtCount(lastPeriod.getStartTime(), lastPeriod.getEndTime());
+        int lastTotalWork = getOhtTotalWorkByStartTimeAndEndTime(lastPeriod.getStartTime(), lastPeriod.getEndTime());
         int lastWorkingTime = getWorkingTime(lastPeriod.getStartTime(), lastPeriod.getEndTime());
         int lastIdleTime = getIdleTime(lastPeriod.getStartTime(), lastPeriod.getEndTime());
 
         // 평균 작업/유휴 시간 계산
-        int averageWorkingTime = workingTime/ohtCount;
-        int averageIdleTime = idleTime/ohtCount;
-        int lastAverageWorkingTime = lastWorkingTime/lastOhtCount;
-        int lastAverageIdleTime = lastIdleTime/lastOhtCount;
+        int averageWorkingTime = workingTime/totalWork;
+        int averageIdleTime = idleTime/totalWork;
+        int lastAverageWorkingTime = lastWorkingTime/lastTotalWork;
+        int lastAverageIdleTime = lastIdleTime/lastTotalWork;
 
         return StateAnalysisResponse.builder()
             .deadline(new IntegerDataDto(OHT_DEADLINE, 0))
