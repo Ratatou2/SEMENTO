@@ -102,9 +102,9 @@ public class SimulationService {
             long overallCount = ((Cardinality) overallAggs.get("unique_starts")).getValue();
 
             list.add(WorkPerTime.builder()
-                    .time(TimeConverter.convertStringToLocalDateTime(keyAsString))
+                    .time(TimeConverter.convertUtcToAsia(keyAsString))
                     .me((int) specificCount)
-                    .average((int) overallCount).build());
+                    .average((int) ((int) overallCount/runningOhtCnt)).build());
         }
 
         return ComparedWorkPerTimeResponse.builder().workPerTime(list).build();
@@ -369,8 +369,8 @@ public class SimulationService {
             }
 
             logPerWorkList.add(LogPerWork.builder()
-                                        .startTime(TimeConverter.convertStringToLocalDateTime(resultStartTime))
-                                        .endTime(TimeConverter.convertStringToLocalDateTime(resultEndTime.getValueAsString()))
+                                        .startTime(TimeConverter.convertUtcToAsia(resultStartTime))
+                                        .endTime(TimeConverter.convertUtcToAsia(resultEndTime.getValueAsString()))
                                         .ohtId(ohtId)
                                         .errors(errorList)
                                         .averageSpeed(resultAverageSpeed.getValue())
