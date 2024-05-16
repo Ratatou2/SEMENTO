@@ -399,6 +399,9 @@ function toggleSidePageHandler(data) {
 }
 .table-container {
   width: 97%;
+  height: 600px;
+  overflow-x: hidden;
+  padding: 10px;
 }
 
 .barchart-box {

@@ -10,7 +10,7 @@
 
 -->
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted, onUnmounted, nextTick } from "vue";
 const props = defineProps({
   columns: Array, // 테이블의 컬럼명 배열
   data: Array, // 테이블 데이터
@@ -61,6 +61,53 @@ function getColumnColor(column) {
   }
   return "black";
 }
+
+//== 무한스크롤
+const pageSize = 20;
+const currentPage = ref(1);
+const visibleData = ref(props.data.slice(0, pageSize));
+
+const observer = ref(null);
+
+// 데이터 로드 함수
+const loadMoreData = () => {
+  const nextItemsStart = pageSize * currentPage.value;
+  const nextPageData = props.data.slice(
+    nextItemsStart,
+    nextItemsStart + pageSize
+  );
+  if (nextPageData.length) {
+    visibleData.value.push(...nextPageData);
+    currentPage.value++;
+  }
+};
+
+const sentinel = ref(null);
+
+onMounted(() => {
+  observer.value = new IntersectionObserver(
+    (entries) => {
+      const [entry] = entries;
+      if (entry.isIntersecting) {
+        loadMoreData();
+      }
+    },
+    {
+      root: null, // 뷰포트를 기준으로 감지
+      threshold: 1.0, // 완전히 보이는 순간을 감지
+    }
+  );
+
+  if (sentinel.value) {
+    observer.value.observe(sentinel.value);
+  }
+});
+
+onUnmounted(() => {
+  if (observer.value && sentinel.value) {
+    observer.value.unobserve(sentinel.value);
+  }
+});
 </script>
 
 <template>
@@ -96,7 +143,7 @@ function getColumnColor(column) {
       <tbody>
         <!-- 데이터를 행과 셀로 반복하여 표시, 셀 텍스트 중앙 정렬 -->
         <tr
-          v-for="(row, index) in data"
+          v-for="(row, index) in visibleData"
           :key="index"
           @click="handleRowClick(index)"
           :class="{ 'selected-row': selectedRowIndex === index }"
@@ -120,6 +167,10 @@ function getColumnColor(column) {
               </div>
             </div>
           </td>
+        </tr>
+        <!-- 센티넬 요소 -->
+        <tr ref="sentinel">
+          <td colspan="columns.length"></td>
         </tr>
       </tbody>
     </table>
