@@ -1,12 +1,9 @@
 package com.dfg.semento.util;
 
-import org.elasticsearch.search.aggregations.bucket.terms.Terms;
-import org.springframework.cglib.core.Local;
+import jakarta.validation.constraints.NotNull;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.Map;
 
 
 public class TimeConverter {
@@ -60,6 +57,14 @@ public class TimeConverter {
         OffsetDateTime odt = OffsetDateTime.parse(dateTimeStr, formatter);
         LocalDateTime ldt = odt.toLocalDateTime();
         return ldt;
+    }
+
+    public static String convertLocalDateTimeToString(@NotNull LocalDateTime startTime){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+        String formattedDate = startTime.format(formatter);
+        System.out.println("Formatted LocalDateTime: " + formattedDate);
+
+        return formattedDate;
     }
     
     

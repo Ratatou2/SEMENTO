@@ -104,7 +104,7 @@ public class ElasticsearchQueryUtil {
 
         log.debug("[ES request] : "+ searchSourceBuilder);
         SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
-        //log.debug("[ES response] : "+searchResponse.toString());
+        log.debug("[ES response] : "+searchResponse.toString());
 
         return searchResponse;
     }
