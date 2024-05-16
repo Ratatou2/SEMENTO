@@ -2,6 +2,7 @@
 import { ref, onMounted, watchEffect, watch } from "vue";
 import { Chart, registerables } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+import ChartDeferred from 'chartjs-plugin-deferred';
 
 import { useDashboardStore } from "@/stores/dashboard";
 const dashboardStore = useDashboardStore();
@@ -31,6 +32,7 @@ const idle_ohts = [
 
 Chart.register(...registerables);
 Chart.register(ChartDataLabels);
+Chart.register(ChartDeferred);
 
 const lineChart = ref(null);
 
@@ -132,6 +134,11 @@ function drawLine() {
                 usePointStyle: true,
                 boxHeight: 6
             }
+        },
+        deferred: {
+          xOffset: 150,   // defer until 150px of the canvas width are inside the viewport
+          yOffset: '50%', // defer until 50% of the canvas height are inside the viewport
+          delay: 500      // delay of 500 ms after the canvas is considered inside the viewport
         }
       },
       scales: {
