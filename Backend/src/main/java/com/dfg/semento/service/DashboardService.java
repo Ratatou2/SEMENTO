@@ -86,16 +86,16 @@ public class DashboardService {
 
         // 운행한 OHT 대수
         int ohtCount = getOhtCount(startTime, endTime);
+        int lastOhtCount = getOhtCount(lastPeriod.getStartTime(), lastPeriod.getEndTime());
 
         // 기간동안 전체 OHT 작업량
         int totalWork = getOhtTotalWorkByStartTimeAndEndTime(startTime, endTime);
         int lastTotalWork = getOhtTotalWorkByStartTimeAndEndTime(lastPeriod.getStartTime(), lastPeriod.getEndTime());
         double totalWorkPercentage = CalculateData.getDifferencePercentage(totalWork, lastTotalWork);
 
-
         // 기간동안 각 OHT별 작업량 평균
-        double averageWork = getOhtAverageWorkByStartTimeAndTime(startTime, endTime);
-        double lastAverageWork = getOhtAverageWorkByStartTimeAndTime(lastPeriod.getStartTime(), lastPeriod.getEndTime());
+        double averageWork = (double)totalWork / (double)ohtCount; //getOhtAverageWorkByStartTimeAndTime(startTime, endTime);
+        double lastAverageWork = (double)lastTotalWork / (double)lastOhtCount; //getOhtAverageWorkByStartTimeAndTime(lastPeriod.getStartTime(), lastPeriod.getEndTime());
         double averageWorkPercentage = CalculateData.getDifferencePercentage(averageWork, lastAverageWork);
 
         return OhtJobAnalysisResponse.builder()
