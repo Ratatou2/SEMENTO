@@ -104,13 +104,15 @@ const drag = (event) => {
 const endDrag = () => {
   isDragging = false;
 };
+const parentElement = ref(null);
 
 onMounted(() => {
-  const parentElement = document.querySelector(".white-box");
+  parentElement.value = document.querySelector(".white-box");
 
   // 부모 요소의 가로와 세로 크기를 가져옵니다.
-  const parentWidth = parentElement.clientWidth;
-  const parentHeight = parentElement.clientHeight;
+  console.log("Map.vue의 white-box를 지정한 parentElement:", parentElement);
+  const parentWidth = parentElement.value.clientWidth;
+  const parentHeight = parentElement.value.clientHeight;
   // console.log(parentWidth, parentHeight);
 
   // const width = 1200;

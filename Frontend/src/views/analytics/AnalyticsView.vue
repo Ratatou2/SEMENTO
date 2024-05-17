@@ -14,14 +14,41 @@ import ErrorChart from "./components/summary/ErrorChart.vue";
 import CongestionChart from "./components/summary/CongestionChart.vue";
 import SementoAiResultCard from "./components/detection-report/SementoAiResultCard.vue";
 
-import { ref } from "vue";
+// vue
+import { useAnalysisStore } from "@/stores/analysis";
+import { onMounted, ref, computed } from "vue";
+import moment from "moment";
 
+import Loading from "@/components/loading/Loading.vue";
+
+const analysisStore = useAnalysisStore();
+
+const nowLoading = ref(true); //로딩창 기본 비활성화
 const cnt = ref(11);
 const detectionReportText = "# Detection Report (" + cnt.value + ")";
+
+const formattedStartDate = computed(() => {
+  return moment(analysisStore.startDate.value).format("YYYY.MM.DD HH:mm:ss");
+});
+
+const formattedEndDate = computed(() => {
+  return moment(analysisStore.endDate.value).format("YYYY.MM.DD HH:mm:ss");
+});
+
+const summaryText = computed(() => {
+  return `${formattedStartDate.value} ~ ${formattedEndDate.value} 기간동안 총 ${cnt.value}개의 정체가 감지되었습니다.`;
+});
+
+onMounted(async () => {
+  await analysisStore.getAiDetection();
+  cnt.value = analysisStore.computedDetectionResult.length;
+  nowLoading.value = false;
+});
 </script>
 
 <template>
-  <div class="body-container">
+  <div v-if="nowLoading"><Loading /></div>
+  <div v-else="!nowLoading" class="body-container">
     <!-- 설명 및 검색창 -->
     <section class="input">
       <Text
@@ -42,9 +69,7 @@ const detectionReportText = "# Detection Report (" + cnt.value + ")";
     <section class="header">
       <!--제목 -->
       <HeadText header-text="# Summary" />
-      <Text
-        text="2024.01.07 12:00:00 ~ 2024.01.08 15:10:00 기간동안 총 11개의 정체가 감지되었습니다."
-      />
+      <Text :text="summaryText" />
     </section>
 
     <section class="result">
@@ -68,7 +93,9 @@ const detectionReportText = "# Detection Report (" + cnt.value + ")";
           ></Cardhead>
         </section>
         <div class="error-chart">
-          <div class="error-chart-content"><ErrorChart /></div>
+          <div class="error-chart-content">
+            <ErrorChart />
+          </div>
         </div>
       </div>
       <div class="right-chart-box">
@@ -219,6 +246,10 @@ const detectionReportText = "# Detection Report (" + cnt.value + ")";
 .congestion-chart-text {
   width: 100%;
   padding: 0 20px;
+}
+
+.white-box {
+  min-width: 400px;
 }
 
 .simulation-box {

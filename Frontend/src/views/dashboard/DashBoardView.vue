@@ -107,6 +107,13 @@ function timeDataFormatting(temp, refData) {
   }
 }
 
+const formatNumber = (value) => {
+  const formattedValue = parseFloat(value).toFixed(2);
+  return formattedValue.endsWith(".00")
+    ? parseInt(formattedValue)
+    : formattedValue;
+};
+
 </script>
 <template>
   <div v-if="nowLoading"><Loading /></div>
@@ -126,22 +133,24 @@ function timeDataFormatting(temp, refData) {
         <div class="container-item row gap-20">
           <div class="col">
             <BlackDataCard
-              title="OHT Usage"
-              :content="dashboardStore.ohtJobAnalysisData['oht-count'].data"
+              title="가용 중인 OHT 수"
+              :content="dashboardStore.ohtJobAnalysisData['oht-count'].data+' 대'"
               :width="'320px'"
               :height="'130px'"
             />
             <BlackDataCard
-              title="Total Work"
-              :content="dashboardStore.ohtJobAnalysisData['total-work'].data"
-              :percentage="dashboardStore.ohtJobAnalysisData['total-work'].percent.toFixed(2)"
+              title="총 작업량"
+              :content="dashboardStore.ohtJobAnalysisData['total-work'].data+' 건'"
+              :percentage="formatNumber(dashboardStore.ohtJobAnalysisData['total-work'].percent)+'%'"
+              :fontColor="dashboardStore.ohtJobAnalysisData['total-work'].percent >= 0 ? 'red' : 'blue'"
               :width="'320px'"
               :height="'130px'"
             />
             <BlackDataCard
-              title="Average Daily Work per OHT"
-              :content="dashboardStore.ohtJobAnalysisData['average-work'].data.toFixed(2)"
-              :percentage="dashboardStore.ohtJobAnalysisData['average-work'].percent.toFixed(2)"
+              title="OHT 한달 평균 작업량"
+              :content="formatNumber(dashboardStore.ohtJobAnalysisData['average-work'].data) +' 건'"
+              :percentage="formatNumber(dashboardStore.ohtJobAnalysisData['average-work'].percent)+'%'"
+              :fontColor="dashboardStore.ohtJobAnalysisData['average-work'].percent >= 0 ? 'red' : 'blue'"
               :width="'320px'"
               :height="'130px'"
             />
@@ -207,22 +216,24 @@ function timeDataFormatting(temp, refData) {
         <div class="container-item row gap-20">
           <div class="col">
             <BlackDataCard
-              title="OHT Deadline"
+              title="OHT 데드라인"
               :content="deadline"
               :width="'320px'"
               :height="'130px'"
             />
             <BlackDataCard
-              title="Average Working Hours"
+              title="평균 작업 시간"
               :content="averageWork"
-              :percentage="dashboardStore.stateAnalysisData['average-work-time'].percent.toFixed(2)"
+              :percentage="formatNumber(dashboardStore.stateAnalysisData['average-work-time'].percent)+'%'"
+              :fontColor="dashboardStore.stateAnalysisData['average-work-time'].percent >= 0 ? 'red' : 'blue'"
               :width="'320px'"
               :height="'130px'"
             />
             <BlackDataCard
-              title="Average Idle Hours"
+              title="평균 유휴 시간"
               :content="averageIdle"
-              :percentage="dashboardStore.stateAnalysisData['average-idle-time'].percent.toFixed(2)"
+              :percentage="formatNumber(dashboardStore.stateAnalysisData['average-idle-time'].percent)+'%'"
+              :fontColor="dashboardStore.stateAnalysisData['average-idle-time'].percent >= 0 ? 'red' : 'blue'"
               :width="'320px'"
               :height="'130px'"
             />

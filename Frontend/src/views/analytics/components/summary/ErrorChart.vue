@@ -1,57 +1,108 @@
 <script setup>
-import { hierarchy, pack } from 'd3-hierarchy'
+import { hierarchy, pack } from "d3-hierarchy";
+import { useAnalysisStore } from "@/stores/analysis";
+import { ref, computed } from "vue";
 
-const errorData = [
-  {
-    name: 'Facility Error',
-    amount: 35,
-    color: '#292D30'
-  },
-  {
-    name: 'OHT Error',
-    amount: 60,
-    color: '#34B3F1'
-  },
-  {
-    name: 'Scheduling Error',
-    amount: 5,
-    color: '#BCE0F2'
+const analysisStore = useAnalysisStore();
+
+const errorCounts = computed(() => {
+  const errorType = {
+    "Facility Error": 0,
+    "OHT Error": 0,
+    "ETC Error": 0,
+  };
+
+  console.log(
+    "analysisStore.computedDetectionResult: ",
+    analysisStore.computedDetectionResult
+  );
+
+  if (analysisStore.computedDetectionResult.length > 0) {
+    analysisStore.computedDetectionResult.forEach((result) => {
+      if (result.cause === "F") {
+        errorType["Facility Error"]++;
+      } else if (result.cause === "O") {
+        errorType["OHT Error"]++;
+      } else if (result.cause === "E") {
+        errorType["ETC Error"]++;
+      }
+    });
   }
-];
 
-const transformedErrorData = {
-  name: 'Top Level',
-  children: errorData.map(error => ({
+  return errorType;
+});
+
+const errorData = computed(() => {
+  return [
+    {
+      name: "Facility Error",
+      amount: errorCounts.value["Facility Error"],
+      color: "#292D30",
+    },
+    {
+      name: "OHT Error",
+      amount: errorCounts.value["OHT Error"],
+      color: "#34B3F1",
+    },
+    {
+      name: "Scheduling Error",
+      amount: errorCounts.value["ETC Error"],
+      color: "#BCE0F2",
+    },
+  ];
+});
+
+// const transformedErrorData = {
+//   name: "Top Level",
+//   children: errorData.map((error) => ({
+//     ...error,
+//     size: error.amount,
+//     parent: "Top Level",
+//   })),
+// };
+
+const transformedErrorData = computed(() => ({
+  name: "Top Level",
+  children: errorData.value.map((error) => ({
     ...error,
     size: error.amount,
-    parent: 'Top Level'
-  }))
-};
+    parent: "Top Level",
+  })),
+}));
 
 // Generate a D3 hierarchy
-const rootHierarchy = hierarchy(transformedErrorData)
-  .sum(d => d.size)
-  .sort((a, b) => b.value - a.value);
+// const rootHierarchy = hierarchy(transformedErrorData)
+//   .sum((d) => d.size)
+//   .sort((a, b) => b.value - a.value);
+const rootHierarchy = computed(() =>
+  hierarchy(transformedErrorData.value)
+    .sum((d) => d.size)
+    .sort((a, b) => b.value - a.value)
+);
 
 // Pack the circles inside the viewbox
-const layoutData = pack()
-  .size([300, 350])
-  .padding(-10)(rootHierarchy);
-
+// const layoutData = pack().size([300, 350]).padding(-10)(rootHierarchy);
+const layoutData = computed(() =>
+  pack().size([300, 350]).padding(-10)(rootHierarchy.value)
+);
 </script>
 
 <template>
   <div>
     <svg width="300" height="500">
-      <g 
+      <g
         class="error"
         v-for="error in layoutData.children"
         :key="error.data.name"
         :style="{
-          transform: `translate(${error.x}px, ${error.y}px)`
+          transform: `translate(${error.x}px, ${error.y}px)`,
         }"
       >
-        <circle class="error__circle" :r="error.r" :fill="error.data.color"></circle>
+        <circle
+          class="error__circle"
+          :r="error.r"
+          :fill="error.data.color"
+        ></circle>
         <text class="error__label" y="-5">{{ error.data.name }}</text>
         <text class="error__amount" y="20">{{ error.data.amount }}</text>
       </g>
