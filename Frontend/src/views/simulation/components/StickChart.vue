@@ -11,6 +11,8 @@ import {
   CategoryScale,
   LinearScale,
 } from "chart.js";
+import ChartDeferred from 'chartjs-plugin-deferred';
+
 
 // 차트 구성 요소 등록
 ChartJS.register(
@@ -21,6 +23,8 @@ ChartJS.register(
   CategoryScale,
   LinearScale
 );
+ChartJS.register(ChartDeferred);
+
 
 // Props 정의
 const props = defineProps({
@@ -91,6 +95,11 @@ const chartOptions = {
     },
     datalabels: {
       display: false,
+    },
+    deferred: {
+      xOffset: 150,   // defer until 150px of the canvas width are inside the viewport
+      yOffset: '50%', // defer until 50% of the canvas height are inside the viewport
+      delay: 500      // delay of 500 ms after the canvas is considered inside the viewport
     },
   },
   scales: {
