@@ -34,6 +34,10 @@ public class ErrorInfoDto {
     private double speed;
     @SerializedName("is-fail")
     private boolean isFail;
+    @SerializedName("current-node")
+    private String currentNode;
+    @SerializedName("next-node")
+    private String nextNode;
     @SerializedName("analyse-result")
     private AnalyseResultDto analyseResult;
 }
