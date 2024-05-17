@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import category_encoders as ce
 from concurrent.futures import ProcessPoolExecutor
-from config import all_nodes, all_paths, path_and_before_path_info, length_info, facility_length_info
+from config import all_nodes, all_paths, path_and_before_path_info, length_info, facility_length_info, CONGESTION_CRITERION_TIME, FAILURE_DEADLINE, N_OHTS
 import os
 from tqdm import tqdm
 
@@ -23,6 +23,7 @@ async def data_preprocessing_for_Conan(
 
         # 인코딩할 데이터프레임의 컬럼 이름을 'node'로 변경하여 인코더에 맞춤
         encoded_target = encoder.transform(df[['target_node']].rename(columns={'target_node': 'node'}))
+        encoded_next = encoder.transform(df[['next_node']].rename(columns={'next_node': 'node'}))
         encoded_current = encoder.transform(df[['current_node']].rename(columns={'current_node': 'node'}))
 
         encoder_status = ce.BinaryEncoder(cols=['status'])
@@ -36,11 +37,10 @@ async def data_preprocessing_for_Conan(
 
         # dataset에서 Fail일때의 deadline 범위 추출
 
-        FAILURE_DEADLINE = 200
+        df = pd.concat([df, encoded_target.add_suffix('_target'), encoded_current.add_suffix('_current'),
+                             encoded_status.add_suffix('_status'), encoded_next.add_suffix('_next')], axis=1)
 
-        n_ohts = 30
-
-        SNAPSHOT_MATRIX = [[df.iloc[k*n_ohts + idx] for idx in range(n_ohts)] for k in range(len(df) // n_ohts)]
+        SNAPSHOT_MATRIX = [[df.iloc[k*N_OHTS + idx] for idx in range(N_OHTS)] for k in range(len(df) // N_OHTS)]
 
         # 노드 앞 path 위에 몇대가 있는지의 정보를 담은 객체를 모아놓을 list
         path_count_arr = []
@@ -127,6 +127,8 @@ async def data_preprocessing_for_Conan(
                                     "error": int(oht["error"]),
                                     "speed": float(oht["speed"]),
                                     "is-fail": bool(oht["is_fail"]),
+                                    "current-node": oht["current_node"],
+                                    "next-node": oht["next_node"],
                                     "congestion-time": int(10)
                                     }
                         error_info.append(info_dict)
@@ -144,7 +146,7 @@ async def data_preprocessing_for_Conan(
                     if path_count[path_name] >= count_criterion and now_second-FAILURE_DEADLINE >= 0:
                         # 지난 20초간 count_criterion 이상이면 혼잡/정체라고 판단
                         is_facility_deadlock = True
-                        for temp_count in path_count_arr[now_second-20:now_second]:
+                        for temp_count in path_count_arr[now_second-CONGESTION_CRITERION_TIME:now_second]:
                             if temp_count.setdefault(path_name, 0) < count_criterion:
                                 is_facility_deadlock = False
 
@@ -161,6 +163,8 @@ async def data_preprocessing_for_Conan(
                                     "error": int(oht["error"]),
                                     "speed": float(oht["speed"]),
                                     "is-fail": bool(oht["is_fail"]),
+                                    "current-node": oht["current_node"],
+                                    "next-node": oht["next_node"],
                                     "congestion-time": int(10)
                                     }
 
@@ -176,8 +180,8 @@ async def data_preprocessing_for_Conan(
         
         print("make path data")
         # 프로세스 풀 생성 및 멀티프로세싱 실행
-        SNAPSHOT_MATRIX = [[df.iloc[k*n_ohts + idx] for idx in range(n_ohts)] for k in range(len(df) // n_ohts)]
-        dataset = list(tqdm(make_matrix_by_path(df, path, moment_time, n_ohts, DROP_LENGTH, SNAPSHOT_MATRIX) for (moment_time, path) in path_and_second_arr))
+        SNAPSHOT_MATRIX = [[df.iloc[k*N_OHTS + idx] for idx in range(N_OHTS)] for k in range(len(df) // N_OHTS)]
+        dataset = list(tqdm(make_matrix_by_path(df, path, moment_time, N_OHTS, DROP_LENGTH, SNAPSHOT_MATRIX) for (moment_time, path) in path_and_second_arr))
 
         # # 멀티프로세싱으로 결과 계산
         # with ProcessPoolExecutor(max_workers=8) as executor:
@@ -190,12 +194,11 @@ async def data_preprocessing_for_Conan(
 
 
 def process_path_data(args):
-    df, path, moment_time, n_ohts, DROP_LENGTH, NEW_SNAPSHOT_MATRIX = args
+    df, path, moment_time, N_OHTS, DROP_LENGTH, NEW_SNAPSHOT_MATRIX = args
 
-    return make_matrix_by_path(df, path, moment_time, n_ohts, DROP_LENGTH, NEW_SNAPSHOT_MATRIX)
+    return make_matrix_by_path(df, path, moment_time, N_OHTS, DROP_LENGTH, NEW_SNAPSHOT_MATRIX)
 
-def make_matrix_by_path(df, path_name, moment_time, n_ohts, DROP_LENGTH, NEW_SNAPSHOT_MATRIX):
-    FAILURE_DEADLINE = 200
+def make_matrix_by_path(df, path_name, moment_time, N_OHTS, DROP_LENGTH, NEW_SNAPSHOT_MATRIX):
     
     path_matrix = []
     oht_arr = NEW_SNAPSHOT_MATRIX[moment_time]
