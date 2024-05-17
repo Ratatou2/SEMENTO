@@ -16,26 +16,13 @@ import Loading from "@/components/loading/Loading.vue";
 import { simulationStore } from "@/stores/simulation";
 import moment from "moment";
 const {
-  // startDate,
-  // endDate,
+  startDate,
+  endDate,
   getComparedData,
   getChartData,
-  // getSimulation,
+  getSimulation,
   getClassificationLog,
 } = simulationStore();
-
-/////HJ///////
-import { simulationComponentStore } from "@/stores/simulationComponent";
-
-const {
-    startDate,
-    endDate,
-    intervals,
-    ohts,
-    getSimulation,
-    splitTimeRange
-} = simulationComponentStore();
-///////HJ///////
 
 const nowLoading = ref(true); //로딩창 기본 비활성화
 const value = ref();
@@ -61,7 +48,29 @@ function transformatDate(date) {
 //==시뮬레이션 관련 데이터
 const simulationData = ref([null]);
 //== 비교 관련 데이터
-const comparedData = ref(null);
+const totalWork = ref();
+const outOfDeadline = ref();
+const averageSpeed = ref();
+const ohtError = ref();
+function setComparedDatas(comparedData) {
+  totalWork.value = {
+    data: comparedData["total-work"].data,
+    percent: comparedData["total-work"].percent,
+  };
+  outOfDeadline.value = {
+    data: comparedData["out-of-dead-line"].data,
+    percent: comparedData["out-of-dead-line"].percent,
+  };
+  averageSpeed.value = {
+    data: comparedData["average-speed"].data,
+    percent: comparedData["average-speed"].percent,
+  };
+  ohtError.value = {
+    data: comparedData["oht-error"].data,
+    percent: comparedData["oht-error"].percent,
+  };
+}
+
 function formattedComparedDate(data) {
   const formattedData = {};
   for (const key in data) {
@@ -103,10 +112,16 @@ const formatLogPerWork = (logs) => {
     `${transformatDate(log["start-time"])} - ${transformatDate(
       log["end-time"]
     )}`,
-    `${
-      new Date(log["end-time"]).getTime() -
-      new Date(log["start-time"]).getTime()
-    } ms`,
+    `${Math.floor(
+      (new Date(log["end-time"]).getTime() -
+        new Date(log["start-time"]).getTime()) /
+        60000
+    )}m ${(
+      ((new Date(log["end-time"]).getTime() -
+        new Date(log["start-time"]).getTime()) %
+        60000) /
+      1000
+    ).toFixed(0)}s`,
     log.errors.join(", "),
     `${log["average-speed"].toFixed(2)} m/s`,
     log["out-of-deadline"].toString().toUpperCase(),
@@ -116,11 +131,13 @@ const formatLogPerWork = (logs) => {
 //== axios 통신 ==
 onMounted(async () => {
   //== 시뮬레이션 데이터 로드 : 시간단위로 잘라서 연속적으로 요청해야함
-  splitTimeRange(startDate, endDate)
-  simulationData.value = await getSimulation(0);
+  //simulationData.value = await getSimulation();
 
   //== 기타데이터 로드
-  comparedData.value = formattedComparedDate(await getComparedData());
+  const com = await getComparedData();
+  const comparedData = formattedComparedDate(com);
+  setComparedDatas(comparedData);
+  console.log("가자", comparedData.value);
 
   //== 작업량 평균 비교 로드
   setChart(await getChartData());
@@ -128,6 +145,7 @@ onMounted(async () => {
   //== 작업별로 분류된 로그 로드
   setclassificationLogData(await getClassificationLog());
 
+  console.log("로딩할게~");
   nowLoading.value = false;
 });
 
@@ -178,10 +196,7 @@ function toggleSidePageHandler(data) {
           ></Cardhead>
         </section>
         <section class="content">
-          <Simulation
-            :ohtLogs="simulationData"
-          >
-          </Simulation>
+          <Simulation />
         </section>
       </div>
       <!-- 가로정렬 : 작업량평균, 블랙데이터카드 -->
@@ -210,46 +225,38 @@ function toggleSidePageHandler(data) {
           <div class="black-card-content">
             <BlackDataCard
               title="Total Work"
-              :content="comparedData['total-work'].data"
-              :percentage="comparedData['total-work'].percent + '%'"
-              :fontColor="
-                comparedData['total-work'].percent >= 0 ? 'red' : 'blue'
-              "
+              :content="totalWork.data"
+              :percentage="totalWork.percent + '%'"
+              :fontColor="totalWork.percent >= 0 ? 'red' : 'blue'"
               :height="'130px'"
               width="250px"
             />
-            <!-- <BlackDataCard
+            <BlackDataCard
               title="Out Of DeadLine"
-              :content="comparedData['out-of-deadline'].data"
-              :percentage="comparedData['out-of-deadline'].percent + '%'"
-              :fontColor="
-                comparedData['out-of-deadline'].percent >= 0 ? 'red' : 'blue'
-              "
+              :content="outOfDeadline.data"
+              :percentage="outOfDeadline.percent + '%'"
+              :fontColor="outOfDeadline.percent >= 0 ? 'red' : 'blue'"
               :height="'130px'"
               width="250px"
-            /> -->
+            />
           </div>
           <div class="black-card-content">
-            <!-- <BlackDataCard
+            <BlackDataCard
               title="Average Speed"
-              :content="comparedData['average-speed'].data"
-              :percentage="comparedData['average-speed'].percent + '%'"
-              :fontColor="
-                comparedData['average-speed'].percent >= 0 ? 'red' : 'blue'
-              "
+              :content="averageSpeed.data"
+              :percentage="averageSpeed.percent + '%'"
+              :fontColor="averageSpeed.percent >= 0 ? 'red' : 'blue'"
               :height="'130px'"
               width="250px"
             />
             <BlackDataCard
               title="OHT ERROR"
-              :content="comparedData['oht-error'].data"
-              :percentage="comparedData['oht-error'].percent + '%'"
-              :fontColor="
-                comparedData['oht-error'].percent >= 0 ? 'red' : 'blue'
-              "
+              :content="ohtError.data"
+              :percentage="ohtError.percent + '%'"
+              :fontColor="ohtError.percent >= 0 ? 'red' : 'blue'"
               :height="'130px'"
               width="250px"
-            /> -->
+            />
           </div>
         </div>
       </section>
@@ -392,6 +399,9 @@ function toggleSidePageHandler(data) {
 }
 .table-container {
   width: 97%;
+  height: 600px;
+  overflow-x: hidden;
+  padding: 10px;
 }
 
 .barchart-box {

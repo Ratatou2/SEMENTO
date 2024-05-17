@@ -1,6 +1,15 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import * as d3 from "d3";
+import { simulationComponentStore } from "@/stores/simulationComponent";
+const {
+    startDate,
+    endDate,
+    intervals,
+    getSimulation,
+} = simulationComponentStore();
+
+const timeOrder = ref(0)
 
 const props = defineProps({
   ohtLogs: {
@@ -862,145 +871,10 @@ const props = defineProps({
   },
 });
 
-//로그
-const currentTimeText = ref("2024.01.08 13:38:23");
+const ohtLogs = ref(props.ohtLogs)
 
-const formatTime = (time) => {
-    // 날짜와 시간을 추출
-  const datePart = time.slice(0, 10).split('-');
-  const timePart = time.slice(11, 19).split(':');
-
-  // 날짜 부분을 원하는 형식으로 조합
-  const formattedDate = `${datePart[0]}.${datePart[1]}.${datePart[2]}`;
-
-  // 시간 부분을 원하는 형식으로 조합
-  const formattedTime = `${timePart[0]}:${timePart[1]}:${timePart[2]}`;
-
-  // 최종적으로 날짜와 시간을 조합하여 원하는 형식으로 출력
-  return `${formattedDate} ${formattedTime}`;
-}
-
-
-currentTimeText.value = formatTime(props.ohtLogs["simulation-log"][0]['time'])
-
-//컬러설정
-const pathColor = "#B4B4B4";
-const facilityColor = "#292D30";
-const ohtColor = "orange";
-
-const container = ref(null);
-const svgContainer = ref(null);
-
-let scale = 1.0;
-let translateX = 0;
-let translateY = 0;
-let isDragging = false;
-let dragStartX = 0;
-let dragStartY = 0;
-const idList = [
-  "6",
-  "16",
-  "28",
-  "38",
-  "50",
-  "60",
-  "72",
-  "82",
-  "94",
-  "104",
-  "21",
-  "43",
-  "65",
-  "77",
-  "87",
-  "99",
-  "114",
-  "119",
-  "127",
-  "131",
-  "136",
-  "140",
-  "145",
-  "153",
-  "157",
-  "162",
-  "165",
-  "170",
-  "178",
-  "186",
-  "189",
-  "194",
-  "208",
-  "230",
-  "240",
-  "308",
-  "281",
-  "311",
-  "297",
-  "288",
-  "276",
-  "267",
-  "256",
-  "247",
-  "235",
-  "225",
-  "213",
-  "203",
-];
-const updateTransform = () => {
-  //svgContainer.value.style.transition = "transform 0.3s ease-in-out"; // 확대 및 축소 시에만 transition 추가
-  svgContainer.value.style.transform = `scale(${scale}) translate(${translateX}px, ${translateY}px)`;
-};
-
-const handleWheel = (event) => {
-  const delta = event.deltaY > 0 ? -0.1 : 0.1;
-  scale += delta;
-  scale = Math.min(Math.max(0.8, scale), 3);
-  updateTransform();
-};
-
-const startDrag = (event) => {
-  isDragging = true;
-  dragStartX = event.clientX;
-  dragStartY = event.clientY;
-};
-
-const drag = (event) => {
-  if (!isDragging) return;
-  const deltaX = event.clientX - dragStartX;
-  const deltaY = event.clientY - dragStartY;
-  translateX += deltaX;
-  translateY += deltaY;
-  dragStartX = event.clientX;
-  dragStartY = event.clientY;
-  updateTransform();
-};
-
-const endDrag = () => {
-  isDragging = false;
-};
-const parentElement = ref(null);
-
-onMounted(() => {
-  parentElement.value = document.querySelector(".white-box");
-
-  // 부모 요소의 가로와 세로 크기를 가져옵니다.
-  const parentWidth = parentElement.value.clientWidth;
-  const parentHeight = parentElement.value.clientHeight;
-  // const width = 1200;
-  // const height = 250;
-  const width = parentWidth;
-  const height = parentHeight * 0.7;
-  const padding = 43;
-
-  const svg = d3
-    .select(svgContainer.value)
-    .append("svg")
-    .attr("width", width)
-    .attr("height", height);
-
-  // 임의의 노드와 링크 생성
-  const nodes = [
+// 임의의 노드와 링크 생성
+const nodes = [
     // Top row
     { id: "10", x: 380.0, y: 360.0 },
     { id: "8", x: 365.0, y: 330.0 },
@@ -1686,21 +1560,162 @@ onMounted(() => {
     { source: "282", target: "164" },
   ];
 
-  // 최대 및 최소 좌표 계산
-  const xExtent = d3.extent(nodes, (d) => d.x);
-  const yExtent = d3.extent(nodes, (d) => d.y);
+//로그
+const currentTimeText = ref("2024.01.08 13:38:23");
 
-  // 스케일 함수 설정
-  const xScale = d3
-    .scaleLinear()
-    .domain([xExtent[0], xExtent[1]])
-    .range([padding, width - padding]);
+const formatTime = (time) => {
+    // 날짜와 시간을 추출
+  const datePart = time.slice(0, 10).split('-');
+  const timePart = time.slice(11, 19).split(':');
 
-  const yScale = d3
-    .scaleLinear()
-    .domain([yExtent[0], yExtent[1]])
-    .range([padding, height - padding]);
+  // 날짜 부분을 원하는 형식으로 조합
+  const formattedDate = `${datePart[0]}.${datePart[1]}.${datePart[2]}`;
 
+  // 시간 부분을 원하는 형식으로 조합
+  const formattedTime = `${timePart[0]}:${timePart[1]}:${timePart[2]}`;
+
+  // 최종적으로 날짜와 시간을 조합하여 원하는 형식으로 출력
+  return `${formattedDate} ${formattedTime}`;
+}
+
+
+currentTimeText.value = formatTime(ohtLogs.value["simulation-log"][0]['time'])
+
+//컬러설정
+const pathColor = "#B4B4B4";
+const facilityColor = "#292D30";
+const ohtColor = "orange";
+
+const container = ref(null);
+const svgContainer = ref(null);
+
+let scale = 1.0;
+let translateX = 0;
+let translateY = 0;
+let isDragging = false;
+let dragStartX = 0;
+let dragStartY = 0;
+const idList = [
+  "6",
+  "16",
+  "28",
+  "38",
+  "50",
+  "60",
+  "72",
+  "82",
+  "94",
+  "104",
+  "21",
+  "43",
+  "65",
+  "77",
+  "87",
+  "99",
+  "114",
+  "119",
+  "127",
+  "131",
+  "136",
+  "140",
+  "145",
+  "153",
+  "157",
+  "162",
+  "165",
+  "170",
+  "178",
+  "186",
+  "189",
+  "194",
+  "208",
+  "230",
+  "240",
+  "308",
+  "281",
+  "311",
+  "297",
+  "288",
+  "276",
+  "267",
+  "256",
+  "247",
+  "235",
+  "225",
+  "213",
+  "203",
+];
+const updateTransform = () => {
+  //svgContainer.value.style.transition = "transform 0.3s ease-in-out"; // 확대 및 축소 시에만 transition 추가
+  svgContainer.value.style.transform = `scale(${scale}) translate(${translateX}px, ${translateY}px)`;
+};
+
+const handleWheel = (event) => {
+  const delta = event.deltaY > 0 ? -0.1 : 0.1;
+  scale += delta;
+  scale = Math.min(Math.max(0.8, scale), 3);
+  updateTransform();
+};
+
+const startDrag = (event) => {
+  isDragging = true;
+  dragStartX = event.clientX;
+  dragStartY = event.clientY;
+};
+
+const drag = (event) => {
+  if (!isDragging) return;
+  const deltaX = event.clientX - dragStartX;
+  const deltaY = event.clientY - dragStartY;
+  translateX += deltaX;
+  translateY += deltaY;
+  dragStartX = event.clientX;
+  dragStartY = event.clientY;
+  updateTransform();
+};
+
+const endDrag = () => {
+  isDragging = false;
+};
+const parentElement = ref(null);
+
+// timeOrder의 변화를 감지하여 새로운 시뮬레이션 데이터를 가져오고 movePoint 실행
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+let svg = null;
+let path = null;
+
+let width = 120;
+let height = 25;
+let padding = 43;
+
+// 최대 및 최소 좌표 계산
+const xExtent = d3.extent(nodes, (d) => d.x);
+const yExtent = d3.extent(nodes, (d) => d.y);
+
+// 스케일 함수 설정
+let xScale = d3
+  .scaleLinear()
+  .domain([xExtent[0], xExtent[1]])
+  .range([padding, width - padding]);
+
+let yScale = d3
+  .scaleLinear()
+  .domain([yExtent[0], yExtent[1]])
+  .range([padding, height - padding]);
+
+// 점 생성 및 이동 경로 설정
+const ohts = [];
+const ohtTexts = [];
+const length = 13; //oht를 표시하는 사각형의 길이
+
+function drawSimulation(width, height) {
+  svg = d3
+    .select(svgContainer.value)
+    .append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+  
   // 노드와 링크 그리기
   svg
     .selectAll(".link")
@@ -1756,7 +1771,7 @@ onMounted(() => {
     .append("g")
     .attr("class", "")
     // .attr("transform", (d) => `translate(${d.x},${d.y})`);
-    .attr("transform", (d) => `translate(${xScale(d.x)},${yScale(d.y)})`);
+    .attr("transform", (d) => `translate(${xScale(d.x)},${yScale(d.y)})`); 
 
   nodeGroup
     .append("circle")
@@ -1772,93 +1787,117 @@ onMounted(() => {
     .attr("fill", "white")
     .text((d) => d.id);
 
-  // 점 생성 및 이동 경로 설정
-  // const point = svg.append("circle").attr("r", 6).attr("fill", ohtColor);
-  const ohts = [];
-  const ohtTexts = [];
-  const length = 13; //oht를 표시하는 사각형의 길이
+
 
   // for문을 사용하여 30개의 원을 생성하고 ohts 배열에 저장합니다.
-  for (let i = 0; i < props.ohtLogs["simulation-log"][0]["data"].length; i++) {
+  for (let i = 0; i < ohtLogs.value["simulation-log"][0]["data"].length; i++) {
     const point = svg
       .append("rect")
       .attr("width", length)
       .attr("height", length)
-      .attr("x", xScale(props.ohtLogs["simulation-log"][0]['data'][i]["location"]["point-x"] - length / 2 - 4))
-      .attr("y", yScale(props.ohtLogs["simulation-log"][0]['data'][i]["location"]["point-y"] - length / 2 - 1))
+      .attr("x", xScale(ohtLogs.value["simulation-log"][0]['data'][i]["location"]["point-x"] - length / 2 - 4))
+      .attr("y", yScale(ohtLogs.value["simulation-log"][0]['data'][i]["location"]["point-y"] - length / 2 - 1))
       .attr("rx", 3) // 모서리 둥근 처리를 위한 x축 반경
       .attr("fill", ohtColor) // 각 원의 색상을 동적으로 설정합니다.
-      .text(props.ohtLogs["simulation-log"][0]['data'][i]["oht-id"]);
+      .text(ohtLogs.value["simulation-log"][0]['data'][i]["oht-id"]);
 
     const ohtId = svg
       .append("text")
-      .attr("x", xScale(props.ohtLogs["simulation-log"][0]['data'][i]["location"]["point-x"]))
-      .attr("y", yScale(props.ohtLogs["simulation-log"][0]['data'][i]["location"]["point-y"] - length / 2 - 1))
+      .attr("x", xScale(ohtLogs.value["simulation-log"][0]['data'][i]["location"]["point-x"]))
+      .attr("y", yScale(ohtLogs.value["simulation-log"][0]['data'][i]["location"]["point-y"] - length / 2 - 1))
       .attr("rx", 3) // 모서리 둥근 처리를 위한 x축 반경
       .attr("fill", ohtColor) // 각 원의 색상을 동적으로 설정합니다.
       .attr("text-anchor", "middle")
       .attr("font-size", 9)
-      .text(props.ohtLogs["simulation-log"][0]['data'][i]["oht-id"]);
+      .text(ohtLogs.value["simulation-log"][0]['data'][i]["oht-id"]);
 
     // 생성된 원을 배열에 추가합니다.
     ohts.push(point);
     ohtTexts.push(ohtId);
   }
 
-  const path = svg.append("path").attr("fill", "none");
+  path = svg.append("path").attr("fill", "none");
+}
 
-  //다중 simulation 구현
 
-  let currentTime = 0;
+//다중 simulation 구현
 
-  function movePoint() {
-    ohts.forEach((point, idx) => {
-      const currentOht = props.ohtLogs["simulation-log"][currentTime]["data"][idx]
-      const nextOht = props.ohtLogs["simulation-log"][currentTime + 1]["data"][idx]
+let nowTime = 0;
 
-      if(currentOht["oht-id"] === 2613){
-        console.log(idx)
-      }
+function movePoint(currentTime) {
+  ohts.forEach((point, idx) => {
+    const currentOht = ohtLogs.value["simulation-log"][currentTime]["data"][idx]
+    const nextOht = ohtLogs.value["simulation-log"][currentTime + 1]["data"][idx]
 
-      ohtTexts[idx]
-        .transition()
-        .duration(1000) //1초의 시간을 할당
-        .attr("x", xScale(currentOht["location"]["point-x"])) //현재ohtx좌표 설정
-        .attr("y", yScale(currentOht["location"]["point-y"] - length / 2 - 1)) //현재ohty좌표 설정
-        .on("end", () => {
-          //애니메이션 종료시 실행할작업
-          ohtTexts[idx].attr(
-            "d", //새로운 경로를 정의한다.
-            `M${xScale(currentOht["location"]["point-x"])},${yScale(currentOht["location"]["point-y"])},
-            ${xScale(nextOht["location"]["point-x"])},${yScale(nextOht["location"]["point-y"])}`
-          );
-        });
+    ohtTexts[idx]
+      .transition()
+      .duration(1000) //1초의 시간을 할당
+      .attr("x", xScale(currentOht["location"]["point-x"])) //현재ohtx좌표 설정
+      .attr("y", yScale(currentOht["location"]["point-y"] - length / 2 - 1)) //현재ohty좌표 설정
+      .on("end", () => {
+        //애니메이션 종료시 실행할작업
+        ohtTexts[idx].attr(
+          "d", //새로운 경로를 정의한다.
+          `M${xScale(currentOht["location"]["point-x"])},${yScale(currentOht["location"]["point-y"])},
+          ${xScale(nextOht["location"]["point-x"])},${yScale(nextOht["location"]["point-y"])}`
+        );
+      });
 
-      point
-        .transition()
-        .duration(1000) //1초의 시간을 할당
-        .attr("x", xScale(currentOht["location"]["point-x"] - length / 2 - 4)) //현재ohtx좌표 설정
-        .attr("y", yScale(currentOht["location"]["point-y"] - length / 2 - 1)) //현재ohty좌표 설정
-        .on("end", () => {
-          //애니메이션 종료시 실행할작업
-          path.attr(
-            "d", //새로운 경로를 정의한다.
-            `M${xScale(currentOht["location"]["point-x"])},${yScale(currentOht["location"]["point-y"])},
-            ${xScale(nextOht["location"]["point-x"])},${yScale(nextOht["location"]["point-y"])}`
-          );
+    point
+      .transition()
+      .duration(1000) //1초의 시간을 할당
+      .attr("x", xScale(currentOht["location"]["point-x"] - length / 2 - 4)) //현재ohtx좌표 설정
+      .attr("y", yScale(currentOht["location"]["point-y"] - length / 2 - 1)) //현재ohty좌표 설정
+      .on("end", async () => {
+        //애니메이션 종료시 실행할작업
+        path.attr(
+          "d", //새로운 경로를 정의한다.
+          `M${xScale(currentOht["location"]["point-x"])},${yScale(currentOht["location"]["point-y"])},
+          ${xScale(nextOht["location"]["point-x"])},${yScale(nextOht["location"]["point-y"])}`
+        );
 
-          if(idx == props.ohtLogs["simulation-log"][0]["data"].length - 1){ //해당 시간초 점을 모두 이동하면 다음 시간초 이동으로 넘어가기
-            currentTime = currentTime + 1; //현재인덱스를 다음으로 변경
-            currentTimeText.value = formatTime(props.ohtLogs["simulation-log"][currentTime]['time'])
-            if (currentTime + 1 >= props.ohtLogs["simulation-log"].length) return true;
-            movePoint();
+        if(idx == ohtLogs.value["simulation-log"][0]["data"].length - 1){ //해당 시간초 점을 모두 이동하면 다음 시간초 이동으로 넘어가기
+          // currentTime = currentTime + 1; //현재인덱스를 다음으로 변경
+          if (currentTime + 2 >= ohtLogs.value["simulation-log"].length){ //현재 시간 시뮬레이션이 끝나면 다음 시뮬레이션 api 호출해야함. 다음초 + 인덱스 = +2
+            nowTime = 0
+            timeOrder.value += 1
+            return;
           }
-        });
-    });
-  }
+          currentTimeText.value = formatTime(ohtLogs.value["simulation-log"][currentTime + 1]['time'])
+          movePoint(currentTime + 1);
+        }
+      });
+  });
+}
 
+watch(timeOrder, async (newTimeOrder) => {
+  ohtLogs.value = await getSimulation(newTimeOrder);
+  currentTimeText.value = formatTime(ohtLogs.value["simulation-log"][0]['time'])
+  movePoint(nowTime)
+});
 
-  movePoint();
+onMounted(async () => { ///////////////////////////////////////////////////onMounted//////////////////////////////////////////////////////////////
+  parentElement.value = document.querySelector(".white-box");
+  
+  // 부모 요소의 가로와 세로 크기를 가져옵니다.
+  const parentWidth = parentElement.value.clientWidth;
+  const parentHeight = parentElement.value.clientHeight;
+  width = parentWidth;
+  height = parentHeight * 0.7;
+  padding = 43;
+
+  xScale = d3
+    .scaleLinear()
+    .domain([xExtent[0], xExtent[1]])
+    .range([padding, width - padding]);
+
+  yScale = d3
+    .scaleLinear()
+    .domain([yExtent[0], yExtent[1]])
+    .range([padding, height - padding]);
+
+  drawSimulation(width, height);
+  movePoint(nowTime);
 });
 </script>
 
