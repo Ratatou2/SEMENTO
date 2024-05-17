@@ -7,6 +7,9 @@ import com.dfg.semento.dto.response.ClassificationLogResponse;
 import com.dfg.semento.dto.response.ComparedDataResponse;
 import com.dfg.semento.dto.response.ComparedWorkPerTimeResponse;
 import com.dfg.semento.dto.response.SimulationLogResponse;
+import com.dfg.semento.exception.RestApiException;
+import com.dfg.semento.exception.errorCode.CommonErrorCode;
+import com.dfg.semento.exception.errorCode.ErrorCode;
 import com.dfg.semento.util.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -120,6 +123,7 @@ public class SimulationService {
 
         //평균위한 Running oht 갯수 초기화
         runningOhtCnt = setRunningOhtCnt(startTime, endTime);
+        if(runningOhtCnt == 0) throw new RestApiException(CommonErrorCode.NO_RUNNING_OHT);
 
         //각 검색결과 얻기
         IntegerDataDto totalWorkData = totalWorkComparison(startTime, endTime, ohtId);
