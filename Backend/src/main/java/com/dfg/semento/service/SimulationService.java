@@ -401,7 +401,9 @@ public class SimulationService {
         TopHitsAggregationBuilder ohtDetails = AggregationBuilders.topHits("oht_details")
                 .fetchSource(new String[]{"oht_id", "path", "curr_node", "point_x", "point_y", "status", "error", "carrier", "speed", "is_fail"}, null)
                 .size(ohtCnt) //OHT 최대갯수
-                .sort("curr_time", SortOrder.DESC); // Sort by curr_time in descending order
+                .sort("curr_time", SortOrder.DESC) // Sort by curr_time in descending order
+                .sort("oht_id", SortOrder.ASC); // Additional sort by oht_id in ascending order
+
 
         logsByCurrTime.subAggregation(ohtDetails);
 
