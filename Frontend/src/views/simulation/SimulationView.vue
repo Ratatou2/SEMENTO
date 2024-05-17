@@ -16,13 +16,26 @@ import Loading from "@/components/loading/Loading.vue";
 import { simulationStore } from "@/stores/simulation";
 import moment from "moment";
 const {
-  startDate,
-  endDate,
+  // startDate,
+  // endDate,
   getComparedData,
   getChartData,
-  getSimulation,
+  // getSimulation,
   getClassificationLog,
 } = simulationStore();
+
+/////HJ///////
+import { simulationComponentStore } from "@/stores/simulationComponent";
+
+const {
+    startDate,
+    endDate,
+    intervals,
+    ohts,
+    getSimulation,
+    splitTimeRange
+} = simulationComponentStore();
+///////HJ///////
 
 const nowLoading = ref(true); //로딩창 기본 비활성화
 const value = ref();
@@ -83,9 +96,6 @@ const totalCnt = ref(null);
 function setclassificationLogData(data) {
   totalCnt.value = data["total-cnt"];
   logPerWork.value = formatLogPerWork(data["log-per-work"]);
-
-  console.log(totalCnt.value);
-  console.log(logPerWork.value);
 }
 const formatLogPerWork = (logs) => {
   return logs.map((log, index) => [
@@ -106,7 +116,8 @@ const formatLogPerWork = (logs) => {
 //== axios 통신 ==
 onMounted(async () => {
   //== 시뮬레이션 데이터 로드 : 시간단위로 잘라서 연속적으로 요청해야함
-  //simulationData.value = await getSimulation();
+  splitTimeRange(startDate, endDate)
+  simulationData.value = await getSimulation(0);
 
   //== 기타데이터 로드
   comparedData.value = formattedComparedDate(await getComparedData());
@@ -167,7 +178,10 @@ function toggleSidePageHandler(data) {
           ></Cardhead>
         </section>
         <section class="content">
-          <Simulation />
+          <Simulation
+            :ohtLogs="simulationData"
+          >
+          </Simulation>
         </section>
       </div>
       <!-- 가로정렬 : 작업량평균, 블랙데이터카드 -->
@@ -204,7 +218,7 @@ function toggleSidePageHandler(data) {
               :height="'130px'"
               width="250px"
             />
-            <BlackDataCard
+            <!-- <BlackDataCard
               title="Out Of DeadLine"
               :content="comparedData['out-of-deadline'].data"
               :percentage="comparedData['out-of-deadline'].percent + '%'"
@@ -213,10 +227,10 @@ function toggleSidePageHandler(data) {
               "
               :height="'130px'"
               width="250px"
-            />
+            /> -->
           </div>
           <div class="black-card-content">
-            <BlackDataCard
+            <!-- <BlackDataCard
               title="Average Speed"
               :content="comparedData['average-speed'].data"
               :percentage="comparedData['average-speed'].percent + '%'"
@@ -235,7 +249,7 @@ function toggleSidePageHandler(data) {
               "
               :height="'130px'"
               width="250px"
-            />
+            /> -->
           </div>
         </div>
       </section>
