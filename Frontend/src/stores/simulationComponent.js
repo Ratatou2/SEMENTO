@@ -5,7 +5,6 @@ import { instance } from "@/util/axios-util";
 export const simulationComponentStore = defineStore("simulationComponentStore", () => {
   const startDate = ref("2023-01-01T03:00:00");
   const endDate = ref("2023-01-01T03:05:00");
-  const ohtId = ref(2600);
   const intervals = ref([]);
   const ohts = ref([])
 
@@ -35,12 +34,11 @@ export const simulationComponentStore = defineStore("simulationComponentStore", 
   };
 
   //==시뮬레이션 데이터를 로드==
-  const getSimulation = async (time) => {
-    const ohtIdList = ref([ohtId.value]); //ohtId를 배열화
+  const getSimulation = async (timeOrder, ohtList) => {
     const resp = await instance.post("/simulation/simulation-log", {
-      "start-date": intervals.value[time].start,
-      "end-date": intervals.value[time].end,
-      "oht-id": [],
+      "start-date": intervals.value[timeOrder].start,
+      "end-date": intervals.value[timeOrder].end,
+      "oht-id": ohtList,
     });
     const { data, error } = resp;
     if (error) alert("SimulatiomData Not Found \n", error);

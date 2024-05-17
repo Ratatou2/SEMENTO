@@ -3,46 +3,97 @@ import { ref, onMounted, watch } from "vue";
 import * as d3 from "d3";
 import { simulationComponentStore } from "@/stores/simulationComponent";
 const {
-    startDate,
-    endDate,
-    intervals,
-    getSimulation,
+  startDate, endDate,
+  splitTimeRange,
+  getSimulation,
 } = simulationComponentStore();
 
 const timeOrder = ref(0)
-
-const props = defineProps({
-  ohtLogs: {
-    type: Object,
-    default: {
-    "simulation-log": [
+const ohtLogs = ref({
+      "simulation-log": [
         {
-            "time": "2023-01-01T00:05:00",
+            "time": "0000-00-00T00:00:00",
             "data": [
                 {
-                    "oht-id": 2594,
+                    "oht-id": 2586,
                     "location": {
-                        "path": "path350",
+                        "path": null,
                         "curr-node": null,
-                        "point-x": 695.249,
-                        "point-y": 480.0
+                        "point-x": 128.08,
+                        "point-y": 451.96
                     },
-                    "status": "G",
-                    "carrier": true,
+                    "status": "I",
+                    "carrier": false,
                     "error": 0,
-                    "speed": 5.0,
+                    "speed": 0.0,
                     "fail": false
                 },
                 {
-                    "oht-id": 2593,
+                    "oht-id": 2587,
                     "location": {
-                        "path": "path101",
+                        "path": null,
                         "curr-node": null,
-                        "point-x": 1412.049,
-                        "point-y": 400.0
+                        "point-x": 103.988,
+                        "point-y": 373.837
                     },
-                    "status": "G",
-                    "carrier": true,
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2588,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 74.601,
+                        "point-y": 361.889
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2589,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 72.977,
+                        "point-y": 397.697
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2590,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 164.901,
+                        "point-y": 455.516
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2591,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 146.53,
+                        "point-y": 361.485
+                    },
+                    "status": "I",
+                    "carrier": false,
                     "error": 0,
                     "speed": 0.0,
                     "fail": false
@@ -50,27 +101,55 @@ const props = defineProps({
                 {
                     "oht-id": 2592,
                     "location": {
-                        "path": "path351",
+                        "path": null,
                         "curr-node": null,
-                        "point-x": 576.115,
-                        "point-y": 497.127
+                        "point-x": 125.712,
+                        "point-y": 441.864
                     },
-                    "status": "G",
+                    "status": "I",
                     "carrier": false,
                     "error": 0,
-                    "speed": 1.5,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2593,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 92.834,
+                        "point-y": 421.956
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2594,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 113.684,
+                        "point-y": 423.616
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
                     "fail": false
                 },
                 {
                     "oht-id": 2595,
                     "location": {
-                        "path": "path76",
+                        "path": null,
                         "curr-node": null,
-                        "point-x": 1780.001,
-                        "point-y": 320.0
+                        "point-x": 80.53,
+                        "point-y": 406.078
                     },
-                    "status": "W",
-                    "carrier": true,
+                    "status": "I",
+                    "carrier": false,
                     "error": 0,
                     "speed": 0.0,
                     "fail": false
@@ -78,12 +157,12 @@ const props = defineProps({
                 {
                     "oht-id": 2596,
                     "location": {
-                        "path": "path101",
+                        "path": null,
                         "curr-node": null,
-                        "point-x": 1389.999,
-                        "point-y": 400.0
+                        "point-x": 124.813,
+                        "point-y": 419.596
                     },
-                    "status": "W",
+                    "status": "I",
                     "carrier": false,
                     "error": 0,
                     "speed": 0.0,
@@ -92,13 +171,13 @@ const props = defineProps({
                 {
                     "oht-id": 2597,
                     "location": {
-                        "path": "path38",
+                        "path": null,
                         "curr-node": null,
-                        "point-x": 1231.709,
-                        "point-y": 320.0
+                        "point-x": 188.738,
+                        "point-y": 406.428
                     },
-                    "status": "G",
-                    "carrier": true,
+                    "status": "I",
+                    "carrier": false,
                     "error": 0,
                     "speed": 0.0,
                     "fail": false
@@ -106,52 +185,52 @@ const props = defineProps({
                 {
                     "oht-id": 2598,
                     "location": {
-                        "path": "path241",
+                        "path": null,
                         "curr-node": null,
-                        "point-x": 1266.871,
-                        "point-y": 520.0
+                        "point-x": 161.378,
+                        "point-y": 366.059
                     },
-                    "status": "G",
+                    "status": "I",
                     "carrier": false,
                     "error": 0,
-                    "speed": 3.738,
+                    "speed": 0.0,
                     "fail": false
                 },
                 {
                     "oht-id": 2599,
                     "location": {
-                        "path": "path244",
+                        "path": null,
                         "curr-node": null,
-                        "point-x": 1239.244,
-                        "point-y": 559.908
+                        "point-x": 183.06,
+                        "point-y": 417.662
                     },
-                    "status": "G",
-                    "carrier": true,
+                    "status": "I",
+                    "carrier": false,
                     "error": 0,
-                    "speed": 1.5,
+                    "speed": 0.0,
                     "fail": false
                 },
                 {
                     "oht-id": 2600,
                     "location": {
-                        "path": "path50",
+                        "path": null,
                         "curr-node": null,
-                        "point-x": 1479.176,
-                        "point-y": 360.0
+                        "point-x": 125.507,
+                        "point-y": 437.985
                     },
-                    "status": "G",
+                    "status": "I",
                     "carrier": false,
                     "error": 0,
-                    "speed": 1.756,
+                    "speed": 0.0,
                     "fail": false
                 },
                 {
                     "oht-id": 2601,
                     "location": {
-                        "path": "path95",
+                        "path": null,
                         "curr-node": null,
-                        "point-x": 1739.999,
-                        "point-y": 400.0
+                        "point-x": 169.553,
+                        "point-y": 387.306
                     },
                     "status": "I",
                     "carrier": false,
@@ -190,12 +269,12 @@ const props = defineProps({
                 {
                     "oht-id": 2604,
                     "location": {
-                        "path": "path135",
+                        "path": null,
                         "curr-node": null,
-                        "point-x": 494.204,
-                        "point-y": 480.0
+                        "point-x": 73.438,
+                        "point-y": 415.316
                     },
-                    "status": "G",
+                    "status": "I",
                     "carrier": false,
                     "error": 0,
                     "speed": 0.0,
@@ -204,13 +283,13 @@ const props = defineProps({
                 {
                     "oht-id": 2605,
                     "location": {
-                        "path": "path245",
+                        "path": null,
                         "curr-node": null,
-                        "point-x": 1204.999,
-                        "point-y": 560.0
+                        "point-x": 106.169,
+                        "point-y": 413.25
                     },
-                    "status": "W",
-                    "carrier": true,
+                    "status": "I",
+                    "carrier": false,
                     "error": 0,
                     "speed": 0.0,
                     "fail": false
@@ -218,26 +297,26 @@ const props = defineProps({
                 {
                     "oht-id": 2606,
                     "location": {
-                        "path": "path114",
+                        "path": null,
                         "curr-node": null,
-                        "point-x": 590.598,
-                        "point-y": 366.206
+                        "point-x": 150.538,
+                        "point-y": 376.329
                     },
-                    "status": "G",
-                    "carrier": true,
+                    "status": "I",
+                    "carrier": false,
                     "error": 0,
-                    "speed": 1.5,
+                    "speed": 0.0,
                     "fail": false
                 },
                 {
                     "oht-id": 2607,
                     "location": {
-                        "path": "path93",
+                        "path": null,
                         "curr-node": null,
-                        "point-x": 1969.999,
-                        "point-y": 400.0
+                        "point-x": 172.346,
+                        "point-y": 362.028
                     },
-                    "status": "A",
+                    "status": "I",
                     "carrier": false,
                     "error": 0,
                     "speed": 0.0,
@@ -246,40 +325,40 @@ const props = defineProps({
                 {
                     "oht-id": 2608,
                     "location": {
-                        "path": "path219",
+                        "path": null,
                         "curr-node": null,
-                        "point-x": 1660.331,
-                        "point-y": 520.0
+                        "point-x": 138.067,
+                        "point-y": 392.523
                     },
-                    "status": "G",
-                    "carrier": true,
+                    "status": "I",
+                    "carrier": false,
                     "error": 0,
-                    "speed": 3.766,
+                    "speed": 0.0,
                     "fail": false
                 },
                 {
                     "oht-id": 2609,
                     "location": {
-                        "path": "path316",
+                        "path": null,
                         "curr-node": null,
-                        "point-x": 485.531,
-                        "point-y": 360.0
+                        "point-x": 158.06,
+                        "point-y": 446.283
                     },
-                    "status": "G",
+                    "status": "I",
                     "carrier": false,
                     "error": 0,
-                    "speed": 4.5,
+                    "speed": 0.0,
                     "fail": false
                 },
                 {
                     "oht-id": 2610,
                     "location": {
-                        "path": "path46",
+                        "path": null,
                         "curr-node": null,
-                        "point-x": 1050.001,
-                        "point-y": 320.0
+                        "point-x": 88.453,
+                        "point-y": 431.255
                     },
-                    "status": "G",
+                    "status": "I",
                     "carrier": false,
                     "error": 0,
                     "speed": 0.0,
@@ -288,29 +367,29 @@ const props = defineProps({
                 {
                     "oht-id": 2611,
                     "location": {
-                        "path": "path164",
+                        "path": null,
                         "curr-node": null,
-                        "point-x": 1469.22,
-                        "point-y": 480.0
+                        "point-x": 174.27,
+                        "point-y": 433.468
                     },
-                    "status": "G",
-                    "carrier": true,
+                    "status": "I",
+                    "carrier": false,
                     "error": 0,
-                    "speed": 3.5,
+                    "speed": 0.0,
                     "fail": false
                 },
                 {
                     "oht-id": 2612,
                     "location": {
-                        "path": "path332",
+                        "path": null,
                         "curr-node": null,
-                        "point-x": 1639.537,
-                        "point-y": 480.0
+                        "point-x": 163.823,
+                        "point-y": 398.983
                     },
-                    "status": "G",
-                    "carrier": true,
+                    "status": "I",
+                    "carrier": false,
                     "error": 0,
-                    "speed": 2.226,
+                    "speed": 0.0,
                     "fail": false
                 },
                 {
@@ -344,17 +423,22 @@ const props = defineProps({
                 {
                     "oht-id": 2615,
                     "location": {
-                        "path": "path277",
+                        "path": null,
                         "curr-node": null,
-                        "point-x": 684.999,
-                        "point-y": 560.0
+                        "point-x": 148.092,
+                        "point-y": 386.196
                     },
-                    "status": "W",
+                    "status": "I",
                     "carrier": false,
                     "error": 0,
                     "speed": 0.0,
                     "fail": false
-                },
+                }
+            ]
+        },
+        {
+            "time": "0000-00-00T00:00:01",
+            "data": [
                 {
                     "oht-id": 2586,
                     "location": {
@@ -372,13 +456,13 @@ const props = defineProps({
                 {
                     "oht-id": 2587,
                     "location": {
-                        "path": "path165",
+                        "path": null,
                         "curr-node": null,
-                        "point-x": 1590.001,
-                        "point-y": 480.0
+                        "point-x": 103.988,
+                        "point-y": 373.837
                     },
-                    "status": "A",
-                    "carrier": true,
+                    "status": "I",
+                    "carrier": false,
                     "error": 0,
                     "speed": 0.0,
                     "fail": false
@@ -386,29 +470,29 @@ const props = defineProps({
                 {
                     "oht-id": 2588,
                     "location": {
-                        "path": "path37",
+                        "path": null,
                         "curr-node": null,
-                        "point-x": 1250.0,
-                        "point-y": 330.001
+                        "point-x": 74.601,
+                        "point-y": 361.889
                     },
-                    "status": "G",
-                    "carrier": true,
-                    "error": 200,
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
                     "speed": 0.0,
-                    "fail": true
+                    "fail": false
                 },
                 {
                     "oht-id": 2589,
                     "location": {
-                        "path": "path308",
+                        "path": null,
                         "curr-node": null,
-                        "point-x": 225.0,
-                        "point-y": 502.651
+                        "point-x": 72.977,
+                        "point-y": 397.697
                     },
-                    "status": "G",
-                    "carrier": true,
+                    "status": "I",
+                    "carrier": false,
                     "error": 0,
-                    "speed": 1.929,
+                    "speed": 0.0,
                     "fail": false
                 },
                 {
@@ -428,46 +512,13 @@ const props = defineProps({
                 {
                     "oht-id": 2591,
                     "location": {
-                        "path": "path314",
+                        "path": null,
                         "curr-node": null,
-                        "point-x": 495.0,
-                        "point-y": 480.0
+                        "point-x": 146.53,
+                        "point-y": 361.485
                     },
-                    "status": "G",
+                    "status": "I",
                     "carrier": false,
-                    "error": 0,
-                    "speed": 0.0,
-                    "fail": false
-                }
-            ]
-        },
-        {
-            "time": "2023-01-01T00:05:00",
-            "data": [
-                {
-                    "oht-id": 2594,
-                    "location": {
-                        "path": "path350",
-                        "curr-node": null,
-                        "point-x": 695.249,
-                        "point-y": 480.0
-                    },
-                    "status": "G",
-                    "carrier": true,
-                    "error": 0,
-                    "speed": 5.0,
-                    "fail": false
-                },
-                {
-                    "oht-id": 2593,
-                    "location": {
-                        "path": "path101",
-                        "curr-node": null,
-                        "point-x": 1412.049,
-                        "point-y": 400.0
-                    },
-                    "status": "G",
-                    "carrier": true,
                     "error": 0,
                     "speed": 0.0,
                     "fail": false
@@ -475,27 +526,55 @@ const props = defineProps({
                 {
                     "oht-id": 2592,
                     "location": {
-                        "path": "path351",
+                        "path": null,
                         "curr-node": null,
-                        "point-x": 576.115,
-                        "point-y": 497.127
+                        "point-x": 125.712,
+                        "point-y": 441.864
                     },
-                    "status": "G",
+                    "status": "I",
                     "carrier": false,
                     "error": 0,
-                    "speed": 1.5,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2593,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 92.834,
+                        "point-y": 421.956
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2594,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 113.684,
+                        "point-y": 423.616
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
                     "fail": false
                 },
                 {
                     "oht-id": 2595,
                     "location": {
-                        "path": "path76",
+                        "path": null,
                         "curr-node": null,
-                        "point-x": 1780.001,
-                        "point-y": 320.0
+                        "point-x": 80.53,
+                        "point-y": 406.078
                     },
-                    "status": "W",
-                    "carrier": true,
+                    "status": "I",
+                    "carrier": false,
                     "error": 0,
                     "speed": 0.0,
                     "fail": false
@@ -503,12 +582,12 @@ const props = defineProps({
                 {
                     "oht-id": 2596,
                     "location": {
-                        "path": "path101",
+                        "path": null,
                         "curr-node": null,
-                        "point-x": 1389.999,
-                        "point-y": 400.0
+                        "point-x": 124.813,
+                        "point-y": 419.596
                     },
-                    "status": "W",
+                    "status": "I",
                     "carrier": false,
                     "error": 0,
                     "speed": 0.0,
@@ -517,13 +596,13 @@ const props = defineProps({
                 {
                     "oht-id": 2597,
                     "location": {
-                        "path": "path38",
+                        "path": null,
                         "curr-node": null,
-                        "point-x": 1231.709,
-                        "point-y": 320.0
+                        "point-x": 188.738,
+                        "point-y": 406.428
                     },
-                    "status": "G",
-                    "carrier": true,
+                    "status": "I",
+                    "carrier": false,
                     "error": 0,
                     "speed": 0.0,
                     "fail": false
@@ -531,52 +610,52 @@ const props = defineProps({
                 {
                     "oht-id": 2598,
                     "location": {
-                        "path": "path241",
+                        "path": null,
                         "curr-node": null,
-                        "point-x": 1266.871,
-                        "point-y": 520.0
+                        "point-x": 161.378,
+                        "point-y": 366.059
                     },
-                    "status": "G",
+                    "status": "I",
                     "carrier": false,
                     "error": 0,
-                    "speed": 3.738,
+                    "speed": 0.0,
                     "fail": false
                 },
                 {
                     "oht-id": 2599,
                     "location": {
-                        "path": "path244",
+                        "path": null,
                         "curr-node": null,
-                        "point-x": 1239.244,
-                        "point-y": 559.908
+                        "point-x": 183.06,
+                        "point-y": 417.662
                     },
-                    "status": "G",
-                    "carrier": true,
+                    "status": "I",
+                    "carrier": false,
                     "error": 0,
-                    "speed": 1.5,
+                    "speed": 0.0,
                     "fail": false
                 },
                 {
                     "oht-id": 2600,
                     "location": {
-                        "path": "path50",
+                        "path": null,
                         "curr-node": null,
-                        "point-x": 1479.176,
-                        "point-y": 360.0
+                        "point-x": 125.507,
+                        "point-y": 437.985
                     },
-                    "status": "G",
+                    "status": "I",
                     "carrier": false,
                     "error": 0,
-                    "speed": 1.756,
+                    "speed": 0.0,
                     "fail": false
                 },
                 {
                     "oht-id": 2601,
                     "location": {
-                        "path": "path95",
+                        "path": null,
                         "curr-node": null,
-                        "point-x": 1739.999,
-                        "point-y": 400.0
+                        "point-x": 169.553,
+                        "point-y": 387.306
                     },
                     "status": "I",
                     "carrier": false,
@@ -615,12 +694,12 @@ const props = defineProps({
                 {
                     "oht-id": 2604,
                     "location": {
-                        "path": "path135",
+                        "path": null,
                         "curr-node": null,
-                        "point-x": 494.204,
-                        "point-y": 480.0
+                        "point-x": 73.438,
+                        "point-y": 415.316
                     },
-                    "status": "G",
+                    "status": "I",
                     "carrier": false,
                     "error": 0,
                     "speed": 0.0,
@@ -629,13 +708,13 @@ const props = defineProps({
                 {
                     "oht-id": 2605,
                     "location": {
-                        "path": "path245",
+                        "path": null,
                         "curr-node": null,
-                        "point-x": 1204.999,
-                        "point-y": 560.0
+                        "point-x": 106.169,
+                        "point-y": 413.25
                     },
-                    "status": "W",
-                    "carrier": true,
+                    "status": "I",
+                    "carrier": false,
                     "error": 0,
                     "speed": 0.0,
                     "fail": false
@@ -643,26 +722,26 @@ const props = defineProps({
                 {
                     "oht-id": 2606,
                     "location": {
-                        "path": "path114",
+                        "path": null,
                         "curr-node": null,
-                        "point-x": 590.598,
-                        "point-y": 366.206
+                        "point-x": 150.538,
+                        "point-y": 376.329
                     },
-                    "status": "G",
-                    "carrier": true,
+                    "status": "I",
+                    "carrier": false,
                     "error": 0,
-                    "speed": 1.5,
+                    "speed": 0.0,
                     "fail": false
                 },
                 {
                     "oht-id": 2607,
                     "location": {
-                        "path": "path93",
+                        "path": null,
                         "curr-node": null,
-                        "point-x": 1969.999,
-                        "point-y": 400.0
+                        "point-x": 172.346,
+                        "point-y": 362.028
                     },
-                    "status": "A",
+                    "status": "I",
                     "carrier": false,
                     "error": 0,
                     "speed": 0.0,
@@ -671,40 +750,40 @@ const props = defineProps({
                 {
                     "oht-id": 2608,
                     "location": {
-                        "path": "path219",
+                        "path": null,
                         "curr-node": null,
-                        "point-x": 1660.331,
-                        "point-y": 520.0
+                        "point-x": 138.067,
+                        "point-y": 392.523
                     },
-                    "status": "G",
-                    "carrier": true,
+                    "status": "I",
+                    "carrier": false,
                     "error": 0,
-                    "speed": 3.766,
+                    "speed": 0.0,
                     "fail": false
                 },
                 {
                     "oht-id": 2609,
                     "location": {
-                        "path": "path316",
+                        "path": null,
                         "curr-node": null,
-                        "point-x": 485.531,
-                        "point-y": 360.0
+                        "point-x": 158.06,
+                        "point-y": 446.283
                     },
-                    "status": "G",
+                    "status": "I",
                     "carrier": false,
                     "error": 0,
-                    "speed": 4.5,
+                    "speed": 0.0,
                     "fail": false
                 },
                 {
                     "oht-id": 2610,
                     "location": {
-                        "path": "path46",
+                        "path": null,
                         "curr-node": null,
-                        "point-x": 1050.001,
-                        "point-y": 320.0
+                        "point-x": 88.453,
+                        "point-y": 431.255
                     },
-                    "status": "G",
+                    "status": "I",
                     "carrier": false,
                     "error": 0,
                     "speed": 0.0,
@@ -713,29 +792,29 @@ const props = defineProps({
                 {
                     "oht-id": 2611,
                     "location": {
-                        "path": "path164",
+                        "path": null,
                         "curr-node": null,
-                        "point-x": 1469.22,
-                        "point-y": 480.0
+                        "point-x": 174.27,
+                        "point-y": 433.468
                     },
-                    "status": "G",
-                    "carrier": true,
+                    "status": "I",
+                    "carrier": false,
                     "error": 0,
-                    "speed": 3.5,
+                    "speed": 0.0,
                     "fail": false
                 },
                 {
                     "oht-id": 2612,
                     "location": {
-                        "path": "path332",
+                        "path": null,
                         "curr-node": null,
-                        "point-x": 1639.537,
-                        "point-y": 480.0
+                        "point-x": 163.823,
+                        "point-y": 398.983
                     },
-                    "status": "G",
-                    "carrier": true,
+                    "status": "I",
+                    "carrier": false,
                     "error": 0,
-                    "speed": 2.226,
+                    "speed": 0.0,
                     "fail": false
                 },
                 {
@@ -769,109 +848,22 @@ const props = defineProps({
                 {
                     "oht-id": 2615,
                     "location": {
-                        "path": "path277",
-                        "curr-node": null,
-                        "point-x": 684.999,
-                        "point-y": 560.0
-                    },
-                    "status": "W",
-                    "carrier": false,
-                    "error": 0,
-                    "speed": 0.0,
-                    "fail": false
-                },
-                {
-                    "oht-id": 2586,
-                    "location": {
                         "path": null,
                         "curr-node": null,
-                        "point-x": 128.08,
-                        "point-y": 451.96
+                        "point-x": 148.092,
+                        "point-y": 386.196
                     },
                     "status": "I",
-                    "carrier": false,
-                    "error": 0,
-                    "speed": 0.0,
-                    "fail": false
-                },
-                {
-                    "oht-id": 2587,
-                    "location": {
-                        "path": "path165",
-                        "curr-node": null,
-                        "point-x": 1590.001,
-                        "point-y": 480.0
-                    },
-                    "status": "A",
-                    "carrier": true,
-                    "error": 0,
-                    "speed": 0.0,
-                    "fail": false
-                },
-                {
-                    "oht-id": 2588,
-                    "location": {
-                        "path": "path37",
-                        "curr-node": null,
-                        "point-x": 1250.0,
-                        "point-y": 330.001
-                    },
-                    "status": "G",
-                    "carrier": true,
-                    "error": 200,
-                    "speed": 0.0,
-                    "fail": true
-                },
-                {
-                    "oht-id": 2589,
-                    "location": {
-                        "path": "path308",
-                        "curr-node": null,
-                        "point-x": 225.0,
-                        "point-y": 502.651
-                    },
-                    "status": "G",
-                    "carrier": true,
-                    "error": 0,
-                    "speed": 1.929,
-                    "fail": false
-                },
-                {
-                    "oht-id": 2590,
-                    "location": {
-                        "path": null,
-                        "curr-node": null,
-                        "point-x": 164.901,
-                        "point-y": 455.516
-                    },
-                    "status": "I",
-                    "carrier": false,
-                    "error": 0,
-                    "speed": 0.0,
-                    "fail": false
-                },
-                {
-                    "oht-id": 2591,
-                    "location": {
-                        "path": "path314",
-                        "curr-node": null,
-                        "point-x": 495.0,
-                        "point-y": 480.0
-                    },
-                    "status": "G",
                     "carrier": false,
                     "error": 0,
                     "speed": 0.0,
                     "fail": false
                 }
             ]
-        },
-     ]
- },
-  },
-});
+        }
+    ]
+ },)
 
-const ohtLogs = ref(props.ohtLogs)
 
 // 임의의 노드와 링크 생성
 const nodes = [
@@ -1798,7 +1790,7 @@ function drawSimulation(width, height) {
       .attr("x", xScale(ohtLogs.value["simulation-log"][0]['data'][i]["location"]["point-x"] - length / 2 - 4))
       .attr("y", yScale(ohtLogs.value["simulation-log"][0]['data'][i]["location"]["point-y"] - length / 2 - 1))
       .attr("rx", 3) // 모서리 둥근 처리를 위한 x축 반경
-      .attr("fill", ohtColor) // 각 원의 색상을 동적으로 설정합니다.
+      .attr("fill", ohtColor)
       .text(ohtLogs.value["simulation-log"][0]['data'][i]["oht-id"]);
 
     const ohtId = svg
@@ -1871,13 +1863,16 @@ function movePoint(currentTime) {
 }
 
 watch(timeOrder, async (newTimeOrder) => {
-  ohtLogs.value = await getSimulation(newTimeOrder);
+  ohtLogs.value = await getSimulation(newTimeOrder, []);
   currentTimeText.value = formatTime(ohtLogs.value["simulation-log"][0]['time'])
   movePoint(nowTime)
 });
 
 onMounted(async () => { ///////////////////////////////////////////////////onMounted//////////////////////////////////////////////////////////////
   parentElement.value = document.querySelector(".white-box");
+    //== 시뮬레이션 데이터 로드 : 시간단위로 잘라서 연속적으로 요청해야함
+  splitTimeRange(startDate, endDate)
+  ohtLogs.value = await getSimulation(0, []);
   
   // 부모 요소의 가로와 세로 크기를 가져옵니다.
   const parentWidth = parentElement.value.clientWidth;

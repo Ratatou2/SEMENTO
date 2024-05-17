@@ -20,7 +20,6 @@ const {
   endDate,
   getComparedData,
   getChartData,
-  getSimulation,
   getClassificationLog,
 } = simulationStore();
 
@@ -130,9 +129,6 @@ const formatLogPerWork = (logs) => {
 
 //== axios 통신 ==
 onMounted(async () => {
-  //== 시뮬레이션 데이터 로드 : 시간단위로 잘라서 연속적으로 요청해야함
-  //simulationData.value = await getSimulation();
-
   //== 기타데이터 로드
   const com = await getComparedData();
   const comparedData = formattedComparedDate(com);
