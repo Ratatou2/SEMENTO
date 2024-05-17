@@ -90,12 +90,6 @@ function toggleSidePageHandler(data) {
 
 //== axios 통신 ==
 onMounted(async () => {
-  console.log(
-    "마운트 됨 | ",
-    newStartDate.value,
-    newEndDate.value,
-    selectedOhtId.value
-  );
   await getNewResult(newStartDate, newEndDate, selectedOhtId);
   nowLoading.value = false;
 });
@@ -111,6 +105,8 @@ onMounted(async () => {
       />
       <div class="input-data">
         <SearchInput
+          :props-start-date="simulationStore().startDate"
+          :props-end-date="simulationStore().endDate"
           @update-start="handleStartDate"
           @update-end="handleEndDate"
         />
@@ -141,9 +137,11 @@ onMounted(async () => {
         <section class="title">
           <Cardhead
             headerText="Simulation"
-            :contentText="`${transformatDate(startDate)} - ${transformatDate(
-              endDate
-            )} 기간동안 ${ohtId}호기의 시뮬레이션 입니다.`"
+            :contentText="`${transformatDate(
+              simulationStore().startDate
+            )} - ${transformatDate(simulationStore().endDate)} 기간동안 ${
+              simulationStore().ohtId
+            }호기의 시뮬레이션 입니다.`"
           ></Cardhead>
         </section>
         <section class="content">
@@ -231,6 +229,7 @@ onMounted(async () => {
         </section>
         <section class="table-container">
           <Table
+            class="table-component"
             width="100%"
             bodyFontSize="14px"
             headerFontSize="12px"
@@ -360,8 +359,10 @@ onMounted(async () => {
 }
 .table-container {
   width: 97%;
-  min-height: 100px;
+  max-height: 550px;
   overflow-x: hidden;
+}
+.table-component {
   padding: 10px;
 }
 

@@ -1,11 +1,9 @@
 import { ref, computed } from "vue";
 import { defineStore } from "pinia";
 import { instance } from "@/util/axios-util";
-import { start } from "@popperjs/core";
 import moment from "moment";
 
 export const simulationStore = defineStore("simulationStore", () => {
-  //==검색 데이터
   const startDate = ref("2023-01-01T00:00:00");
   const endDate = ref("2023-01-01T23:59:59");
   const ohtId = ref(2600);
@@ -34,6 +32,8 @@ export const simulationStore = defineStore("simulationStore", () => {
   const averageSpeed = ref();
   const ohtError = ref();
   function setComparedData() {
+    console.log("setComparedData");
+    console.log(comparedData.value);
     totalWork.value = {
       data: comparedData.value["total-work"].data,
       percent: formatNumber(comparedData.value["total-work"].percent),
@@ -53,7 +53,6 @@ export const simulationStore = defineStore("simulationStore", () => {
   }
   const formatNumber = (value) => {
     const formattedValue = parseFloat(value).toFixed(2);
-    console.log(formattedValue);
     return formattedValue.endsWith(".00")
       ? parseInt(formattedValue)
       : formattedValue;
@@ -100,15 +99,12 @@ export const simulationStore = defineStore("simulationStore", () => {
   //==세터
   const setStartDate = (newDate) => {
     startDate.value = transformDate(newDate.value);
-    // console.log(startDate.value);
   };
   const setEndDate = (newDate) => {
     endDate.value = transformDate(newDate.value);
-    // console.log(endDate.value);
   };
   const setOhtId = (newOhtId) => {
     ohtId.value = newOhtId.value.value;
-    // console.log(ohtId.value);
   };
 
   //==기타 함수
@@ -120,7 +116,12 @@ export const simulationStore = defineStore("simulationStore", () => {
 
   //==Input 업데이트시 모든 데이터를 새로 업로드
   const getNewResult = async (newStartDate, newEndDate, newOhtId) => {
-    console.log(newStartDate.value, newEndDate.value);
+    if (newStartDate.value == null || newStartDate.value == undefined) {
+      console.log("no data");
+      newStartDate.value = new Date().setHours(0, 0, 0, 0);
+      newEndDate.value = new Date().setHours(new Date().getHours(), 0, 0, 0);
+    }
+
     setStartDate(newStartDate);
     setEndDate(newEndDate);
     setOhtId(newOhtId);
@@ -145,7 +146,7 @@ export const simulationStore = defineStore("simulationStore", () => {
     });
     const { data, error } = resp;
     if (error) alert("SimulatiomData Not Found \n", error);
-    else simulationData.value = data;
+    else return data;
   };
 
   //==작업별로 분류된 로그 데이터를 로드==
@@ -185,6 +186,9 @@ export const simulationStore = defineStore("simulationStore", () => {
   };
 
   return {
+    ohtId,
+    startDate,
+    endDate,
     //axios 통신
     getNewResult,
     //차트데이터
