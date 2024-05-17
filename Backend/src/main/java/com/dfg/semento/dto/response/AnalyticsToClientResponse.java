@@ -41,6 +41,8 @@ public class AnalyticsToClientResponse {
                                                                 .causeOht(errorInfo.getOhtId())
                                                                 .startDate(resultStartTime)
                                                                 .endDate(resultEndTime)
+                                                                .currentNode(errorInfo.getCurrentNode())
+                                                                .nextNode(errorInfo.getNextNode())
                                                                 .ohtId(errorInfo.getRelatedOhtId())
                                                                 .build();
             detectionResult.add(dto);

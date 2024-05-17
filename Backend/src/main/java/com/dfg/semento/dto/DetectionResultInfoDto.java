@@ -18,5 +18,7 @@ public class DetectionResultInfoDto {
     private Long causeOht;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
+    private String currentNode;
+    private String nextNode;
     private List<Long> ohtId;
 }
