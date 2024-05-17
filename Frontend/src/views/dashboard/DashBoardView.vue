@@ -142,13 +142,15 @@ const formatNumber = (value) => {
               title="총 작업량"
               :content="dashboardStore.ohtJobAnalysisData['total-work'].data+' 건'"
               :percentage="formatNumber(dashboardStore.ohtJobAnalysisData['total-work'].percent)+'%'"
+              :fontColor="dashboardStore.ohtJobAnalysisData['total-work'].percent >= 0 ? 'red' : 'blue'"
               :width="'320px'"
               :height="'130px'"
             />
             <BlackDataCard
               title="OHT 한달 평균 작업량"
               :content="formatNumber(dashboardStore.ohtJobAnalysisData['average-work'].data) +' 건'"
-              :percentage="formatNumber(dashboardStore.ohtJobAnalysisData['average-work'].percent.toFixed(2))+'%'"
+              :percentage="formatNumber(dashboardStore.ohtJobAnalysisData['average-work'].percent)+'%'"
+              :fontColor="dashboardStore.ohtJobAnalysisData['average-work'].percent >= 0 ? 'red' : 'blue'"
               :width="'320px'"
               :height="'130px'"
             />
@@ -223,6 +225,7 @@ const formatNumber = (value) => {
               title="평균 작업 시간"
               :content="averageWork"
               :percentage="formatNumber(dashboardStore.stateAnalysisData['average-work-time'].percent)+'%'"
+              :fontColor="dashboardStore.stateAnalysisData['average-work-time'].percent >= 0 ? 'red' : 'blue'"
               :width="'320px'"
               :height="'130px'"
             />
@@ -230,6 +233,7 @@ const formatNumber = (value) => {
               title="평균 유휴 시간"
               :content="averageIdle"
               :percentage="formatNumber(dashboardStore.stateAnalysisData['average-idle-time'].percent)+'%'"
+              :fontColor="dashboardStore.stateAnalysisData['average-idle-time'].percent >= 0 ? 'red' : 'blue'"
               :width="'320px'"
               :height="'130px'"
             />
