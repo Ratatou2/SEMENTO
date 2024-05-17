@@ -369,7 +369,8 @@ public class SimulationService {
 
             List<Integer> errorList = new ArrayList<>();
             for (Terms.Bucket errorBucket : resultErrors.getBuckets()) {
-                errorList.add(Integer.parseInt(errorBucket.getKeyAsString()));
+                int errorCode = Integer.parseInt(errorBucket.getKeyAsString());
+                if(errorCode !=0 ) errorList.add(errorCode);
             }
 
             logPerWorkList.add(LogPerWork.builder()
