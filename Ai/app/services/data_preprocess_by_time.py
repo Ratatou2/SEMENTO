@@ -117,6 +117,8 @@ async def data_preprocessing_by_time(
                                     "error": int(oht["error"]),
                                     "speed": float(oht["speed"]),
                                     "is-fail": bool(oht["is_fail"]),
+                                    "current-node": oht["current_node"],
+                                    "next-node": oht["next_node"],
                                     "congestion-time": int(10)
                                     }
 
