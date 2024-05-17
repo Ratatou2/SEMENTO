@@ -5,7 +5,7 @@ import Text from "@/components/Text/Text.vue";
 import SearchInput from "@/components/searchBar/SearchInput.vue";
 import Button from "@/components/button/Button.vue";
 import Line from "@/components/line/Line.vue";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import Multiselect from "vue-multiselect";
 import "vue-multiselect/dist/vue-multiselect.css";
 import StickChart from "./components/StickChart.vue";
@@ -15,139 +15,68 @@ import Table from "@/components/table/Table.vue";
 import Loading from "@/components/loading/Loading.vue";
 import { simulationStore } from "@/stores/simulation";
 import moment from "moment";
-const {
-  startDate,
-  endDate,
-  getComparedData,
-  getChartData,
-  getSimulation,
-  getClassificationLog,
-} = simulationStore();
+const { getNewResult } = simulationStore();
 
 const nowLoading = ref(true); //로딩창 기본 비활성화
-const value = ref();
-const options = [
-  { name: "1호기" },
-  { name: "2호기" },
-  { name: "3호기" },
-  { name: "4호기" },
-  { name: "5호기" },
-  { name: "6호기" },
-  { name: "7호기" },
-];
-const selectOhtId = ref(2600);
-const isSidePageOpen = ref(false);
+const isSidePageOpen = ref(false); //사이드탭 기본 비활성화
 
-// 날짜 변환 함수
 function transformatDate(date) {
-  return [
-    moment(date).format("YYYY-MM-DD") + " " + moment(date).format("HH:mm:ss"),
-  ];
+  return (
+    moment(date).format("YYYY-MM-DD") + " " + moment(date).format("HH:mm:ss")
+  );
 }
 
-//==시뮬레이션 관련 데이터
-const simulationData = ref([null]);
-//== 비교 관련 데이터
-const totalWork = ref();
-const outOfDeadline = ref();
-const averageSpeed = ref();
-const ohtError = ref();
-function setComparedDatas(comparedData) {
-  totalWork.value = {
-    data: comparedData["total-work"].data,
-    percent: comparedData["total-work"].percent,
-  };
-  outOfDeadline.value = {
-    data: comparedData["out-of-dead-line"].data,
-    percent: comparedData["out-of-dead-line"].percent,
-  };
-  averageSpeed.value = {
-    data: comparedData["average-speed"].data,
-    percent: comparedData["average-speed"].percent,
-  };
-  ohtError.value = {
-    data: comparedData["oht-error"].data,
-    percent: comparedData["oht-error"].percent,
-  };
-}
+//== 인풋창 설정 => 디폴트 셋팅
+const options = [
+  { name: "2586호기", value: 2586 },
+  { name: "2587호기", value: 2587 },
+  { name: "2588호기", value: 2588 },
+  { name: "2589호기", value: 2589 },
+  { name: "2590호기", value: 2590 },
+  { name: "2591호기", value: 2591 },
+  { name: "2592호기", value: 2592 },
+  { name: "2593호기", value: 2593 },
+  { name: "2594호기", value: 2594 },
+  { name: "2595호기", value: 2595 },
+  { name: "2596호기", value: 2596 },
+  { name: "2597호기", value: 2597 },
+  { name: "2598호기", value: 2598 },
+  { name: "2599호기", value: 2599 },
+  { name: "2600호기", value: 2600 },
+  { name: "2601호기", value: 2601 },
+  { name: "2602호기", value: 2602 },
+  { name: "2603호기", value: 2603 },
+  { name: "2604호기", value: 2604 },
+  { name: "2605호기", value: 2605 },
+  { name: "2606호기", value: 2606 },
+  { name: "2607호기", value: 2607 },
+  { name: "2608호기", value: 2608 },
+  { name: "2609호기", value: 2609 },
+  { name: "2610호기", value: 2610 },
+  { name: "2611호기", value: 2611 },
+  { name: "2612호기", value: 2612 },
+  { name: "2613호기", value: 2613 },
+  { name: "2614호기", value: 2614 },
+  { name: "2615호기", value: 2615 },
+];
+const selectedOhtId = ref(ref(options[0]));
+const newStartDate = ref();
+const newEndDate = ref();
 
-function formattedComparedDate(data) {
-  const formattedData = {};
-  for (const key in data) {
-    if (data.hasOwnProperty(key)) {
-      formattedData[key] = {
-        data: formatNumber(data[key].data),
-        percent: formatNumber(data[key].percent),
-      };
-    }
-  }
-  return formattedData;
-}
-const formatNumber = (value) => {
-  const formattedValue = parseFloat(value).toFixed(2);
-  return formattedValue.endsWith(".00")
-    ? parseInt(formattedValue)
-    : formattedValue;
+const handleStartDate = (newDate) => {
+  console.log("handleStartDate");
+  newStartDate.value = newDate;
 };
-//==차트 관련 데이터
-const timeArray = ref([null]);
-const meArray = ref([null]);
-const averageArray = ref([null]);
-function setChart(chartData) {
-  timeArray.value = chartData["work-per-time"].map((item) => item.time);
-  meArray.value = chartData["work-per-time"].map((item) => item.me);
-  averageArray.value = chartData["work-per-time"].map((item) => item.average);
-}
-
-//== 작업별 분류 관련 데이터
-const logPerWork = ref(null);
-const totalCnt = ref(null);
-function setclassificationLogData(data) {
-  totalCnt.value = data["total-cnt"];
-  logPerWork.value = formatLogPerWork(data["log-per-work"]);
-}
-const formatLogPerWork = (logs) => {
-  return logs.map((log, index) => [
-    index + 1,
-    `${transformatDate(log["start-time"])} - ${transformatDate(
-      log["end-time"]
-    )}`,
-    `${Math.floor(
-      (new Date(log["end-time"]).getTime() -
-        new Date(log["start-time"]).getTime()) /
-        60000
-    )}m ${(
-      ((new Date(log["end-time"]).getTime() -
-        new Date(log["start-time"]).getTime()) %
-        60000) /
-      1000
-    ).toFixed(0)}s`,
-    log.errors.join(", "),
-    `${log["average-speed"].toFixed(2)} m/s`,
-    log["out-of-deadline"].toString().toUpperCase(),
-  ]);
+const handleEndDate = (newDate) => {
+  console.log("handleEndDate");
+  newEndDate.value = newDate;
 };
-
-//== axios 통신 ==
-onMounted(async () => {
-  //== 시뮬레이션 데이터 로드 : 시간단위로 잘라서 연속적으로 요청해야함
-  //simulationData.value = await getSimulation();
-
-  //== 기타데이터 로드
-  const com = await getComparedData();
-  const comparedData = formattedComparedDate(com);
-  setComparedDatas(comparedData);
-  console.log("가자", comparedData.value);
-
-  //== 작업량 평균 비교 로드
-  setChart(await getChartData());
-
-  //== 작업별로 분류된 로그 로드
-  setclassificationLogData(await getClassificationLog());
-
-  console.log("로딩할게~");
+//시뮬레이션 버튼 핸들링 이벤트
+const handleSimulationButton = async () => {
+  nowLoading.value = true;
+  await getNewResult(newStartDate, newEndDate, selectedOhtId);
   nowLoading.value = false;
-});
+};
 
 //== 이벤트 핸들러 ==
 function toggleSidePage(date) {
@@ -158,6 +87,18 @@ function toggleSidePageHandler(data) {
   //emit 받는 핸들러
   toggleSidePage(data);
 }
+
+//== axios 통신 ==
+onMounted(async () => {
+  console.log(
+    "마운트 됨 | ",
+    newStartDate.value,
+    newEndDate.value,
+    selectedOhtId.value
+  );
+  await getNewResult(newStartDate, newEndDate, selectedOhtId);
+  nowLoading.value = false;
+});
 </script>
 
 <template>
@@ -169,19 +110,27 @@ function toggleSidePageHandler(data) {
         text="개별이송체의 시스템로그를 통해 시뮬레이션과 분석결과를 받아보세요."
       />
       <div class="input-data">
-        <SearchInput />
+        <SearchInput
+          @update-start="handleStartDate"
+          @update-end="handleEndDate"
+        />
         <div>
           <multiselect
             id="oht-selector"
-            v-model="value"
+            v-model="selectedOhtId"
             :options="options"
-            placeholder="OHT_ID"
+            placeholder="OHT 호기 선택"
             label="name"
             style="width: 200px"
             selectLabel="선택하기"
           ></multiselect>
         </div>
-        <Button title="Simulation" backgroundColor="black" fontColor="white" />
+        <Button
+          @click="handleSimulationButton"
+          title="Simulation"
+          backgroundColor="black"
+          fontColor="white"
+        />
       </div>
     </section>
     <Line></Line>
@@ -192,7 +141,9 @@ function toggleSidePageHandler(data) {
         <section class="title">
           <Cardhead
             headerText="Simulation"
-            contentText="2024.01.07 12:00:00 - 2024.01.08 15:10:00 기간 1817호기의 시뮬레이션 입니다."
+            :contentText="`${transformatDate(startDate)} - ${transformatDate(
+              endDate
+            )} 기간동안 ${ohtId}호기의 시뮬레이션 입니다.`"
           ></Cardhead>
         </section>
         <section class="content">
@@ -212,10 +163,10 @@ function toggleSidePageHandler(data) {
           <div class="bar-chart">
             <div class="bar-chart-content">
               <StickChart
-                :labels="timeArray"
-                :work-per-all="averageArray"
-                :work-per-one="meArray"
-                :oht-id="selectOhtId"
+                :labels="simulationStore().timeArray"
+                :work-per-all="simulationStore().averageArray"
+                :work-per-one="simulationStore().meArray"
+                :oht-id="`${ohtId}호기`"
               />
             </div>
           </div>
@@ -225,17 +176,21 @@ function toggleSidePageHandler(data) {
           <div class="black-card-content">
             <BlackDataCard
               title="Total Work"
-              :content="totalWork.data"
-              :percentage="totalWork.percent + '%'"
-              :fontColor="totalWork.percent >= 0 ? 'red' : 'blue'"
+              :content="simulationStore().totalWork.data"
+              :percentage="simulationStore().totalWork.percent + '%'"
+              :fontColor="
+                simulationStore().totalWork.percent >= 0 ? 'red' : 'blue'
+              "
               :height="'130px'"
               width="250px"
             />
             <BlackDataCard
               title="Out Of DeadLine"
-              :content="outOfDeadline.data"
-              :percentage="outOfDeadline.percent + '%'"
-              :fontColor="outOfDeadline.percent >= 0 ? 'red' : 'blue'"
+              :content="simulationStore().outOfDeadline.data"
+              :percentage="simulationStore().outOfDeadline.percent + '%'"
+              :fontColor="
+                simulationStore().outOfDeadline.percent >= 0 ? 'red' : 'blue'
+              "
               :height="'130px'"
               width="250px"
             />
@@ -243,17 +198,21 @@ function toggleSidePageHandler(data) {
           <div class="black-card-content">
             <BlackDataCard
               title="Average Speed"
-              :content="averageSpeed.data"
-              :percentage="averageSpeed.percent + '%'"
-              :fontColor="averageSpeed.percent >= 0 ? 'red' : 'blue'"
+              :content="simulationStore().averageSpeed.data"
+              :percentage="simulationStore().averageSpeed.percent + '%'"
+              :fontColor="
+                simulationStore().averageSpeed.percent >= 0 ? 'red' : 'blue'
+              "
               :height="'130px'"
               width="250px"
             />
             <BlackDataCard
               title="OHT ERROR"
-              :content="ohtError.data"
-              :percentage="ohtError.percent + '%'"
-              :fontColor="ohtError.percent >= 0 ? 'red' : 'blue'"
+              :content="simulationStore().ohtError.data"
+              :percentage="simulationStore().ohtError.percent + '%'"
+              :fontColor="
+                simulationStore().ohtError.percent >= 0 ? 'red' : 'blue'
+              "
               :height="'130px'"
               width="250px"
             />
@@ -264,7 +223,9 @@ function toggleSidePageHandler(data) {
       <div class="white-box log-table-box">
         <section class="title">
           <Cardhead
-            :headerText="'Log By Total Work(' + totalCnt + '건)'"
+            :headerText="
+              'Log By Total Work(' + simulationStore().totalCnt + '건)'
+            "
             contentText="각 작업을 클릭하여 해당하는 로그를 시뮬레이션과 함께 확인하실 수 있습니다."
           />
         </section>
@@ -282,7 +243,7 @@ function toggleSidePageHandler(data) {
               'Average Speed',
               'Out of DeadLine',
             ]"
-            :data="logPerWork"
+            :data="simulationStore().logPerWork"
           />
         </section>
       </div>
@@ -399,7 +360,7 @@ function toggleSidePageHandler(data) {
 }
 .table-container {
   width: 97%;
-  height: 600px;
+  min-height: 100px;
   overflow-x: hidden;
   padding: 10px;
 }

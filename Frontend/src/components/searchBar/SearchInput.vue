@@ -6,10 +6,19 @@
 -->
 <script setup>
 import moment from "moment";
-import { ref } from "vue";
+import { ref, watch, defineEmits } from "vue";
 
-const startDate = ref();
-const endDate = ref();
+const startDate = ref(new Date().setHours(0, 0, 0, 0));
+const endDate = ref(new Date.setHours(new Date().getHours(), 0, 0, 0));
+
+const emit = defineEmits(["update-start", "update-end"]);
+watch(startDate, (newValue) => {
+  emit("update-start", newValue);
+});
+
+watch(endDate, (newValue) => {
+  emit("update-end", newValue);
+});
 
 function transformatDate(date) {
   return moment(date).format("YYYY.MM.DD HH:mm:ss");
@@ -22,7 +31,7 @@ function transformatDate(date) {
     <VDatePicker v-model="startDate" mode="dateTime" is24hr>
       <template #default="{ togglePopover }">
         <button class="date-box" @click="togglePopover">
-          {{ startDate == null ? "Start Date" : transformatDate(startDate) }}
+          {{ startDate == null ? "시작 시간" : transformatDate(startDate) }}
           <font-awesome-icon
             :icon="['fas', 'calendar']"
             size="xs"
@@ -36,7 +45,7 @@ function transformatDate(date) {
     <VDatePicker v-model="endDate" mode="dateTime" is24hr>
       <template #default="{ togglePopover }">
         <button class="date-box" @click="togglePopover">
-          {{ endDate == null ? "End Date" : transformatDate(endDate) }}
+          {{ endDate == null ? "종료 시간" : transformatDate(endDate) }}
           <font-awesome-icon
             :icon="['fas', 'calendar']"
             size="xs"
