@@ -6,6 +6,7 @@ const {
   startDate, endDate,
   splitTimeRange,
   getSimulation,
+  intervals
 } = simulationComponentStore();
 
 const timeOrder = ref(0)
@@ -1863,9 +1864,11 @@ function movePoint(currentTime) {
 }
 
 watch(timeOrder, async (newTimeOrder) => {
-  ohtLogs.value = await getSimulation(newTimeOrder, []);
-  currentTimeText.value = formatTime(ohtLogs.value["simulation-log"][0]['time'])
-  movePoint(nowTime)
+  if(!(intervals.length === newTimeOrder)){
+    ohtLogs.value = await getSimulation(newTimeOrder, []);
+    currentTimeText.value = formatTime(ohtLogs.value["simulation-log"][0]['time'])
+    movePoint(nowTime)
+  }
 });
 
 onMounted(async () => { ///////////////////////////////////////////////////onMounted//////////////////////////////////////////////////////////////
