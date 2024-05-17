@@ -6,7 +6,12 @@
 -->
 <script setup>
 import moment from "moment";
-import { ref } from "vue";
+
+// SearchInput
+import { useAnalysisStore } from "@/stores/analysis";
+import { ref, watch } from "vue";
+
+const analysisStore = useAnalysisStore();
 
 const startDate = ref();
 const endDate = ref();
@@ -14,6 +19,18 @@ const endDate = ref();
 function transformatDate(date) {
   return moment(date).format("YYYY.MM.DD HH:mm:ss");
 }
+
+function formatDateToISO(date) {
+  return moment(date).format("YYYY-MM-DDTHH:mm:ss");
+}
+
+// pinia의 startDate와 endDate 업데이트
+watch(startDate, (newDate) => {
+  analysisStore.startDate.value = formatDateToISO(newDate);
+});
+watch(endDate, (newDate) => {
+  analysisStore.endDate.value = formatDateToISO(newDate);
+});
 </script>
 
 <template>
