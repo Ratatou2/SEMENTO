@@ -9,6 +9,10 @@ load_dotenv()
 HOST = os.getenv("HOST")
 PORT = int(os.getenv("PORT"))
 
+N_OHTS = 30
+FAILURE_DEADLINE = 200
+CONGESTION_CRITERION_TIME = 20
+
 path_and_before_path_info = pd.read_excel("./xlsx/paths.xlsx")
 node_path_info = pd.read_csv("./xlsx/path_link_info.csv")
 facility_length_info_excel = pd.read_excel("./xlsx/facility_node_path_length.xlsx")
