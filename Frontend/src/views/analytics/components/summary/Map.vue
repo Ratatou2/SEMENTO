@@ -1318,18 +1318,22 @@ onMounted(() => {
     .attr("class", "")
     .attr("transform", (congestion) => {
       const midIdx = Math.floor(congestion.links.length / 2);
-      const x = nodes.find(
+      const x = (nodes.find(
         (node) => node.id === congestion.links[midIdx].source
-      ).x;
-      const y = nodes.find(
+      ).x + nodes.find(
+        (node) => node.id === congestion.links[midIdx].target
+      ).x) / 2;
+      const y = (nodes.find(
         (node) => node.id === congestion.links[midIdx].source
-      ).y;
+      ).y + nodes.find(
+        (node) => node.id === congestion.links[midIdx].target
+      ).y) / 2;
       return `translate(${xScale(x)},${yScale(y)})`;
     });
 
   congestionNodeGroup
     .append("circle")
-    .attr("r", 13)
+    .attr("r", 10)
     // .attr("fill", "steelblue")
     .attr("fill", (congestion) => congestionPathColor[congestion.level]);
 
