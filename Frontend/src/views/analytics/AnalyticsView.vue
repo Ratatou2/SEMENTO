@@ -88,7 +88,7 @@ onMounted(async () => {
           <Info />
         </div>
         <div class="content">
-          <!-- <Map /> -->
+          <Map />
         </div>
       </div>
     </section>
