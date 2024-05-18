@@ -4,6 +4,9 @@ import Table from "@/components/table/Table.vue";
 import CongestionSimulation from "@/components/simulation/CongestionSimulation.vue";
 import Line from "@/components/line/Line.vue";
 import { useAnalysisStore } from "@/stores/analysis";
+import { simulationComponentStore } from "@/stores/simulationComponent";
+import { ref, onMounted } from "vue";
+const { getCongestionSimulation } = simulationComponentStore();
 
 const { detectionResult } = useAnalysisStore();
 
@@ -24,6 +27,40 @@ const props = defineProps({
     type: String,
     default: "Facility Error",
   },
+});
+
+const logs = ref([]);
+const datas = ref([]);
+
+onMounted(async () => {
+  const start = new Date(detectionResult[props.number - 1]["start-date"]); //에러 시작 시간을 마지막 시간으로 설정해야함
+  const end = new Date(detectionResult[props.number - 1]["end-date"]);
+  start.setSeconds(start.getSeconds() - 30);
+  start.setHours(start.getHours() + 9);
+  end.setHours(end.getHours() + 9);
+  logs.value = await getCongestionSimulation(
+    start.toISOString().slice(0, -5),
+    end.toISOString().slice(0, -5),
+    [detectionResult[props.number - 1]["cause-oht"]]
+  );
+
+  logs.value["simulation-log"].forEach((log) => {
+    const [, year, month, day, hour, minute, second] = log["time"].match(
+      /(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/
+    );
+    const dateString = `${year}.${month}.${day} ${hour}:${minute}:${second}`;
+    const data = [
+      dateString,
+      log["data"][0]["oht-id"],
+      log["data"][0]["location"]["path"],
+      log["data"][0]["status"],
+      log["data"][0]["carrier"],
+      log["data"][0]["error"],
+      log["data"][0]["speed"] + "m/s",
+      log["data"][0]["fail"],
+    ];
+    datas.value.push(data);
+  });
 });
 </script>
 
@@ -60,88 +97,7 @@ const props = defineProps({
               'SPEED',
               'IS_FAIL',
             ]"
-            :data="[
-              [
-                '2024.01.07 12:03:21',
-                '1817',
-                'path230',
-                'IDLE',
-                'FALSE',
-                '300',
-                '2.3m/s',
-                'FALSE',
-              ],
-              [
-                '2024.01.07 12:03:21',
-                '1817',
-                'path230',
-                'IDLE',
-                'FALSE',
-                '300',
-                '2.3m/s',
-                'FALSE',
-              ],
-              [
-                '2024.01.07 12:03:21',
-                '1817',
-                'path230',
-                'IDLE',
-                'FALSE',
-                '300',
-                '2.3m/s',
-                'FALSE',
-              ],
-              [
-                '2024.01.07 12:03:21',
-                '1817',
-                'path230',
-                'IDLE',
-                'FALSE',
-                '300',
-                '2.3m/s',
-                'FALSE',
-              ],
-              [
-                '2024.01.07 12:03:21',
-                '1817',
-                'path230',
-                'IDLE',
-                'FALSE',
-                '300',
-                '2.3m/s',
-                'FALSE',
-              ],
-              [
-                '2024.01.07 12:03:21',
-                '1817',
-                'path230',
-                'IDLE',
-                'FALSE',
-                '300',
-                '2.3m/s',
-                'FALSE',
-              ],
-              [
-                '2024.01.07 12:03:21',
-                '1817',
-                'path230',
-                'IDLE',
-                'FALSE',
-                '300',
-                '2.3m/s',
-                'FALSE',
-              ],
-              [
-                '2024.01.07 12:03:21',
-                '1817',
-                'path230',
-                'IDLE',
-                'FALSE',
-                '300',
-                '2.3m/s',
-                'FALSE',
-              ],
-            ]"
+            :data="datas"
           />
         </div>
       </div>

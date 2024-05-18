@@ -1942,15 +1942,12 @@ function movePoint(currentTime) {
   });
 }
 
-// watch(timeOrder, async (newTimeOrder) => {
-//   if (!(intervals.length === newTimeOrder)) {
-//     ohtLogs.value = await getSimulation(newTimeOrder, []);
-//     currentTimeText.value = formatTime(
-//       ohtLogs.value["simulation-log"][0]["time"]
-//     );
-//     movePoint(nowTime);
-//   }
-// });
+watch(timeOrder, async () => {
+  currentTimeText.value = formatTime(
+    ohtLogs.value["simulation-log"][0]["time"]
+  );
+  movePoint(nowTime);
+});
 
 onMounted(async () => {
   const start = new Date(props.errorData["start-date"]); //에러 시작 시간을 마지막 시간으로 설정해야함
