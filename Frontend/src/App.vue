@@ -62,4 +62,23 @@ import Header from "@/components/header/Header.vue";
   display: flex;
   flex-direction: start;
 }
+
+/* 스크롤바 전체 너비 설정 */
+::-webkit-scrollbar {
+  width: 10px; /* 스크롤바의 너비 설정 */
+  height: 10px;
+}
+/* 스크롤바 트랙 스타일링 */
+::-webkit-scrollbar-track {
+  background: #f6f6f6; /* 트랙의 배경 색상 */
+}
+/* 스크롤바 핸들(썸) 스타일링 */
+::-webkit-scrollbar-thumb {
+  background: #b9b9b9; /* 핸들의 배경 색상 */
+  border-radius: 10px;
+}
+/* 스크롤바 핸들 호버 시 스타일링 */
+::-webkit-scrollbar-thumb:hover {
+  background: #555; /* 호버 시 핸들의 배경 색상 변경 */
+}
 </style>

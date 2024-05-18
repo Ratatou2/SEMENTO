@@ -6,14 +6,49 @@
 -->
 <script setup>
 import moment from "moment";
-import { ref } from "vue";
+// import { useAnalysisStore } from "@/stores/analysis";
+import { ref, watch } from "vue";
 
-const startDate = ref();
-const endDate = ref();
+//== 초기값 변경
+const props = defineProps({
+  propsStartDate: {
+    type: Date,
+    default: null,
+  },
+  propsEndDate: {
+    type: Date,
+    default: null,
+  },
+});
+//== 초기화코드
+const startDate = ref(props.propsStartDate);
+const endDate = ref(props.propsEndDate);
+
+const emit = defineEmits(["update-start", "update-end"]);
+
+watch(startDate, (newValue) => {
+  emit("update-start", newValue);
+});
+watch(endDate, (newValue) => {
+  emit("update-end", newValue);
+});
 
 function transformatDate(date) {
   return moment(date).format("YYYY.MM.DD HH:mm:ss");
 }
+
+//== 수혁코드
+// const analysisStore = useAnalysisStore();
+// function formatDateToISO(date) {
+//   return moment(date).format("YYYY-MM-DDTHH:mm:ss");
+// }
+// // pinia의 startDate와 endDate 업데이트
+// watch(startDate, (newDate) => {
+//   analysisStore.startDate.value = formatDateToISO(newDate);
+// });
+// watch(endDate, (newDate) => {
+//   analysisStore.endDate.value = formatDateToISO(newDate);
+// });
 </script>
 
 <template>

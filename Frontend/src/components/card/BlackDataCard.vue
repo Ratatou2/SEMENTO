@@ -38,6 +38,7 @@ const props = defineProps({
     default: "377px",
   },
 });
+
 </script>
 
 <template>
@@ -69,7 +70,7 @@ const props = defineProps({
 .card-title {
   font-weight: 400;
   margin-bottom: 10px; /* 제목 아래 여백 추가 */
-  font-size: 1.3rem;
+  font-size: 1.1rem;
 }
 
 .card-content-container {
@@ -80,11 +81,13 @@ const props = defineProps({
 }
 
 .card-content {
+  color: #F3F3F3;
   font-size: 1.3rem;
   font-weight: bold;
 }
 
 .card-percentage {
   font-weight: bold;
+  font-size: 1.3rem;
 }
 </style>

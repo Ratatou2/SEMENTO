@@ -1,7 +1,11 @@
 <script setup>
-import { ref, onMounted, watchEffect } from "vue";
+import { ref, onMounted, watchEffect, watch } from "vue";
 import { Chart, registerables } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+import ChartDeferred from 'chartjs-plugin-deferred';
+
+import { useDashboardStore } from "@/stores/dashboard";
+const dashboardStore = useDashboardStore();
 
 const props = defineProps({
   width: {
@@ -20,10 +24,7 @@ const labels = [
     "12h", '13h', '14h', '15h', '16h', '17h', 
     '18h', '19h', '20h', '21h', '22h', '23h'
 ];
-const working_ohts = [
-  14, 20, 25, 11, 28, 17, 30, 18, 12, 26, 29, 15, 
-  21, 27, 22, 19, 23, 16, 24, 13, 31, 32, 33, 15
-];
+const working_ohts = ref([]);
 const idle_ohts = [
   17, 23, 20, 22, 32, 30, 27, 29, 19, 25, 30, 18, 
   21, 22, 16, 21, 22, 26, 29, 33, 34, 35, 36, 37
@@ -31,6 +32,7 @@ const idle_ohts = [
 
 Chart.register(...registerables);
 Chart.register(ChartDataLabels);
+Chart.register(ChartDeferred);
 
 const lineChart = ref(null);
 
@@ -38,16 +40,19 @@ const lineChart = ref(null);
 let lineChartRef = null;
 
 onMounted(async () => {
-  //라인차트
+  dataUpdate();
   drawLine();
-  //실시간 변화시 차트 업데이트
-  watchEffect(() => {
-    //라인차트 업데이트
-    lineChartRef.data.datasets[0].data = working_ohts;
-    lineChartRef.data.datasets[1].data = idle_ohts;
-    lineChartRef.update();
-  });
 });
+
+watch(() => dashboardStore.watchedStateHourlyAnalysisData, (oldValue, newValue) => {
+  dataUpdate();
+  drawLine();
+},{ deep: true });
+
+function dataUpdate() {
+  working_ohts.value = dashboardStore.stateHourlyAnalysisData["work-hour-count"].map(item => item.count);
+  idle_ohts.value = dashboardStore.stateHourlyAnalysisData["idle-hour-count"].map(item => item.count);
+}
 
 function drawLine() {
   const ctx = lineChart.value.getContext("2d");
@@ -61,7 +66,7 @@ function drawLine() {
     datasets: [
       {
         label: "Working",
-        data: working_ohts,
+        data: working_ohts.value,
         borderColor: "#2E8FD6",
         tension: 0.5,
         pointStyle: 'Rounded',
@@ -77,7 +82,7 @@ function drawLine() {
       },
       {
         label: "Idle",
-        data: idle_ohts,
+        data: idle_ohts.value,
         fill: false,
         borderColor: "#ECE9F1",
         tension: 0.5,
@@ -129,6 +134,11 @@ function drawLine() {
                 usePointStyle: true,
                 boxHeight: 6
             }
+        },
+        deferred: {
+          xOffset: 150,   // defer until 150px of the canvas width are inside the viewport
+          yOffset: '50%', // defer until 50% of the canvas height are inside the viewport
+          delay: 500      // delay of 500 ms after the canvas is considered inside the viewport
         }
       },
       scales: {
