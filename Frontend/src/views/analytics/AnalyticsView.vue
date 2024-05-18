@@ -74,11 +74,11 @@ const detectionReports = computed(() => {
     let cause;
     const errorType = result["cause"];
     if (errorType === "F") {
-      cause = "Facility Error";
+      cause = "설비 에러";
     } else if (errorType === "O") {
-      cause = "Oht Error";
+      cause = "Oht 에러";
     } else if (errorType === "E") {
-      cause = "ETC Error";
+      cause = "기타 에러";
     }
 
     return {
