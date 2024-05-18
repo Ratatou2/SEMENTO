@@ -1781,32 +1781,34 @@ function drawSimulation(width, height) {
     .text((d) => d.id);
 
 
+  //ohtLogs가 있을 경우에만(조회한 시간대에 시뮬레이션 로그가 있는 경우에만) oht 그려주기  
+  if(ohtLogs.value["simulation-log"].length !== 0){
+    // for문을 사용하여 30개의 원을 생성하고 ohts 배열에 저장합니다.
+    for (let i = 0; i < ohtLogs.value["simulation-log"][0]["data"].length; i++) {
+        const point = svg
+        .append("rect")
+        .attr("width", length)
+        .attr("height", length)
+        .attr("x", xScale(ohtLogs.value["simulation-log"][0]['data'][i]["location"]["point-x"] - length / 2 - 4))
+        .attr("y", yScale(ohtLogs.value["simulation-log"][0]['data'][i]["location"]["point-y"] - length / 2 - 1))
+        .attr("rx", 3) // 모서리 둥근 처리를 위한 x축 반경
+        .attr("fill", ohtColor)
+        .text(ohtLogs.value["simulation-log"][0]['data'][i]["oht-id"]);
 
-  // for문을 사용하여 30개의 원을 생성하고 ohts 배열에 저장합니다.
-  for (let i = 0; i < ohtLogs.value["simulation-log"][0]["data"].length; i++) {
-    const point = svg
-      .append("rect")
-      .attr("width", length)
-      .attr("height", length)
-      .attr("x", xScale(ohtLogs.value["simulation-log"][0]['data'][i]["location"]["point-x"] - length / 2 - 4))
-      .attr("y", yScale(ohtLogs.value["simulation-log"][0]['data'][i]["location"]["point-y"] - length / 2 - 1))
-      .attr("rx", 3) // 모서리 둥근 처리를 위한 x축 반경
-      .attr("fill", ohtColor)
-      .text(ohtLogs.value["simulation-log"][0]['data'][i]["oht-id"]);
+        const ohtId = svg
+        .append("text")
+        .attr("x", xScale(ohtLogs.value["simulation-log"][0]['data'][i]["location"]["point-x"]))
+        .attr("y", yScale(ohtLogs.value["simulation-log"][0]['data'][i]["location"]["point-y"] - length / 2 - 1))
+        .attr("rx", 3) // 모서리 둥근 처리를 위한 x축 반경
+        .attr("fill", ohtColor) // 각 원의 색상을 동적으로 설정합니다.
+        .attr("text-anchor", "middle")
+        .attr("font-size", 9)
+        .text(ohtLogs.value["simulation-log"][0]['data'][i]["oht-id"]);
 
-    const ohtId = svg
-      .append("text")
-      .attr("x", xScale(ohtLogs.value["simulation-log"][0]['data'][i]["location"]["point-x"]))
-      .attr("y", yScale(ohtLogs.value["simulation-log"][0]['data'][i]["location"]["point-y"] - length / 2 - 1))
-      .attr("rx", 3) // 모서리 둥근 처리를 위한 x축 반경
-      .attr("fill", ohtColor) // 각 원의 색상을 동적으로 설정합니다.
-      .attr("text-anchor", "middle")
-      .attr("font-size", 9)
-      .text(ohtLogs.value["simulation-log"][0]['data'][i]["oht-id"]);
-
-    // 생성된 원을 배열에 추가합니다.
-    ohts.push(point);
-    ohtTexts.push(ohtId);
+        // 생성된 원을 배열에 추가합니다.
+        ohts.push(point);
+        ohtTexts.push(ohtId);
+    }
   }
 
   path = svg.append("path").attr("fill", "none");
