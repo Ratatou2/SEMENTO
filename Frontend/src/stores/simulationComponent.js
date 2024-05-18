@@ -44,7 +44,23 @@ export const simulationComponentStore = defineStore("simulationComponentStore", 
         "oht-id": ohtList,
       });
       const { data, error } = resp;
-      console.log(data)
+      if (error) alert("SimulatiomData Not Found \n", error);
+      else return data;
+    } catch(error){
+      console.log("해당 날짜의 데이터가 없습니다.")
+      return emptyData
+    }
+  };
+
+  //==에러 시뮬레이션 데이터를 로드==
+  const getCongestionSimulation = async (start, end, ohtList) => {
+    try{
+      const resp = await instance.post("/simulation/simulation-log", {
+        "start-date": start,
+        "end-date": end,
+        "oht-id": ohtList,
+      });
+      const { data, error } = resp;
       if (error) alert("SimulatiomData Not Found \n", error);
       else return data;
     } catch(error){
@@ -60,5 +76,6 @@ export const simulationComponentStore = defineStore("simulationComponentStore", 
     ohts,
     splitTimeRange,
     getSimulation,
+    getCongestionSimulation,
   };
 });

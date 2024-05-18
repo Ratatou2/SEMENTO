@@ -1,9 +1,26 @@
 <script setup>
 import Text from "@/components/Text/Text.vue";
 import Table from "@/components/table/Table.vue";
-import Simulation from "@/components/simulation/Simulation.vue";
+import CongestionSimulation from "@/components/simulation/CongestionSimulation.vue";
 import Line from "@/components/line/Line.vue";
-import SmallSimulation from "./SmallSimulation.vue";
+import { useAnalysisStore } from "@/stores/analysis";
+import { simulationComponentStore } from "@/stores/simulationComponent";
+import { ref, onMounted, watch } from "vue";
+
+const {
+  detectionResult
+} = useAnalysisStore();
+
+const {
+  startDate, endDate,
+  splitTimeRange,
+  getSimulation,
+  intervals
+} = simulationComponentStore();
+
+const ohtCongestionLogs= ref([]);
+
+
 const props = defineProps({
   location: {
     type: Boolean,
@@ -21,6 +38,14 @@ const props = defineProps({
     type: String,
     default: "Facility Error",
   },
+})
+
+onMounted(async () => {
+  console.log(ohtCongestionLogs.value)
+  ohtCongestionLogs.value.forEach(async detection => {
+    console.log("시간: " + detection["start-date"])
+    // ohtCongestionLogs.value.push(await getCongestionSimulation(detection["start-date"], detection["start-date"], detection["oht-id"]));
+  });
 });
 </script>
 
@@ -36,7 +61,7 @@ const props = defineProps({
         <div class="white block">{{ cause }}</div>
       </div>
       <div class="simulation-and-table">
-        <Simulation class="simulation" />
+        <CongestionSimulation class="simulation" />
         <div class="table">
           <Table
             width="100%"
