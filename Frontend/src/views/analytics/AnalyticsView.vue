@@ -84,6 +84,19 @@ const congestionText = computed(() => {
   return text;
 });
 
+watch(
+  () => analysisStore.computedDetectionResult,
+  (newValue, oldValue) => {
+    congTime.value = newValue.reduce((total, result) => {
+      return (
+        total +
+        (new Date(result["end-date"]) - new Date(result["start-date"])) / 1000
+      );
+    }, 0);
+  },
+  { immediate: true }
+);
+
 const detectionReports = computed(() => {
   return analysisStore.computedDetectionResult.map((result, index) => {
     const startDate = new Date(result["start-date"]);
