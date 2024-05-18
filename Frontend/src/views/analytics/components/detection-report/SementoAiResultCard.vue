@@ -17,6 +17,10 @@ const props = defineProps({
     type: String,
     default: "2024.01.07 12:03:21 ~ 2024.01.07 12:05:59 [총 2분 38초]",
   },
+  cause: {
+    type: String,
+    default: "Facility Error",
+  },
 });
 </script>
 
@@ -29,7 +33,7 @@ const props = defineProps({
     <section class="content">
       <div class="ai">
         <div class="blue block">[ SEMENTO AI 분석결과 ]</div>
-        <div class="white block">NODE 30번 설비의 Facillity ERROR 98%</div>
+        <div class="white block">{{ cause }}</div>
       </div>
       <div class="simulation-and-table">
         <Simulation class="simulation" />

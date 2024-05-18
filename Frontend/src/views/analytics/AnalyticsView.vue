@@ -16,7 +16,7 @@ import SementoAiResultCard from "./components/detection-report/SementoAiResultCa
 
 // vue
 import { useAnalysisStore } from "@/stores/analysis";
-import { onMounted, ref, computed } from "vue";
+import { onMounted, ref, computed, watch } from "vue";
 import moment from "moment";
 
 import Loading from "@/components/loading/Loading.vue";
@@ -25,7 +25,12 @@ const analysisStore = useAnalysisStore();
 
 const nowLoading = ref(true); //로딩창 기본 비활성화
 const cnt = ref(11);
-const detectionReportText = "# Detection Report (" + cnt.value + ")";
+const congTime = ref(0);
+const eachCongestTime = ref(0);
+
+const detectionReportText = computed(() => {
+  return "# Detection Report (" + cnt.value + ")";
+});
 
 const formattedStartDate = computed(() => {
   return moment(analysisStore.startDate.value).format("YYYY.MM.DD HH:mm:ss");
@@ -39,9 +44,60 @@ const summaryText = computed(() => {
   return `${formattedStartDate.value} ~ ${formattedEndDate.value} 기간동안 총 ${cnt.value}개의 정체가 감지되었습니다.`;
 });
 
+const congestionText = computed(() => {
+  const hours = Math.floor(congTime.value / 3600);
+  const minutes = Math.floor(congTime.value / 60);
+  const seconds = congTime.value % 60;
+
+  let text = "총";
+  if (hours > 0) text += `${hours}시간 `;
+  if (minutes > 0 || hours > 0) text += `${minutes}분 `;
+  text += `${seconds}초의 정체시간이 소요되었습니다.`;
+  return text;
+});
+
+const detectionReports = computed(() => {
+  return analysisStore.computedDetectionResult.map((result, index) => {
+    const startDate = new Date(result["start-date"]);
+    const endDate = new Date(result["end-date"]);
+    const duration = (endDate - startDate) / 1000;
+
+    const hours = Math.floor(duration / 3600);
+    const minutes = Math.floor((duration % 3600) / 60);
+    const seconds = duration % 60;
+
+    let durationText = "";
+    if (hours > 0) durationText += `${hours}시간 `;
+    if (minutes > 0 || hours > 0) durationText += `${minutes}분 `;
+    durationText += `${seconds}초`;
+
+    let cause;
+    const errorType = result["cause"];
+    if (errorType === "F") {
+      cause = "설비 에러";
+    } else if (errorType === "O") {
+      cause = "Oht 에러";
+    } else if (errorType === "E") {
+      cause = "기타 에러";
+    }
+
+    return {
+      index: index + 1,
+      startDate: moment(startDate).format("YYYY.MM.DD HH:mm:ss"),
+      endDate: moment(endDate).format("YYYY.MM.DD HH:mm:ss"),
+      durationText: durationText,
+      cause: cause,
+    };
+  });
+});
+
 onMounted(async () => {
   await analysisStore.getAiDetection();
   cnt.value = analysisStore.computedDetectionResult.length;
+  analysisStore.computedDetectionResult.forEach((result) => {
+    congTime.value +=
+      (new Date(result["end-date"]) - new Date(result["start-date"])) / 1000;
+  });
   nowLoading.value = false;
 });
 </script>
@@ -107,13 +163,12 @@ onMounted(async () => {
             ></Cardhead>
           </section>
           <div class="congestion-chart">
-            <div class="congestion-chart-content"><CongestionChart /></div>
+            <div class="congestion-chart-content">
+              <CongestionChart />
+            </div>
           </div>
           <div class="congestion-chart-text">
-            <Text
-              text="총 2시간 15분 23초의 정체시간이 소요되었습니다."
-              size="19px"
-            />
+            <Text :text="congestionText" size="19px" />
           </div>
         </div>
         <div class="white-box duration-chart-box">
@@ -135,11 +190,16 @@ onMounted(async () => {
       <!--제목 -->
       <HeadText :header-text="detectionReportText" />
     </section>
-    <section v-for="index in 3" :key="index" class="detection-report-container">
+    <section
+      v-for="report in detectionReports"
+      :key="report.index"
+      class="detection-report-container"
+    >
       <SementoAiResultCard
         :location="true"
-        :number="index"
-        text="2024.01.07 12:03:21 ~ 2024.01.07 12:05:59 [총 2분 38초]"
+        :number="report.index"
+        :text="`${report.startDate} ~ ${report.endDate} [총 ${report.durationText}]`"
+        :cause="report.cause"
       />
     </section>
   </div>

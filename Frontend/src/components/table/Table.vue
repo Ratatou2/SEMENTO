@@ -239,5 +239,6 @@ tr:hover {
 
 .selected-row {
   background-color: #89a7e0; /* 선택된 행의 배경색 */
+  font-weight: bold;
 }
 </style>

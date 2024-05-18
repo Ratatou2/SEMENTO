@@ -1,7 +1,10 @@
 <script setup>
-import { ref, onMounted, watchEffect } from "vue";
-import { Chart, registerables } from 'chart.js';
-import ChartDataLabels from 'chartjs-plugin-datalabels';
+import { ref, onMounted, watchEffect, watch } from "vue";
+import { Chart, registerables } from "chart.js";
+import ChartDataLabels from "chartjs-plugin-datalabels";
+import { useAnalysisStore } from "@/stores/analysis";
+
+const analysisStore = useAnalysisStore();
 
 const props = defineProps({
   width: {
@@ -14,17 +17,21 @@ const props = defineProps({
   },
 });
 
-const labels = [
-    "1", "2", "3", "4", "5", 
-    "6", "7", "8", "9", "10", "11"
-];
-const duration_times = [
-  14, 20, 25, 11, 28, 17, 30, 18, 12, 26, 29
-];
+const labels = ref([]);
+const duration_times = ref([]);
 
 const congestion_times = [
-    "2024.01.08 15:10:00", "2024.01.08 15:10:00", "2024.01.08 15:10:00", "2024.01.08 15:10:00", "2024.01.08 15:10:00",
-    "2024.01.08 15:10:00", "2024.01.08 15:10:00", "2024.01.08 15:10:00", "2024.01.08 15:10:00", "2024.01.08 15:10:00", "2024.01.08 15:10:00"
+  "2024.01.08 15:10:00",
+  "2024.01.08 15:10:00",
+  "2024.01.08 15:10:00",
+  "2024.01.08 15:10:00",
+  "2024.01.08 15:10:00",
+  "2024.01.08 15:10:00",
+  "2024.01.08 15:10:00",
+  "2024.01.08 15:10:00",
+  "2024.01.08 15:10:00",
+  "2024.01.08 15:10:00",
+  "2024.01.08 15:10:00",
 ];
 
 Chart.register(...registerables);
@@ -35,14 +42,43 @@ const lineChart = ref(null);
 //update를 위한 변수
 let lineChartRef = null;
 
+watch(
+  () => analysisStore.computedDetectionResult,
+  (newValue, oldValue) => {
+    console.log("computedDetectionResult changed:", oldValue, "->", newValue);
+    const len = newValue.length;
+    console.log("len: ", len);
+    labels.value = Array.from({ length: len }, (_, i) => (i + 1).toString());
+
+    duration_times.value = newValue.map((result) => {
+      const timeDiff =
+        (new Date(result["end-date"]) - new Date(result["start-date"])) / 1000;
+      return timeDiff;
+    });
+    console.log("duration_times: ", duration_times.value);
+    if (lineChartRef) {
+      lineChartRef.data.labels = labels.value;
+      lineChartRef.data.datasets[0].data = duration_times.value;
+      lineChartRef.update();
+    }
+  },
+  { immediate: true }
+);
+
 onMounted(async () => {
   //라인차트
   drawLine();
   //실시간 변화시 차트 업데이트
   watchEffect(() => {
     //라인차트 업데이트
-    lineChartRef.data.datasets[0].data = duration_times;
-    lineChartRef.update();
+    console.log("DurationChart.vue에서의 duration_times: ", duration_times);
+    if (lineChartRef) {
+      lineChartRef.data.labels = labels.value;
+      lineChartRef.data.datasets[0].data = duration_times.value;
+      lineChartRef.update();
+    }
+    // lineChartRef.data.datasets[0].data = duration_times;
+    // lineChartRef.update();
   });
 });
 
@@ -53,25 +89,25 @@ function drawLine() {
   gradientFill.addColorStop(1, "rgba(45, 156, 219, 0.05)");
 
   const data = {
-    labels: labels,
+    labels: labels.value,
 
     datasets: [
       {
         label: "Duration Time",
-        data: duration_times,
+        data: duration_times.value,
         borderColor: "#2D9CDB",
         tension: 0.5,
-        pointStyle: 'Rounded',
+        pointStyle: "Rounded",
         pointRadius: 1,
         pointBorderWidth: 0.1,
         pointHoverRadius: 5,
         pointHoverBorderWidth: 5,
         pointBackgroundColor: "#2D9CDB",
         fill: true, // 선 배경 채우기
-        backgroundColor: gradientFill, // 배경 그라데이션 
+        backgroundColor: gradientFill, // 배경 그라데이션
         borderWidth: 4,
         hoverOffset: 10,
-      }
+      },
     ],
   };
 
@@ -85,33 +121,33 @@ function drawLine() {
       maintainAspectRatio: false,
       plugins: {
         tooltip: {
-            enabled: true, // 튤팁 활성화 (기본값 true)
-            backgroundColor: "#ffffff", // 튤팁 색상
-            padding: 10, // 튤팁 패딩
-            titleColor: '#555555',
-            titleAlign: 'left',
-            titleFont: {
-                weight: 'bold',
-                size: 10,
-                lineHeight: 1.5
-            },
-            bodyColor: '#555555',
-            bodyAlign: 'center',
-            bodyFont: {
-                weight: 'bold',
-                size: 14,
-                lineHeight: 1.5
-            },
-            displayColors: false, // 색상 제거
+          enabled: true, // 튤팁 활성화 (기본값 true)
+          backgroundColor: "#ffffff", // 튤팁 색상
+          padding: 10, // 튤팁 패딩
+          titleColor: "#555555",
+          titleAlign: "left",
+          titleFont: {
+            weight: "bold",
+            size: 10,
+            lineHeight: 1.5,
+          },
+          bodyColor: "#555555",
+          bodyAlign: "center",
+          bodyFont: {
+            weight: "bold",
+            size: 14,
+            lineHeight: 1.5,
+          },
+          displayColors: false, // 색상 제거
         },
         datalabels: {
-            formatter: function(value, context) {
-                return '';
-            },
+          formatter: function (value, context) {
+            return "";
+          },
         },
         legend: {
-            display: false
-        }
+          display: false,
+        },
       },
       scales: {
         y: {
@@ -122,7 +158,7 @@ function drawLine() {
             },
           },
           grid: {
-            color: 'transparent',
+            color: "transparent",
           },
           border: {
             display: false,
@@ -132,7 +168,7 @@ function drawLine() {
           ticks: {
             color: "#A2A3A5",
             callback: (value, index) => {
-              return "정체 " + (value+1);
+              return "정체 " + (value + 1);
             },
           },
           grid: {
@@ -146,14 +182,12 @@ function drawLine() {
     },
   });
 }
-
 </script>
 
 <template>
-  <div :style="{ width: width, height: height}">
+  <div :style="{ width: width, height: height }">
     <canvas ref="lineChart"> </canvas>
   </div>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>
