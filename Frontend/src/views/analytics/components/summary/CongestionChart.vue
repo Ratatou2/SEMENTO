@@ -1,8 +1,21 @@
 <script setup>
-import { ref, onMounted, watchEffect } from "vue";
+import { ref, onMounted, watch } from "vue";
+import { useAnalysisStore } from "@/stores/analysis";
 
-const currentPercent = ref(10);
-const percent = ref(45);
+const analysisStore = useAnalysisStore();
+
+// currentPercent에서 percent이동
+const currentPercent = ref(0);
+const percent = ref(0);
+
+watch(
+  () => analysisStore.computedCongestionRatio,
+  (newValue, oldValue) => {
+    percent.value = newValue;
+    startAnimation();
+  },
+  { immediate: true }
+);
 
 onMounted(async () => {
   //프로그래스바
@@ -24,12 +37,9 @@ function startAnimation() {
 </script>
 
 <template>
-    <div class="progress-container">
-        <div
-        class="progress-bar"
-        :style="{ width: currentPercent + '%' }"
-        ></div>
-    </div>
+  <div class="progress-container">
+    <div class="progress-bar" :style="{ width: currentPercent + '%' }"></div>
+  </div>
 </template>
 
 <style scoped>
@@ -48,5 +58,4 @@ function startAnimation() {
   transition: width 0.3s ease;
   border-radius: 5px;
 }
-
 </style>

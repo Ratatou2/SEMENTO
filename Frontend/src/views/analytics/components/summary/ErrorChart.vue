@@ -12,11 +12,6 @@ const errorCounts = computed(() => {
     "ETC Error": 0,
   };
 
-  console.log(
-    "analysisStore.computedDetectionResult: ",
-    analysisStore.computedDetectionResult
-  );
-
   if (analysisStore.computedDetectionResult.length > 0) {
     analysisStore.computedDetectionResult.forEach((result) => {
       if (result.cause === "F") {
@@ -49,7 +44,7 @@ const errorData = computed(() => {
       amount: errorCounts.value["ETC Error"],
       color: "#BCE0F2",
     },
-  ];
+  ].filter((error) => error.amount > 0);
 });
 
 // const transformedErrorData = {

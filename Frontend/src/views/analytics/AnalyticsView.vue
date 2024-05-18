@@ -16,7 +16,7 @@ import SementoAiResultCard from "./components/detection-report/SementoAiResultCa
 
 // vue
 import { useAnalysisStore } from "@/stores/analysis";
-import { onMounted, ref, computed } from "vue";
+import { onMounted, ref, computed, watch } from "vue";
 import moment from "moment";
 
 import Loading from "@/components/loading/Loading.vue";
@@ -25,6 +25,7 @@ const analysisStore = useAnalysisStore();
 
 const nowLoading = ref(true); //로딩창 기본 비활성화
 const cnt = ref(11);
+const congTime = ref(0);
 const detectionReportText = "# Detection Report (" + cnt.value + ")";
 
 const formattedStartDate = computed(() => {
@@ -39,9 +40,17 @@ const summaryText = computed(() => {
   return `${formattedStartDate.value} ~ ${formattedEndDate.value} 기간동안 총 ${cnt.value}개의 정체가 감지되었습니다.`;
 });
 
+const congestionText = computed(() => {
+  return `총 ${congTime.value}초의 정체시간이 소요되었습니다.`;
+});
+
 onMounted(async () => {
   await analysisStore.getAiDetection();
   cnt.value = analysisStore.computedDetectionResult.length;
+  analysisStore.computedDetectionResult.forEach((result) => {
+    congTime.value +=
+      (new Date(result["end-date"]) - new Date(result["start-date"])) / 1000;
+  });
   nowLoading.value = false;
 });
 </script>
@@ -79,7 +88,7 @@ onMounted(async () => {
           <Info />
         </div>
         <div class="content">
-          <Map />
+          <!-- <Map /> -->
         </div>
       </div>
     </section>
@@ -107,13 +116,12 @@ onMounted(async () => {
             ></Cardhead>
           </section>
           <div class="congestion-chart">
-            <div class="congestion-chart-content"><CongestionChart /></div>
+            <div class="congestion-chart-content">
+              <CongestionChart />
+            </div>
           </div>
           <div class="congestion-chart-text">
-            <Text
-              text="총 2시간 15분 23초의 정체시간이 소요되었습니다."
-              size="19px"
-            />
+            <Text :text="congestionText" size="19px" />
           </div>
         </div>
         <div class="white-box duration-chart-box">
