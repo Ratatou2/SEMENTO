@@ -1,6 +1,7 @@
 import { ref, computed } from "vue";
 import { defineStore } from "pinia";
 import { instance } from "@/util/axios-util";
+import moment from "moment";
 
 export const useAnalysisStore = defineStore("analysisStore", () => {
   const startDate = ref("2024-05-11T20:30:00");
@@ -11,7 +12,7 @@ export const useAnalysisStore = defineStore("analysisStore", () => {
   const congestionRatio = ref(0);
 
   const getAiDetection = async () => {
-    console.log(startDate.value, endDate.value)
+    console.log(startDate.value, endDate.value);
     const resp = await instance.post("/analytics/ai-detection", {
       "start-time": startDate.value,
       "end-time": endDate.value,
@@ -40,6 +41,28 @@ export const useAnalysisStore = defineStore("analysisStore", () => {
   };
   const computedDetectionResult = computed(() => detectionResult.value);
   const computedCongestionRatio = computed(() => congestionRatio.value);
+  const computedStartDate = computed(() => startDate.value);
+  const computedEndDate = computed(() => endDate.value);
+
+  function transformDate(date) {
+    return (
+      moment(date).format("YYYY-MM-DD") + "T" + moment(date).format("HH:mm:ss")
+    );
+  }
+
+  const setStartDate = (newDate) => {
+    startDate.value = transformDate(newDate.value);
+  };
+  const setEndDate = (newDate) => {
+    endDate.value = transformDate(newDate.value);
+  };
+
+  const getNewAIDetection = async (newStartDate, newEndDate) => {
+    setStartDate(newStartDate);
+    setEndDate(newEndDate);
+
+    await getAiDetection();
+  };
 
   return {
     startDate,
@@ -49,6 +72,9 @@ export const useAnalysisStore = defineStore("analysisStore", () => {
     totalTime,
     congestionRatio,
     computedCongestionRatio,
+    computedStartDate,
+    computedEndDate,
     getAiDetection,
+    getNewAIDetection,
   };
 });
