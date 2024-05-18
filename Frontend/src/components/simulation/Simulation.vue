@@ -1,128 +1,873 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import * as d3 from "d3";
+import { simulationComponentStore } from "@/stores/simulationComponent";
+const {
+  startDate, endDate,
+  splitTimeRange,
+  getSimulation,
+  intervals
+} = simulationComponentStore();
 
-//로그
-const currentTime = ref("2024.01.08 13:38:23");
+const timeOrder = ref(0)
+const ohtLogs = ref({
+      "simulation-log": [
+        {
+            "time": "0000-00-00T00:00:00",
+            "data": [
+                {
+                    "oht-id": 2586,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 128.08,
+                        "point-y": 451.96
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2587,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 103.988,
+                        "point-y": 373.837
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2588,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 74.601,
+                        "point-y": 361.889
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2589,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 72.977,
+                        "point-y": 397.697
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2590,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 164.901,
+                        "point-y": 455.516
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2591,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 146.53,
+                        "point-y": 361.485
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2592,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 125.712,
+                        "point-y": 441.864
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2593,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 92.834,
+                        "point-y": 421.956
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2594,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 113.684,
+                        "point-y": 423.616
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2595,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 80.53,
+                        "point-y": 406.078
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2596,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 124.813,
+                        "point-y": 419.596
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2597,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 188.738,
+                        "point-y": 406.428
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2598,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 161.378,
+                        "point-y": 366.059
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2599,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 183.06,
+                        "point-y": 417.662
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2600,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 125.507,
+                        "point-y": 437.985
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2601,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 169.553,
+                        "point-y": 387.306
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2602,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 174.441,
+                        "point-y": 445.753
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2603,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 67.067,
+                        "point-y": 415.047
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2604,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 73.438,
+                        "point-y": 415.316
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2605,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 106.169,
+                        "point-y": 413.25
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2606,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 150.538,
+                        "point-y": 376.329
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2607,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 172.346,
+                        "point-y": 362.028
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2608,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 138.067,
+                        "point-y": 392.523
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2609,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 158.06,
+                        "point-y": 446.283
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2610,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 88.453,
+                        "point-y": 431.255
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2611,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 174.27,
+                        "point-y": 433.468
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2612,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 163.823,
+                        "point-y": 398.983
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2613,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 87.83,
+                        "point-y": 440.167
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2614,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 186.766,
+                        "point-y": 459.99
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2615,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 148.092,
+                        "point-y": 386.196
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                }
+            ]
+        },
+        {
+            "time": "0000-00-00T00:00:01",
+            "data": [
+                {
+                    "oht-id": 2586,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 128.08,
+                        "point-y": 451.96
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2587,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 103.988,
+                        "point-y": 373.837
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2588,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 74.601,
+                        "point-y": 361.889
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2589,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 72.977,
+                        "point-y": 397.697
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2590,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 164.901,
+                        "point-y": 455.516
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2591,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 146.53,
+                        "point-y": 361.485
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2592,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 125.712,
+                        "point-y": 441.864
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2593,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 92.834,
+                        "point-y": 421.956
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2594,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 113.684,
+                        "point-y": 423.616
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2595,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 80.53,
+                        "point-y": 406.078
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2596,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 124.813,
+                        "point-y": 419.596
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2597,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 188.738,
+                        "point-y": 406.428
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2598,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 161.378,
+                        "point-y": 366.059
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2599,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 183.06,
+                        "point-y": 417.662
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2600,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 125.507,
+                        "point-y": 437.985
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2601,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 169.553,
+                        "point-y": 387.306
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2602,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 174.441,
+                        "point-y": 445.753
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2603,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 67.067,
+                        "point-y": 415.047
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2604,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 73.438,
+                        "point-y": 415.316
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2605,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 106.169,
+                        "point-y": 413.25
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2606,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 150.538,
+                        "point-y": 376.329
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2607,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 172.346,
+                        "point-y": 362.028
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2608,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 138.067,
+                        "point-y": 392.523
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2609,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 158.06,
+                        "point-y": 446.283
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2610,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 88.453,
+                        "point-y": 431.255
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2611,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 174.27,
+                        "point-y": 433.468
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2612,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 163.823,
+                        "point-y": 398.983
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2613,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 87.83,
+                        "point-y": 440.167
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2614,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 186.766,
+                        "point-y": 459.99
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                },
+                {
+                    "oht-id": 2615,
+                    "location": {
+                        "path": null,
+                        "curr-node": null,
+                        "point-x": 148.092,
+                        "point-y": 386.196
+                    },
+                    "status": "I",
+                    "carrier": false,
+                    "error": 0,
+                    "speed": 0.0,
+                    "fail": false
+                }
+            ]
+        }
+    ]
+ },)
 
-//컬러설정
-const pathColor = "#B4B4B4";
-const facilityColor = "#292D30";
-const ohtColor = "orange";
 
-const container = ref(null);
-const svgContainer = ref(null);
-
-let scale = 1.0;
-let translateX = 0;
-let translateY = 0;
-let isDragging = false;
-let dragStartX = 0;
-let dragStartY = 0;
-const idList = [
-  "6",
-  "16",
-  "28",
-  "38",
-  "50",
-  "60",
-  "72",
-  "82",
-  "94",
-  "104",
-  "21",
-  "43",
-  "65",
-  "77",
-  "87",
-  "99",
-  "114",
-  "119",
-  "127",
-  "131",
-  "136",
-  "140",
-  "145",
-  "153",
-  "157",
-  "162",
-  "165",
-  "170",
-  "178",
-  "186",
-  "189",
-  "194",
-  "208",
-  "230",
-  "240",
-  "308",
-  "281",
-  "311",
-  "297",
-  "288",
-  "276",
-  "267",
-  "256",
-  "247",
-  "235",
-  "225",
-  "213",
-  "203",
-];
-const updateTransform = () => {
-  //svgContainer.value.style.transition = "transform 0.3s ease-in-out"; // 확대 및 축소 시에만 transition 추가
-  svgContainer.value.style.transform = `scale(${scale}) translate(${translateX}px, ${translateY}px)`;
-};
-
-const handleWheel = (event) => {
-  const delta = event.deltaY > 0 ? -0.1 : 0.1;
-  scale += delta;
-  scale = Math.min(Math.max(0.8, scale), 3);
-  updateTransform();
-};
-
-const startDrag = (event) => {
-  isDragging = true;
-  dragStartX = event.clientX;
-  dragStartY = event.clientY;
-};
-
-const drag = (event) => {
-  if (!isDragging) return;
-  const deltaX = event.clientX - dragStartX;
-  const deltaY = event.clientY - dragStartY;
-  translateX += deltaX;
-  translateY += deltaY;
-  dragStartX = event.clientX;
-  dragStartY = event.clientY;
-  updateTransform();
-};
-
-const endDrag = () => {
-  isDragging = false;
-};
-const parentElement = ref(null);
-
-onMounted(() => {
-  parentElement.value = document.querySelector(".white-box");
-
-  // 부모 요소의 가로와 세로 크기를 가져옵니다.
-  const parentWidth = parentElement.value.clientWidth;
-  const parentHeight = parentElement.value.clientHeight;
-  // const width = 1200;
-  // const height = 250;
-  const width = parentWidth;
-  const height = parentHeight * 0.7;
-  const padding = 43;
-
-  const svg = d3
-    .select(svgContainer.value)
-    .append("svg")
-    .attr("width", width)
-    .attr("height", height);
-
-  // 임의의 노드와 링크 생성
-  const nodes = [
+// 임의의 노드와 링크 생성
+const nodes = [
     // Top row
     { id: "10", x: 380.0, y: 360.0 },
     { id: "8", x: 365.0, y: 330.0 },
@@ -439,7 +1184,6 @@ onMounted(() => {
   ];
 
   const links = [
-    // { source: "A", target: "B" },
     { source: "20", target: "22" },
     { source: "42", target: "44" },
     { source: "64", target: "66" },
@@ -469,27 +1213,19 @@ onMounted(() => {
     { source: "113", target: "114" },
     { source: "115", target: "118" },
     { source: "118", target: "119" },
-    // { source: "120", target: "89" },
     { source: "120", target: "121" },
-    // { source: "88", target: "121" },
     { source: "121", target: "122" },
     { source: "123", target: "126" },
     { source: "126", target: "127" },
-    // { source: "128", target: "67" },
     { source: "128", target: "129" },
-    // { source: "66", target: "129" },
     { source: "129", target: "130" },
     { source: "132", target: "135" },
     { source: "135", target: "136" },
-    // { source: "138", target: "45" },
     { source: "138", target: "139" },
-    // { source: "44", target: "139" },
     { source: "139", target: "140" },
     { source: "141", target: "144" },
     { source: "144", target: "145" },
-    // { source: "146", target: "23" },
     { source: "146", target: "147" },
-    // { source: "22", target: "147" },
     { source: "147", target: "148" },
     { source: "149", target: "152" },
     { source: "152", target: "153" },
@@ -789,14 +1525,6 @@ onMounted(() => {
     { source: "281", target: "280" },
     { source: "145", target: "146" },
     { source: "165", target: "166" },
-    // { source: "163", target: "283" },
-    // { source: "282", target: "164" },
-    // { source: "171", target: "262" },
-    // { source: "261", target: "172" },
-    // { source: "179", target: "242" },
-    // { source: "241", target: "180" },
-    // { source: "187", target: "220" },
-    // { source: "219", target: "188" },
     { source: "136", target: "137" },
     { source: "131", target: "132" },
     { source: "155", target: "1" },
@@ -825,1944 +1553,162 @@ onMounted(() => {
     { source: "282", target: "164" },
   ];
 
-  const tempOhts = [
-    [
-      { id: "0", x: 1251.178, y: 526.037 },
-      { id: "1", x: 275.866, y: 360.0 },
-      { id: "2", x: 840.001, y: 360.0 },
-      { id: "3", x: 520.521, y: 520.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 1599.036, y: 560.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1740.0, y: 400.0 },
-      { id: "9", x: 585.98, y: 495.376 },
-      { id: "10", x: 1779.999, y: 560.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 840.001, y: 320.0 },
-      { id: "13", x: 1050.0, y: 560.0 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1259.798, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 568.259, y: 395.944 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 645.795, y: 520.0 },
-      { id: "21", x: 816.321, y: 360.0 },
-      { id: "22", x: 1935.001, y: 320.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 1435.0, y: 480.0 },
-      { id: "26", x: 785.914, y: 400.797 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 1301.984, y: 491.709 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1250.0, y: 543.476 },
-      { id: "1", x: 311.562, y: 360.0 },
-      { id: "2", x: 840.001, y: 360.0 },
-      { id: "3", x: 482.136, y: 520.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 1580.74, y: 560.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1740.0, y: 400.0 },
-      { id: "9", x: 592.615, y: 482.175 },
-      { id: "10", x: 1779.999, y: 560.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 840.001, y: 320.0 },
-      { id: "13", x: 1048.955, y: 560.0 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1273.027, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 553.075, y: 400.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 621.024, y: 520.0 },
-      { id: "21", x: 816.321, y: 360.0 },
-      { id: "22", x: 1935.001, y: 320.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 1460.0, y: 480.0 },
-      { id: "26", x: 780.0, y: 413.766 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 1302.506, y: 506.523 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1243.379, y: 558.502 },
-      { id: "1", x: 357.235, y: 360.0 },
-      { id: "2", x: 840.001, y: 360.0 },
-      { id: "3", x: 434.323, y: 520.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 1569.999, y: 560.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1740.0, y: 400.0 },
-      { id: "9", x: 609.848, y: 480.0 },
-      { id: "10", x: 1779.999, y: 560.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 840.001, y: 320.0 },
-      { id: "13", x: 1039.382, y: 560.0 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1293.756, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 526.547, y: 400.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 598.754, y: 520.0 },
-      { id: "21", x: 816.321, y: 360.0 },
-      { id: "22", x: 1935.001, y: 320.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 1474.081, y: 474.074 },
-      { id: "26", x: 780.0, y: 436.095 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 1295.437, y: 519.553 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1227.745, y: 560.0 },
-      { id: "1", x: 402.235, y: 360.0 },
-      { id: "2", x: 840.001, y: 360.0 },
-      { id: "3", x: 384.323, y: 520.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 1569.999, y: 560.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1740.0, y: 400.0 },
-      { id: "9", x: 637.694, y: 480.0 },
-      { id: "10", x: 1779.999, y: 560.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 840.001, y: 320.0 },
-      { id: "13", x: 1019.81, y: 560.001 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1324.485, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 490.166, y: 400.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 587.922, y: 509.894 },
-      { id: "21", x: 816.321, y: 360.0 },
-      { id: "22", x: 1935.001, y: 320.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 1475.0, y: 456.624 },
-      { id: "26", x: 780.0, y: 465.923 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 1276.035, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1206.007, y: 560.0 },
-      { id: "1", x: 437.235, y: 360.0 },
-      { id: "2", x: 840.001, y: 360.0 },
-      { id: "3", x: 334.324, y: 520.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 1569.999, y: 560.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1740.0, y: 400.0 },
-      { id: "9", x: 675.539, y: 480.0 },
-      { id: "10", x: 1779.999, y: 560.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 840.001, y: 320.0 },
-      { id: "13", x: 1005.082, y: 551.3 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1365.214, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 456.072, y: 400.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 586.002, y: 495.245 },
-      { id: "21", x: 821.321, y: 360.0 },
-      { id: "22", x: 1935.001, y: 320.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 1475.0, y: 429.432 },
-      { id: "26", x: 792.53, y: 480.006 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 1246.452, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1204.999, y: 560.0 },
-      { id: "1", x: 462.235, y: 360.0 },
-      { id: "2", x: 840.001, y: 360.0 },
-      { id: "3", x: 289.46, y: 520.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 1569.999, y: 560.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1740.0, y: 400.0 },
-      { id: "9", x: 713.133, y: 480.0 },
-      { id: "10", x: 1779.999, y: 560.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 840.001, y: 320.0 },
-      { id: "13", x: 1005.0, y: 532.135 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1414.302, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 431.978, y: 400.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 592.708, y: 482.08 },
-      { id: "21", x: 836.321, y: 360.0 },
-      { id: "22", x: 1935.001, y: 320.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 1471.557, y: 403.102 },
-      { id: "26", x: 812.102, y: 480.0 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 1206.87, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1204.999, y: 560.0 },
-      { id: "1", x: 475.001, y: 360.0 },
-      { id: "2", x: 840.001, y: 360.0 },
-      { id: "3", x: 254.595, y: 520.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 1569.999, y: 560.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1740.0, y: 400.0 },
-      { id: "9", x: 740.727, y: 480.0 },
-      { id: "10", x: 1779.999, y: 560.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 840.001, y: 320.0 },
-      { id: "13", x: 994.079, y: 519.294 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1464.302, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 417.597, y: 404.478 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 610.051, y: 480.0 },
-      { id: "21", x: 861.321, y: 360.0 },
-      { id: "22", x: 1935.001, y: 320.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 1454.415, y: 400.0 },
-      { id: "26", x: 841.451, y: 480.0 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 1159.788, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1204.999, y: 560.0 },
-      { id: "1", x: 475.001, y: 360.0 },
-      { id: "2", x: 840.001, y: 360.0 },
-      { id: "3", x: 230.286, y: 517.095 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 1569.999, y: 560.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1740.0, y: 400.0 },
-      { id: "9", x: 757.289, y: 475.224 },
-      { id: "10", x: 1779.999, y: 560.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 840.001, y: 320.0 },
-      { id: "13", x: 976.534, y: 520.0 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1513.052, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 415.0, y: 420.575 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 637.986, y: 480.0 },
-      { id: "21", x: 896.321, y: 360.0 },
-      { id: "22", x: 1935.001, y: 320.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 1430.689, y: 400.0 },
-      { id: "26", x: 879.418, y: 480.0 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 1117.705, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1204.999, y: 560.0 },
-      { id: "1", x: 475.001, y: 360.0 },
-      { id: "2", x: 840.001, y: 360.0 },
-      { id: "3", x: 225.0, y: 501.669 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 1569.999, y: 560.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1740.0, y: 400.0 },
-      { id: "9", x: 760.0, y: 459.116 },
-      { id: "10", x: 1779.999, y: 560.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 840.001, y: 320.0 },
-      { id: "13", x: 949.301, y: 520.0 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1553.052, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 415.0, y: 446.467 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 665.921, y: 480.0 },
-      { id: "21", x: 941.321, y: 360.0 },
-      { id: "22", x: 1935.001, y: 320.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 1396.963, y: 400.0 },
-      { id: "26", x: 911.33, y: 480.0 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 1078.123, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1204.999, y: 560.0 },
-      { id: "1", x: 475.001, y: 360.0 },
-      { id: "2", x: 840.001, y: 360.0 },
-      { id: "3", x: 231.9, y: 482.169 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 1569.999, y: 560.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1740.0, y: 400.0 },
-      { id: "9", x: 760.0, y: 433.077 },
-      { id: "10", x: 1779.999, y: 560.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 842.572, y: 320.0 },
-      { id: "13", x: 912.068, y: 520.0 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1583.052, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 415.264, y: 472.34 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 675.001, y: 480.0 },
-      { id: "21", x: 991.321, y: 360.0 },
-      { id: "22", x: 1935.001, y: 320.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 1353.237, y: 400.0 },
-      { id: "26", x: 932.185, y: 482.391 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 1040.53, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1204.999, y: 560.0 },
-      { id: "1", x: 475.001, y: 360.0 },
-      { id: "2", x: 840.001, y: 360.0 },
-      { id: "3", x: 248.97, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 1569.999, y: 560.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1740.0, y: 400.0 },
-      { id: "9", x: 759.313, y: 407.121 },
-      { id: "10", x: 1779.999, y: 560.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 854.744, y: 320.0 },
-      { id: "13", x: 865.084, y: 520.0 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1590.001, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 428.083, y: 480.177 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 675.001, y: 480.0 },
-      { id: "21", x: 1041.321, y: 360.0 },
-      { id: "22", x: 1935.001, y: 320.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 1303.318, y: 400.0 },
-      { id: "26", x: 939.097, y: 495.654 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 996.189, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1204.999, y: 560.0 },
-      { id: "1", x: 475.001, y: 360.0 },
-      { id: "2", x: 840.001, y: 360.0 },
-      { id: "3", x: 274.079, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 1569.999, y: 560.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1740.0, y: 400.0 },
-      { id: "9", x: 745.886, y: 399.744 },
-      { id: "10", x: 1779.999, y: 560.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 874.399, y: 319.848 },
-      { id: "13", x: 815.084, y: 520.0 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1590.001, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 446.869, y: 480.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 675.001, y: 480.0 },
-      { id: "21", x: 1086.321, y: 360.0 },
-      { id: "22", x: 1935.001, y: 320.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 1253.318, y: 400.0 },
-      { id: "26", x: 937.399, y: 510.339 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 947.46, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1204.999, y: 560.0 },
-      { id: "1", x: 475.001, y: 360.0 },
-      { id: "2", x: 840.001, y: 360.0 },
-      { id: "3", x: 299.188, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 1569.999, y: 560.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1740.0, y: 400.0 },
-      { id: "9", x: 726.519, y: 400.0 },
-      { id: "10", x: 1779.999, y: 560.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 884.908, y: 329.508 },
-      { id: "13", x: 765.084, y: 520.0 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1590.001, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 475.583, y: 480.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 675.001, y: 480.0 },
-      { id: "21", x: 1121.321, y: 360.0 },
-      { id: "22", x: 1935.001, y: 320.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 1203.318, y: 400.0 },
-      { id: "26", x: 937.399, y: 510.339 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 947.46, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1204.999, y: 560.0 },
-      { id: "1", x: 475.001, y: 360.0 },
-      { id: "2", x: 840.001, y: 360.0 },
-      { id: "3", x: 300.001, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 1569.999, y: 560.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1740.0, y: 400.0 },
-      { id: "9", x: 697.135, y: 400.0 },
-      { id: "10", x: 1779.999, y: 560.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 885.0, y: 349.171 },
-      { id: "13", x: 715.084, y: 520.0 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1590.001, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 514.297, y: 480.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 675.001, y: 480.0 },
-      { id: "21", x: 1146.267, y: 359.628 },
-      { id: "22", x: 1935.001, y: 320.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 1153.318, y: 400.0 },
-      { id: "26", x: 937.399, y: 510.339 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 947.46, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1204.999, y: 560.0 },
-      { id: "1", x: 475.001, y: 360.0 },
-      { id: "2", x: 840.001, y: 360.0 },
-      { id: "3", x: 300.001, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 1569.999, y: 560.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1737.428, y: 400.0 },
-      { id: "9", x: 657.751, y: 400.191 },
-      { id: "10", x: 1779.999, y: 560.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 899.068, y: 360.19 },
-      { id: "13", x: 665.084, y: 520.0 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1590.001, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 553.011, y: 480.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 675.001, y: 480.0 },
-      { id: "21", x: 1159.432, y: 351.001 },
-      { id: "22", x: 1935.001, y: 320.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 1103.318, y: 400.0 },
-      { id: "26", x: 936.872, y: 511.472 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 947.46, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1204.999, y: 560.0 },
-      { id: "1", x: 475.001, y: 360.0 },
-      { id: "2", x: 844.9, y: 360.0 },
-      { id: "3", x: 300.001, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 1569.999, y: 560.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1725.256, y: 400.0 },
-      { id: "9", x: 618.368, y: 400.393 },
-      { id: "10", x: 1779.999, y: 560.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 918.434, y: 360.0 },
-      { id: "13", x: 615.084, y: 520.0 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1590.001, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 587.351, y: 480.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 675.001, y: 480.0 },
-      { id: "21", x: 1160.0, y: 331.889 },
-      { id: "22", x: 1935.001, y: 320.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 1053.318, y: 400.0 },
-      { id: "26", x: 930.798, y: 519.334 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 947.46, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1204.999, y: 560.0 },
-      { id: "1", x: 475.001, y: 360.0 },
-      { id: "2", x: 859.799, y: 360.0 },
-      { id: "3", x: 300.001, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 1569.999, y: 560.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1703.084, y: 400.0 },
-      { id: "9", x: 591.308, y: 395.761 },
-      { id: "10", x: 1779.999, y: 560.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 934.645, y: 366.269 },
-      { id: "13", x: 565.084, y: 520.0 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1590.001, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 612.838, y: 480.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 675.001, y: 480.0 },
-      { id: "21", x: 1171.944, y: 320.346 },
-      { id: "22", x: 1935.001, y: 320.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 1003.318, y: 400.0 },
-      { id: "26", x: 911.709, y: 520.0 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 947.46, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1204.999, y: 560.0 },
-      { id: "1", x: 475.001, y: 360.0 },
-      { id: "2", x: 882.199, y: 360.0 },
-      { id: "3", x: 300.001, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 1569.999, y: 560.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1670.911, y: 400.0 },
-      { id: "9", x: 586.932, y: 377.249 },
-      { id: "10", x: 1779.999, y: 560.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 938.249, y: 380.648 },
-      { id: "13", x: 515.084, y: 520.0 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1590.001, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 630.824, y: 480.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 675.001, y: 480.0 },
-      { id: "21", x: 1190.084, y: 320.0 },
-      { id: "22", x: 1935.001, y: 320.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 953.318, y: 400.0 },
-      { id: "26", x: 892.524, y: 520.124 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 942.46, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1204.999, y: 560.0 },
-      { id: "1", x: 475.001, y: 360.0 },
-      { id: "2", x: 907.098, y: 360.0 },
-      { id: "3", x: 300.001, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 1569.999, y: 560.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1628.739, y: 400.0 },
-      { id: "9", x: 592.414, y: 363.477 },
-      { id: "10", x: 1779.999, y: 560.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 937.106, y: 388.038 },
-      { id: "13", x: 465.084, y: 520.0 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1590.001, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 646.311, y: 480.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 675.001, y: 480.0 },
-      { id: "21", x: 1205.001, y: 320.0 },
-      { id: "22", x: 1935.004, y: 320.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 903.318, y: 400.0 },
-      { id: "26", x: 885.0, y: 532.038 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 927.632, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1204.999, y: 560.0 },
-      { id: "1", x: 475.001, y: 360.0 },
-      { id: "2", x: 941.997, y: 360.0 },
-      { id: "3", x: 300.001, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 1567.428, y: 560.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1579.139, y: 400.0 },
-      { id: "9", x: 607.544, y: 360.317 },
-      { id: "10", x: 1779.999, y: 560.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 935.275, y: 392.684 },
-      { id: "13", x: 416.334, y: 520.0 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1590.001, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 650.304, y: 480.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 675.001, y: 480.0 },
-      { id: "21", x: 1205.001, y: 320.0 },
-      { id: "22", x: 1940.292, y: 320.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 853.318, y: 400.0 },
-      { id: "26", x: 884.771, y: 550.807 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 912.757, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1204.999, y: 560.0 },
-      { id: "1", x: 475.001, y: 360.0 },
-      { id: "2", x: 986.897, y: 360.0 },
-      { id: "3", x: 300.001, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 1555.256, y: 560.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1529.139, y: 400.0 },
-      { id: "9", x: 633.178, y: 360.0 },
-      { id: "10", x: 1779.999, y: 560.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 924.82, y: 400.0 },
-      { id: "13", x: 376.334, y: 520.0 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1590.001, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 650.304, y: 480.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 675.001, y: 480.0 },
-      { id: "21", x: 1205.001, y: 320.0 },
-      { id: "22", x: 1955.58, y: 320.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 803.318, y: 400.0 },
-      { id: "26", x: 873.807, y: 559.972 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 890.382, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1204.999, y: 560.0 },
-      { id: "1", x: 475.001, y: 360.0 },
-      { id: "2", x: 1036.896, y: 360.0 },
-      { id: "3", x: 300.001, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 1535.602, y: 560.351 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1479.139, y: 400.0 },
-      { id: "9", x: 668.815, y: 360.0 },
-      { id: "10", x: 1779.999, y: 560.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 901.693, y: 400.0 },
-      { id: "13", x: 346.334, y: 520.0 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1590.001, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 650.304, y: 480.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 675.001, y: 480.0 },
-      { id: "21", x: 1205.001, y: 320.0 },
-      { id: "22", x: 1976.55, y: 323.321 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 753.318, y: 400.0 },
-      { id: "26", x: 856.033, y: 560.0 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 858.007, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1204.999, y: 560.0 },
-      { id: "1", x: 475.001, y: 360.0 },
-      { id: "2", x: 1081.896, y: 360.0 },
-      { id: "3", x: 300.001, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 1525.078, y: 551.273 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1429.139, y: 400.0 },
-      { id: "9", x: 714.432, y: 360.0 },
-      { id: "10", x: 1779.999, y: 560.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 868.566, y: 400.0 },
-      { id: "13", x: 326.334, y: 520.0 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1590.001, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 651.554, y: 480.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 675.009, y: 480.0 },
-      { id: "21", x: 1205.001, y: 320.0 },
-      { id: "22", x: 1980.0, y: 339.483 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 703.323, y: 400.0 },
-      { id: "26", x: 839.999, y: 560.0 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 815.632, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1204.999, y: 560.0 },
-      { id: "1", x: 475.001, y: 360.0 },
-      { id: "2", x: 1116.896, y: 360.0 },
-      { id: "3", x: 300.001, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 1525.0, y: 532.091 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1379.139, y: 400.0 },
-      { id: "9", x: 763.182, y: 360.0 },
-      { id: "10", x: 1779.999, y: 560.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 825.439, y: 400.0 },
-      { id: "13", x: 324.999, y: 520.0 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1590.001, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 651.554, y: 480.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 680.424, y: 480.0 },
-      { id: "21", x: 1205.001, y: 320.0 },
-      { id: "22", x: 1987.394, y: 359.123 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 658.66, y: 400.186 },
-      { id: "26", x: 839.999, y: 560.0 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 765.977, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1202.428, y: 560.0 },
-      { id: "1", x: 475.001, y: 360.0 },
-      { id: "2", x: 1141.896, y: 360.0 },
-      { id: "3", x: 300.001, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 1514.018, y: 519.295 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1329.139, y: 400.0 },
-      { id: "9", x: 803.182, y: 360.0 },
-      { id: "10", x: 1779.999, y: 560.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 782.312, y: 400.0 },
-      { id: "13", x: 324.999, y: 520.0 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1590.001, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 656.554, y: 480.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 695.84, y: 480.0 },
-      { id: "21", x: 1205.001, y: 320.0 },
-      { id: "22", x: 2004.838, y: 360.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 623.997, y: 400.364 },
-      { id: "26", x: 839.999, y: 560.0 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 715.977, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1190.256, y: 560.0 },
-      { id: "1", x: 475.001, y: 360.0 },
-      { id: "2", x: 1156.693, y: 354.462 },
-      { id: "3", x: 300.001, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 1496.443, y: 520.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1279.139, y: 400.0 },
-      { id: "9", x: 833.182, y: 360.0 },
-      { id: "10", x: 1779.999, y: 560.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 741.686, y: 400.0 },
-      { id: "13", x: 324.999, y: 520.0 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1590.001, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 671.554, y: 480.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 721.255, y: 480.0 },
-      { id: "21", x: 1205.001, y: 320.0 },
-      { id: "22", x: 2027.967, y: 359.888 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 599.334, y: 400.491 },
-      { id: "26", x: 839.999, y: 560.0 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 665.977, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1170.602, y: 560.351 },
-      { id: "1", x: 475.001, y: 360.0 },
-      { id: "2", x: 1160.0, y: 338.602 },
-      { id: "3", x: 300.001, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 1469.169, y: 520.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1230.389, y: 400.0 },
-      { id: "9", x: 840.001, y: 360.0 },
-      { id: "10", x: 1775.741, y: 560.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 701.059, y: 400.0 },
-      { id: "13", x: 324.999, y: 520.0 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1590.001, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 694.843, y: 480.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 746.643, y: 479.702 },
-      { id: "21", x: 1205.001, y: 320.0 },
-      { id: "22", x: 2039.948, y: 369.798 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 588.689, y: 390.667 },
-      { id: "26", x: 839.999, y: 560.0 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 615.977, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1160.078, y: 551.273 },
-      { id: "1", x: 475.001, y: 360.0 },
-      { id: "2", x: 1162.939, y: 323.129 },
-      { id: "3", x: 300.001, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 1431.895, y: 520.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1190.389, y: 400.0 },
-      { id: "9", x: 840.001, y: 360.0 },
-      { id: "10", x: 1761.512, y: 560.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 667.932, y: 400.139 },
-      { id: "13", x: 324.999, y: 520.0 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1590.001, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 711.57, y: 480.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 759.582, y: 471.349 },
-      { id: "21", x: 1205.001, y: 320.0 },
-      { id: "22", x: 2040.0, y: 389.653 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 587.113, y: 375.928 },
-      { id: "26", x: 839.999, y: 560.0 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 565.977, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1160.0, y: 532.091 },
-      { id: "1", x: 475.001, y: 360.0 },
-      { id: "2", x: 1175.291, y: 320.0 },
-      { id: "3", x: 300.001, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 1384.88, y: 520.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1160.389, y: 400.0 },
-      { id: "9", x: 840.001, y: 360.0 },
-      { id: "10", x: 1740.064, y: 558.9 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 634.806, y: 400.309 },
-      { id: "13", x: 324.999, y: 520.0 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1590.001, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 725.797, y: 480.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 760.0, y: 452.311 },
-      { id: "21", x: 1205.001, y: 320.0 },
-      { id: "22", x: 2026.504, y: 400.108 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 593.241, y: 362.431 },
-      { id: "26", x: 839.999, y: 560.0 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 517.227, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1149.018, y: 519.295 },
-      { id: "1", x: 475.0, y: 360.0 },
-      { id: "2", x: 1180.291, y: 320.0 },
-      { id: "3", x: 300.001, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 1336.13, y: 520.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1145.057, y: 409.766 },
-      { id: "9", x: 840.001, y: 360.0 },
-      { id: "10", x: 1735.0, y: 544.22 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 591.68, y: 400.445 },
-      { id: "13", x: 324.999, y: 520.0 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1590.001, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 742.523, y: 480.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 760.0, y: 425.753 },
-      { id: "21", x: 1205.001, y: 320.0 },
-      { id: "22", x: 2007.465, y: 400.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 609.418, y: 360.283 },
-      { id: "26", x: 839.999, y: 560.0 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 469.727, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1131.443, y: 520.0 },
-      { id: "1", x: 475.0, y: 360.0 },
-      { id: "2", x: 1180.291, y: 320.0 },
-      { id: "3", x: 300.001, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 1291.832, y: 520.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1145.0, y: 429.599 },
-      { id: "9", x: 840.001, y: 360.0 },
-      { id: "10", x: 1732.951, y: 523.701 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 541.859, y: 400.0 },
-      { id: "13", x: 324.999, y: 520.0 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1590.001, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 769.25, y: 480.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 759.183, y: 406.757 },
-      { id: "21", x: 1205.001, y: 320.0 },
-      { id: "22", x: 1978.471, y: 400.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 632.96, y: 357.302 },
-      { id: "26", x: 839.999, y: 560.0 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 429.727, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1104.169, y: 520.0 },
-      { id: "1", x: 475.0, y: 360.0 },
-      { id: "2", x: 1180.291, y: 320.0 },
-      { id: "3", x: 300.001, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 1252.969, y: 520.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1145.0, y: 456.938 },
-      { id: "9", x: 840.001, y: 360.0 },
-      { id: "10", x: 1718.822, y: 520.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 491.859, y: 400.0 },
-      { id: "13", x: 324.999, y: 520.0 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1590.001, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 805.977, y: 480.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 747.301, y: 399.491 },
-      { id: "21", x: 1205.001, y: 320.0 },
-      { id: "22", x: 1939.478, y: 400.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 640.0, y: 341.702 },
-      { id: "26", x: 839.999, y: 560.0 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 399.727, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1066.895, y: 520.0 },
-      { id: "1", x: 475.0, y: 360.0 },
-      { id: "2", x: 1180.291, y: 320.0 },
-      { id: "3", x: 300.001, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 1214.105, y: 520.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1148.53, y: 475.716 },
-      { id: "9", x: 840.001, y: 360.0 },
-      { id: "10", x: 1698.057, y: 520.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 441.859, y: 400.0 },
-      { id: "13", x: 324.999, y: 520.0 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1590.001, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 852.555, y: 480.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 728.811, y: 400.0 },
-      { id: "21", x: 1205.001, y: 320.0 },
-      { id: "22", x: 1891.281, y: 400.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 646.042, y: 321.152 },
-      { id: "26", x: 839.999, y: 560.0 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 378.336, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1023.436, y: 520.0 },
-      { id: "1", x: 475.0, y: 360.0 },
-      { id: "2", x: 1180.291, y: 320.0 },
-      { id: "3", x: 300.001, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 1170.241, y: 520.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1162.506, y: 480.0 },
-      { id: "9", x: 840.001, y: 360.0 },
-      { id: "10", x: 1667.292, y: 520.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 391.859, y: 400.0 },
-      { id: "13", x: 324.999, y: 520.0 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1590.001, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 902.555, y: 480.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 700.386, y: 400.0 },
-      { id: "21", x: 1205.001, y: 320.0 },
-      { id: "22", x: 1841.281, y: 400.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 664.005, y: 320.0 },
-      { id: "26", x: 839.999, y: 560.0 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 362.498, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 988.514, y: 520.0 },
-      { id: "1", x: 475.0, y: 360.0 },
-      { id: "2", x: 1180.291, y: 320.0 },
-      { id: "3", x: 302.572, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 1131.378, y: 520.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1184.092, y: 480.0 },
-      { id: "9", x: 840.001, y: 360.0 },
-      { id: "10", x: 1626.527, y: 520.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 346.859, y: 400.0 },
-      { id: "13", x: 324.999, y: 520.0 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1590.001, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 952.555, y: 480.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 661.96, y: 400.169 },
-      { id: "21", x: 1205.001, y: 320.0 },
-      { id: "22", x: 1791.281, y: 400.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 679.56, y: 320.0 },
-      { id: "26", x: 839.999, y: 560.0 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 349.159, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 963.592, y: 520.0 },
-      { id: "1", x: 475.0, y: 360.0 },
-      { id: "2", x: 1180.291, y: 320.0 },
-      { id: "3", x: 314.744, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 1092.514, y: 520.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1215.678, y: 480.0 },
-      { id: "9", x: 840.001, y: 360.0 },
-      { id: "10", x: 1577.424, y: 520.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 311.859, y: 400.0 },
-      { id: "13", x: 324.999, y: 520.0 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1590.001, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 1002.555, y: 480.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 623.535, y: 400.366 },
-      { id: "21", x: 1205.001, y: 320.0 },
-      { id: "22", x: 1741.281, y: 400.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 685.001, y: 320.0 },
-      { id: "26", x: 839.999, y: 560.0 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 349.159, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 952.449, y: 510.05 },
-      { id: "1", x: 475.0, y: 360.0 },
-      { id: "2", x: 1180.291, y: 320.0 },
-      { id: "3", x: 336.916, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 1056.151, y: 520.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1253.327, y: 480.0 },
-      { id: "9", x: 840.001, y: 360.0 },
-      { id: "10", x: 1532.424, y: 520.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 286.859, y: 400.0 },
-      { id: "13", x: 324.999, y: 520.0 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1590.001, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 1050.335, y: 480.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 595.11, y: 400.512 },
-      { id: "21", x: 1205.001, y: 320.0 },
-      { id: "22", x: 1691.281, y: 400.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 685.001, y: 320.0 },
-      { id: "26", x: 839.999, y: 560.0 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 349.159, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 950.844, y: 495.352 },
-      { id: "1", x: 475.0, y: 360.0 },
-      { id: "2", x: 1180.291, y: 320.0 },
-      { id: "3", x: 369.089, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 1025.93, y: 520.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1282.363, y: 480.0 },
-      { id: "9", x: 840.001, y: 360.0 },
-      { id: "10", x: 1497.424, y: 520.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 284.999, y: 400.0 },
-      { id: "13", x: 324.999, y: 520.0 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1590.001, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 1097.803, y: 480.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 587.012, y: 384.211 },
-      { id: "21", x: 1205.001, y: 320.0 },
-      { id: "22", x: 1641.281, y: 400.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 685.001, y: 320.0 },
-      { id: "26", x: 839.999, y: 560.0 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 349.159, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 957.649, y: 482.225 },
-      { id: "1", x: 475.0, y: 360.0 },
-      { id: "2", x: 1180.291, y: 320.0 },
-      { id: "3", x: 411.261, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 993.62, y: 520.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1298.942, y: 485.091 },
-      { id: "9", x: 840.001, y: 360.0 },
-      { id: "10", x: 1472.485, y: 519.471 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 284.999, y: 400.0 },
-      { id: "13", x: 324.999, y: 520.0 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1590.001, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 1141.662, y: 480.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 588.947, y: 369.515 },
-      { id: "21", x: 1205.001, y: 320.0 },
-      { id: "22", x: 1591.281, y: 400.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 685.001, y: 320.0 },
-      { id: "26", x: 839.999, y: 560.0 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 349.159, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 974.836, y: 480.0 },
-      { id: "1", x: 475.0, y: 360.0 },
-      { id: "2", x: 1180.291, y: 320.0 },
-      { id: "3", x: 460.861, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 951.31, y: 520.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1303.243, y: 499.277 },
-      { id: "9", x: 840.001, y: 360.0 },
-      { id: "10", x: 1460.448, y: 528.214 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 284.999, y: 400.0 },
-      { id: "13", x: 324.999, y: 520.0 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1590.001, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 1182.456, y: 480.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 599.025, y: 360.472 },
-      { id: "21", x: 1207.572, y: 320.0 },
-      { id: "22", x: 1541.281, y: 400.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 685.001, y: 320.0 },
-      { id: "26", x: 839.999, y: 560.0 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 349.159, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1002.677, y: 480.0 },
-      { id: "1", x: 475.0, y: 360.0 },
-      { id: "2", x: 1185.291, y: 320.0 },
-      { id: "3", x: 510.861, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 901.672, y: 520.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1299.75, y: 513.683 },
-      { id: "9", x: 840.001, y: 360.0 },
-      { id: "10", x: 1460.0, y: 547.004 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 284.999, y: 400.0 },
-      { id: "13", x: 324.999, y: 520.0 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1590.001, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 1225.242, y: 480.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 620.005, y: 360.091 },
-      { id: "21", x: 1219.744, y: 320.0 },
-      { id: "22", x: 1491.281, y: 400.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 685.001, y: 320.0 },
-      { id: "26", x: 839.999, y: 560.0 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 349.159, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1040.518, y: 480.0 },
-      { id: "1", x: 475.0, y: 360.0 },
-      { id: "2", x: 1199.48, y: 320.0 },
-      { id: "3", x: 560.861, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 851.672, y: 520.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1286.819, y: 520.0 },
-      { id: "9", x: 840.001, y: 360.0 },
-      { id: "10", x: 1448.879, y: 559.963 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 284.999, y: 400.0 },
-      { id: "13", x: 324.999, y: 520.0 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1590.001, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 1274.997, y: 480.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 650.988, y: 360.0 },
-      { id: "21", x: 1239.399, y: 319.848 },
-      { id: "22", x: 1441.281, y: 400.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 685.001, y: 320.0 },
-      { id: "26", x: 839.999, y: 560.0 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 344.159, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1078.359, y: 480.0 },
-      { id: "1", x: 475.0, y: 360.0 },
-      { id: "2", x: 1205.001, y: 320.0 },
-      { id: "3", x: 610.861, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 801.672, y: 520.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1262.106, y: 520.0 },
-      { id: "9", x: 840.001, y: 360.0 },
-      { id: "10", x: 1431.143, y: 560.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 284.999, y: 400.0 },
-      { id: "13", x: 325.0, y: 520.0 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1590.001, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 1324.997, y: 480.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 691.734, y: 360.0 },
-      { id: "21", x: 1249.908, y: 329.508 },
-      { id: "22", x: 1391.281, y: 400.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 685.001, y: 320.0 },
-      { id: "26", x: 839.999, y: 560.0 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 330.165, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1105.261, y: 475.897 },
-      { id: "1", x: 475.0, y: 360.0 },
-      { id: "2", x: 1205.001, y: 320.0 },
-      { id: "3", x: 660.861, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 751.672, y: 520.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1227.392, y: 520.0 },
-      { id: "9", x: 840.001, y: 360.0 },
-      { id: "10", x: 1414.999, y: 560.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 284.999, y: 400.0 },
-      { id: "13", x: 325.0, y: 520.0 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1590.001, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 1374.997, y: 480.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 729.634, y: 360.0 },
-      { id: "21", x: 1250.0, y: 349.171 },
-      { id: "22", x: 1341.281, y: 400.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 685.001, y: 320.0 },
-      { id: "26", x: 839.999, y: 560.0 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 330.165, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1110.0, y: 455.719 },
-      { id: "1", x: 475.0, y: 360.0 },
-      { id: "2", x: 1205.001, y: 320.0 },
-      { id: "3", x: 710.861, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 701.672, y: 520.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1182.679, y: 520.0 },
-      { id: "9", x: 840.001, y: 360.0 },
-      { id: "10", x: 1414.999, y: 560.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 284.999, y: 400.0 },
-      { id: "13", x: 325.0, y: 520.0 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1590.001, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 1424.997, y: 480.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 760.035, y: 360.0 },
-      { id: "21", x: 1264.068, y: 360.19 },
-      { id: "22", x: 1293.555, y: 400.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 685.001, y: 320.0 },
-      { id: "26", x: 839.999, y: 560.0 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 330.165, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1110.0, y: 427.629 },
-      { id: "1", x: 475.0, y: 360.0 },
-      { id: "2", x: 1205.001, y: 320.0 },
-      { id: "3", x: 760.861, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 651.672, y: 520.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1132.683, y: 520.0 },
-      { id: "9", x: 840.001, y: 360.0 },
-      { id: "10", x: 1414.999, y: 560.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 284.999, y: 400.0 },
-      { id: "13", x: 323.75, y: 520.0 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1590.001, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 1474.997, y: 480.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 787.935, y: 360.0 },
-      { id: "21", x: 1283.434, y: 360.0 },
-      { id: "22", x: 1255.299, y: 400.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 685.001, y: 320.0 },
-      { id: "26", x: 839.999, y: 560.0 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 330.165, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1108.97, y: 407.23 },
-      { id: "1", x: 475.0, y: 360.0 },
-      { id: "2", x: 1205.001, y: 320.0 },
-      { id: "3", x: 810.861, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 601.672, y: 520.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1082.683, y: 520.0 },
-      { id: "9", x: 840.001, y: 360.0 },
-      { id: "10", x: 1414.999, y: 560.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 284.999, y: 400.0 },
-      { id: "13", x: 313.75, y: 520.0 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1590.001, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 1524.997, y: 480.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 815.835, y: 360.0 },
-      { id: "21", x: 1300.547, y: 365.493 },
-      { id: "22", x: 1227.042, y: 400.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 685.001, y: 320.0 },
-      { id: "26", x: 839.999, y: 560.0 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 330.165, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1096.766, y: 399.899 },
-      { id: "1", x: 475.0, y: 360.0 },
-      { id: "2", x: 1205.001, y: 320.0 },
-      { id: "3", x: 860.861, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 551.672, y: 520.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 1032.683, y: 520.0 },
-      { id: "9", x: 840.001, y: 360.0 },
-      { id: "10", x: 1414.999, y: 560.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 284.999, y: 400.0 },
-      { id: "13", x: 293.75, y: 520.0 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1590.001, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 1573.747, y: 480.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 840.001, y: 360.0 },
-      { id: "21", x: 1305.595, y: 379.356 },
-      { id: "22", x: 1208.786, y: 400.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 685.001, y: 320.0 },
-      { id: "26", x: 840.0, y: 560.0 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 328.915, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1077.88, y: 400.0 },
-      { id: "1", x: 475.0, y: 360.0 },
-      { id: "2", x: 1205.001, y: 320.0 },
-      { id: "3", x: 910.861, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 502.383, y: 520.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 982.683, y: 520.0 },
-      { id: "9", x: 840.001, y: 360.0 },
-      { id: "10", x: 1414.999, y: 560.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 284.999, y: 400.0 },
-      { id: "13", x: 263.763, y: 520.0 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1590.001, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 1613.747, y: 480.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 840.001, y: 360.0 },
-      { id: "21", x: 1301.513, y: 393.533 },
-      { id: "22", x: 1204.999, y: 400.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 685.001, y: 320.0 },
-      { id: "26", x: 840.0, y: 560.0 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 324.999, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1049.06, y: 400.0 },
-      { id: "1", x: 475.0, y: 360.0 },
-      { id: "2", x: 1205.001, y: 320.0 },
-      { id: "3", x: 960.861, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 457.383, y: 520.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 932.683, y: 520.0 },
-      { id: "9", x: 840.001, y: 360.0 },
-      { id: "10", x: 1414.999, y: 560.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 284.999, y: 400.0 },
-      { id: "13", x: 234.556, y: 519.125 },
-      { id: "14", x: 1919.999, y: 520.0 },
-      { id: "15", x: 1591.965, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 1643.747, y: 480.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 840.001, y: 360.0 },
-      { id: "21", x: 1288.498, y: 400.0 },
-      { id: "22", x: 1204.999, y: 400.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 685.001, y: 320.0 },
-      { id: "26", x: 840.0, y: 560.0 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 324.999, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1010.241, y: 400.0 },
-      { id: "1", x: 475.0, y: 360.0 },
-      { id: "2", x: 1205.001, y: 320.0 },
-      { id: "3", x: 1010.861, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 422.383, y: 520.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 882.683, y: 520.0 },
-      { id: "9", x: 840.001, y: 360.0 },
-      { id: "10", x: 1414.999, y: 560.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 284.999, y: 400.0 },
-      { id: "13", x: 225.0, y: 503.272 },
-      { id: "14", x: 1916.945, y: 520.0 },
-      { id: "15", x: 1603.235, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 1662.814, y: 482.469 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 840.001, y: 360.0 },
-      { id: "21", x: 1267.156, y: 400.0 },
-      { id: "22", x: 1204.999, y: 400.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1935.0, y: 320.0 },
-      { id: "25", x: 685.001, y: 320.0 },
-      { id: "26", x: 840.0, y: 560.0 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 324.999, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 971.421, y: 400.0 },
-      { id: "1", x: 475.0, y: 360.0 },
-      { id: "2", x: 1205.001, y: 320.0 },
-      { id: "3", x: 1060.861, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 394.883, y: 520.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 833.933, y: 520.0 },
-      { id: "9", x: 840.001, y: 360.0 },
-      { id: "10", x: 1414.999, y: 560.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 284.999, y: 400.0 },
-      { id: "13", x: 225.0, y: 477.078 },
-      { id: "14", x: 1904.128, y: 520.0 },
-      { id: "15", x: 1622.005, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 1669.605, y: 495.592 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 840.001, y: 360.0 },
-      { id: "21", x: 1245.814, y: 400.0 },
-      { id: "22", x: 1204.999, y: 400.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1940.011, y: 320.0 },
-      { id: "25", x: 685.001, y: 320.0 },
-      { id: "26", x: 840.0, y: 560.0 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 324.999, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 952.171, y: 384.736 },
-      { id: "1", x: 475.0, y: 360.0 },
-      { id: "2", x: 1205.001, y: 320.0 },
-      { id: "3", x: 1110.861, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 369.883, y: 520.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 793.933, y: 520.0 },
-      { id: "9", x: 840.001, y: 360.0 },
-      { id: "10", x: 1414.999, y: 560.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 284.999, y: 400.0 },
-      { id: "13", x: 225.0, y: 440.885 },
-      { id: "14", x: 1881.311, y: 520.0 },
-      { id: "15", x: 1640.775, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 1667.798, y: 510.257 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 840.001, y: 360.0 },
-      { id: "21", x: 1231.972, y: 400.0 },
-      { id: "22", x: 1204.999, y: 400.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1955.022, y: 320.0 },
-      { id: "25", x: 685.001, y: 320.0 },
-      { id: "26", x: 840.0, y: 560.0 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 324.999, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 955.181, y: 366.445 },
-      { id: "1", x: 475.0, y: 360.0 },
-      { id: "2", x: 1205.001, y: 320.0 },
-      { id: "3", x: 1160.861, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 354.883, y: 520.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 763.933, y: 520.0 },
-      { id: "9", x: 840.001, y: 360.0 },
-      { id: "10", x: 1414.999, y: 560.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 284.999, y: 400.0 },
-      { id: "13", x: 225.0, y: 404.691 },
-      { id: "14", x: 1848.494, y: 520.0 },
-      { id: "15", x: 1654.544, y: 480.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 1657.486, y: 520.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 840.001, y: 360.0 },
-      { id: "21", x: 1228.801, y: 400.0 },
-      { id: "22", x: 1204.999, y: 400.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1976.173, y: 322.962 },
-      { id: "25", x: 685.001, y: 320.0 },
-      { id: "26", x: 840.0, y: 560.0 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 324.999, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 967.991, y: 360.0 },
-      { id: "1", x: 475.0, y: 360.0 },
-      { id: "2", x: 1206.458, y: 320.0 },
-      { id: "3", x: 1210.861, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 349.883, y: 520.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 743.974, y: 519.711 },
-      { id: "9", x: 840.001, y: 360.0 },
-      { id: "10", x: 1414.999, y: 560.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 284.999, y: 400.0 },
-      { id: "13", x: 225.228, y: 378.514 },
-      { id: "14", x: 1805.677, y: 520.0 },
-      { id: "15", x: 1667.089, y: 488.303 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 1635.895, y: 520.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 840.001, y: 360.0 },
-      { id: "21", x: 1228.801, y: 400.0 },
-      { id: "22", x: 1204.999, y: 400.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1980.0, y: 338.924 },
-      { id: "25", x: 685.001, y: 320.0 },
-      { id: "26", x: 840.0, y: 560.0 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 324.999, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 992.607, y: 360.0 },
-      { id: "1", x: 475.0, y: 360.0 },
-      { id: "2", x: 1216.858, y: 320.0 },
-      { id: "3", x: 1260.861, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 349.883, y: 520.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 731.376, y: 525.623 },
-      { id: "9", x: 840.001, y: 360.0 },
-      { id: "10", x: 1414.999, y: 560.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 284.999, y: 400.0 },
-      { id: "13", x: 232.943, y: 363.934 },
-      { id: "14", x: 1757.165, y: 520.0 },
-      { id: "15", x: 1669.874, y: 502.485 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 1604.305, y: 520.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 840.001, y: 360.0 },
-      { id: "21", x: 1228.801, y: 400.0 },
-      { id: "22", x: 1204.999, y: 400.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 1986.914, y: 358.861 },
-      { id: "25", x: 685.001, y: 320.0 },
-      { id: "26", x: 840.0, y: 560.0 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 324.999, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1027.223, y: 360.0 },
-      { id: "1", x: 475.0, y: 360.0 },
-      { id: "2", x: 1234.759, y: 320.0 },
-      { id: "3", x: 1310.861, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 349.883, y: 520.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 730.0, y: 542.8 },
-      { id: "9", x: 840.001, y: 360.0 },
-      { id: "10", x: 1414.999, y: 560.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 284.999, y: 400.0 },
-      { id: "13", x: 247.923, y: 360.0 },
-      { id: "14", x: 1717.165, y: 520.0 },
-      { id: "15", x: 1664.128, y: 516.097 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 1562.738, y: 520.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 840.001, y: 360.0 },
-      { id: "21", x: 1228.801, y: 400.0 },
-      { id: "22", x: 1204.999, y: 400.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 2004.271, y: 360.0 },
-      { id: "25", x: 685.001, y: 320.0 },
-      { id: "26", x: 840.0, y: 560.0 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 324.999, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1071.84, y: 360.0 },
-      { id: "1", x: 475.0, y: 360.0 },
-      { id: "2", x: 1247.994, y: 325.048 },
-      { id: "3", x: 1360.861, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 349.883, y: 520.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 724.15, y: 558.055 },
-      { id: "9", x: 840.001, y: 360.0 },
-      { id: "10", x: 1414.999, y: 560.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 284.999, y: 400.0 },
-      { id: "13", x: 272.505, y: 360.0 },
-      { id: "14", x: 1688.361, y: 517.687 },
-      { id: "15", x: 1648.768, y: 520.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 1522.134, y: 520.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 840.001, y: 360.0 },
-      { id: "21", x: 1228.801, y: 400.0 },
-      { id: "22", x: 1204.999, y: 400.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 2027.124, y: 359.853 },
-      { id: "25", x: 685.001, y: 320.0 },
-      { id: "26", x: 840.0, y: 560.0 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 324.999, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1121.832, y: 360.0 },
-      { id: "1", x: 475.0, y: 360.0 },
-      { id: "2", x: 1250.0, y: 341.668 },
-      { id: "3", x: 1405.861, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 349.883, y: 520.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 708.871, y: 560.0 },
-      { id: "9", x: 840.001, y: 360.0 },
-      { id: "10", x: 1414.999, y: 560.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 284.999, y: 400.0 },
-      { id: "13", x: 307.087, y: 360.0 },
-      { id: "14", x: 1680.367, y: 499.858 },
-      { id: "15", x: 1622.564, y: 520.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 1491.53, y: 520.0 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 840.001, y: 360.0 },
-      { id: "21", x: 1228.801, y: 400.0 },
-      { id: "22", x: 1204.999, y: 400.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 2039.656, y: 368.847 },
-      { id: "25", x: 685.001, y: 320.0 },
-      { id: "26", x: 840.0, y: 560.0 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 324.999, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-    [
-      { id: "0", x: 1166.832, y: 360.0 },
-      { id: "1", x: 475.0, y: 360.0 },
-      { id: "2", x: 1254.767, y: 357.233 },
-      { id: "3", x: 1440.861, y: 480.0 },
-      { id: "4", x: 1780.001, y: 360.0 },
-      { id: "5", x: 1934.999, y: 560.0 },
-      { id: "6", x: 349.883, y: 520.0 },
-      { id: "7", x: 1780.001, y: 320.0 },
-      { id: "8", x: 687.728, y: 560.0 },
-      { id: "9", x: 840.001, y: 360.0 },
-      { id: "10", x: 1413.542, y: 560.0 },
-      { id: "11", x: 1780.001, y: 320.0 },
-      { id: "12", x: 284.999, y: 400.0 },
-      { id: "13", x: 346.96, y: 360.0 },
-      { id: "14", x: 1684.548, y: 485.704 },
-      { id: "15", x: 1588.86, y: 520.0 },
-      { id: "16", x: 1204.999, y: 560.0 },
-      { id: "17", x: 1470.988, y: 519.431 },
-      { id: "18", x: 324.999, y: 560.0 },
-      { id: "19", x: 1780.001, y: 320.0 },
-      { id: "20", x: 840.001, y: 360.0 },
-      { id: "21", x: 1228.801, y: 400.0 },
-      { id: "22", x: 1204.999, y: 400.0 },
-      { id: "23", x: 1955.001, y: 480.0 },
-      { id: "24", x: 2040.0, y: 388.025 },
-      { id: "25", x: 685.001, y: 320.0 },
-      { id: "26", x: 840.0, y: 560.0 },
-      { id: "27", x: 1934.999, y: 560.0 },
-      { id: "28", x: 324.999, y: 520.0 },
-      { id: "29", x: 1934.999, y: 560.0 },
-    ],
-  ];
+//로그
+const currentTimeText = ref("2024.01.08 13:38:23");
 
-  // 최대 및 최소 좌표 계산
-  const xExtent = d3.extent(nodes, (d) => d.x);
-  const yExtent = d3.extent(nodes, (d) => d.y);
+const formatTime = (time) => {
+    // 날짜와 시간을 추출
+  const datePart = time.slice(0, 10).split('-');
+  const timePart = time.slice(11, 19).split(':');
 
-  // 스케일 함수 설정
-  const xScale = d3
-    .scaleLinear()
-    .domain([xExtent[0], xExtent[1]])
-    .range([padding, width - padding]);
+  // 날짜 부분을 원하는 형식으로 조합
+  const formattedDate = `${datePart[0]}.${datePart[1]}.${datePart[2]}`;
 
-  const yScale = d3
-    .scaleLinear()
-    .domain([yExtent[0], yExtent[1]])
-    .range([padding, height - padding]);
+  // 시간 부분을 원하는 형식으로 조합
+  const formattedTime = `${timePart[0]}:${timePart[1]}:${timePart[2]}`;
 
+  // 최종적으로 날짜와 시간을 조합하여 원하는 형식으로 출력
+  return `${formattedDate} ${formattedTime}`;
+}
+
+
+currentTimeText.value = formatTime(ohtLogs.value["simulation-log"][0]['time'])
+
+//컬러설정
+const pathColor = "#B4B4B4";
+const facilityColor = "#292D30";
+const ohtColor = "orange";
+
+const container = ref(null);
+const svgContainer = ref(null);
+
+let scale = 1.0;
+let translateX = 0;
+let translateY = 0;
+let isDragging = false;
+let dragStartX = 0;
+let dragStartY = 0;
+const idList = [
+  "6",
+  "16",
+  "28",
+  "38",
+  "50",
+  "60",
+  "72",
+  "82",
+  "94",
+  "104",
+  "21",
+  "43",
+  "65",
+  "77",
+  "87",
+  "99",
+  "114",
+  "119",
+  "127",
+  "131",
+  "136",
+  "140",
+  "145",
+  "153",
+  "157",
+  "162",
+  "165",
+  "170",
+  "178",
+  "186",
+  "189",
+  "194",
+  "208",
+  "230",
+  "240",
+  "308",
+  "281",
+  "311",
+  "297",
+  "288",
+  "276",
+  "267",
+  "256",
+  "247",
+  "235",
+  "225",
+  "213",
+  "203",
+];
+const updateTransform = () => {
+  //svgContainer.value.style.transition = "transform 0.3s ease-in-out"; // 확대 및 축소 시에만 transition 추가
+  svgContainer.value.style.transform = `scale(${scale}) translate(${translateX}px, ${translateY}px)`;
+};
+
+const handleWheel = (event) => {
+  const delta = event.deltaY > 0 ? -0.1 : 0.1;
+  scale += delta;
+  scale = Math.min(Math.max(0.8, scale), 3);
+  updateTransform();
+};
+
+const startDrag = (event) => {
+  isDragging = true;
+  dragStartX = event.clientX;
+  dragStartY = event.clientY;
+};
+
+const drag = (event) => {
+  if (!isDragging) return;
+  const deltaX = event.clientX - dragStartX;
+  const deltaY = event.clientY - dragStartY;
+  translateX += deltaX;
+  translateY += deltaY;
+  dragStartX = event.clientX;
+  dragStartY = event.clientY;
+  updateTransform();
+};
+
+const endDrag = () => {
+  isDragging = false;
+};
+const parentElement = ref(null);
+
+// timeOrder의 변화를 감지하여 새로운 시뮬레이션 데이터를 가져오고 movePoint 실행
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+let svg = null;
+let path = null;
+
+let width = 120;
+let height = 25;
+let padding = 43;
+
+// 최대 및 최소 좌표 계산
+const xExtent = d3.extent(nodes, (d) => d.x);
+const yExtent = d3.extent(nodes, (d) => d.y);
+
+// 스케일 함수 설정
+let xScale = d3
+  .scaleLinear()
+  .domain([xExtent[0], xExtent[1]])
+  .range([padding, width - padding]);
+
+let yScale = d3
+  .scaleLinear()
+  .domain([yExtent[0], yExtent[1]])
+  .range([padding, height - padding]);
+
+// 점 생성 및 이동 경로 설정
+const ohts = [];
+const ohtTexts = [];
+const length = 13; //oht를 표시하는 사각형의 길이
+
+function drawSimulation(width, height) {
+  svg = d3
+    .select(svgContainer.value)
+    .append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+  
   // 노드와 링크 그리기
   svg
     .selectAll(".link")
@@ -2818,7 +1764,7 @@ onMounted(() => {
     .append("g")
     .attr("class", "")
     // .attr("transform", (d) => `translate(${d.x},${d.y})`);
-    .attr("transform", (d) => `translate(${xScale(d.x)},${yScale(d.y)})`);
+    .attr("transform", (d) => `translate(${xScale(d.x)},${yScale(d.y)})`); 
 
   nodeGroup
     .append("circle")
@@ -2834,117 +1780,124 @@ onMounted(() => {
     .attr("fill", "white")
     .text((d) => d.id);
 
-  // 점 생성 및 이동 경로 설정
-  // const point = svg.append("circle").attr("r", 6).attr("fill", ohtColor);
-  const ohts = [];
-  const ohtTexts = [];
-  const length = 13; //oht를 표시하는 사각형의 길이
 
-  // for문을 사용하여 30개의 원을 생성하고 ohts 배열에 저장합니다.
-  for (let i = 0; i < 30; i++) {
-    const point = svg
-      .append("rect")
-      .attr("width", length)
-      .attr("height", length)
-      .attr("x", xScale(tempOhts[0][i].x - length / 2 - 4))
-      .attr("y", yScale(tempOhts[0][i].y - length / 2 - 1))
-      .attr("rx", 3) // 모서리 둥근 처리를 위한 x축 반경
-      .attr("fill", ohtColor) // 각 원의 색상을 동적으로 설정합니다.
-      .text(i);
+  //ohtLogs가 있을 경우에만(조회한 시간대에 시뮬레이션 로그가 있는 경우에만) oht 그려주기  
+  if(ohtLogs.value["simulation-log"].length !== 0){
+    // for문을 사용하여 30개의 원을 생성하고 ohts 배열에 저장합니다.
+    for (let i = 0; i < ohtLogs.value["simulation-log"][0]["data"].length; i++) {
+        const point = svg
+        .append("rect")
+        .attr("width", length)
+        .attr("height", length)
+        .attr("x", xScale(ohtLogs.value["simulation-log"][0]['data'][i]["location"]["point-x"] - length / 2 - 4))
+        .attr("y", yScale(ohtLogs.value["simulation-log"][0]['data'][i]["location"]["point-y"] - length / 2 - 1))
+        .attr("rx", 3) // 모서리 둥근 처리를 위한 x축 반경
+        .attr("fill", ohtColor)
+        .text(ohtLogs.value["simulation-log"][0]['data'][i]["oht-id"]);
 
-    const ohtId = svg
-      .append("text")
-      .attr("x", xScale(tempOhts[0][i].x))
-      .attr("y", yScale(tempOhts[0][i].y - length / 2 - 1))
-      .attr("rx", 3) // 모서리 둥근 처리를 위한 x축 반경
-      .attr("fill", ohtColor) // 각 원의 색상을 동적으로 설정합니다.
-      .attr("text-anchor", "middle")
-      .attr("font-size", 10)
-      .text(i);
+        const ohtId = svg
+        .append("text")
+        .attr("x", xScale(ohtLogs.value["simulation-log"][0]['data'][i]["location"]["point-x"]))
+        .attr("y", yScale(ohtLogs.value["simulation-log"][0]['data'][i]["location"]["point-y"] - length / 2 - 1))
+        .attr("rx", 3) // 모서리 둥근 처리를 위한 x축 반경
+        .attr("fill", ohtColor) // 각 원의 색상을 동적으로 설정합니다.
+        .attr("text-anchor", "middle")
+        .attr("font-size", 9)
+        .text(ohtLogs.value["simulation-log"][0]['data'][i]["oht-id"]);
 
-    // 생성된 원을 배열에 추가합니다.
-    ohts.push(point);
-    ohtTexts.push(ohtId);
+        // 생성된 원을 배열에 추가합니다.
+        ohts.push(point);
+        ohtTexts.push(ohtId);
+    }
   }
 
-  const path = svg.append("path").attr("fill", "none");
-  // .attr("stroke", "red")
-  // .attr("stroke-width", 2);
+  path = svg.append("path").attr("fill", "none");
+}
 
-  // let currentIndex = 0;
 
-  //원본
-  // function movePoint() {
-  //   const currentNode = nodes[currentIndex];
-  //   const nextNode = nodes[(currentIndex + 1) % nodes.length];
+//다중 simulation 구현
 
-  //   point
-  //     .transition()
-  //     .duration(1000) //1초의 시간을 할당
-  //     .attr("cx", xScale(currentNode.x)) //현재노드x좌표 설정
-  //     .attr("cy", yScale(currentNode.y)) //현재노드y좌표 설정
-  //     .on("end", () => {
-  //       //애니메이션 종료시 실행할작업
-  //       path.attr(
-  //         "d", //새로운 경로를 정의한다.
-  //         `M${xScale(currentNode.x)},${yScale(currentNode.y)},${xScale(
-  //           nextNode.x
-  //         )},${yScale(nextNode.y)}`
-  //       );
-  //       currentIndex = (currentIndex + 1) % nodes.length; //현재인덱스를 다음으로 변경
-  //       movePoint(); //재귀호출
-  //     });
-  // }
+let nowTime = 0;
 
-  //다중 simulation 구현
+function movePoint(currentTime) {
+  ohts.forEach((point, idx) => {
+    const currentOht = ohtLogs.value["simulation-log"][currentTime]["data"][idx]
+    const nextOht = ohtLogs.value["simulation-log"][currentTime + 1]["data"][idx]
 
-  let currentTime = 0;
+    ohtTexts[idx]
+      .transition()
+      .duration(1000) //1초의 시간을 할당
+      .attr("x", xScale(currentOht["location"]["point-x"])) //현재ohtx좌표 설정
+      .attr("y", yScale(currentOht["location"]["point-y"] - length / 2 - 1)) //현재ohty좌표 설정
+      .on("end", () => {
+        //애니메이션 종료시 실행할작업
+        ohtTexts[idx].attr(
+          "d", //새로운 경로를 정의한다.
+          `M${xScale(currentOht["location"]["point-x"])},${yScale(currentOht["location"]["point-y"])},
+          ${xScale(nextOht["location"]["point-x"])},${yScale(nextOht["location"]["point-y"])}`
+        );
+      });
 
-  function movePoint() {
-    ohts.forEach((point, idx) => {
-      const currentOht = tempOhts[currentTime][idx];
-      const nextOht = tempOhts[currentTime + 1][idx];
+    point
+      .transition()
+      .duration(1000) //1초의 시간을 할당
+      .attr("x", xScale(currentOht["location"]["point-x"] - length / 2 - 4)) //현재ohtx좌표 설정
+      .attr("y", yScale(currentOht["location"]["point-y"] - length / 2 - 1)) //현재ohty좌표 설정
+      .on("end", async () => {
+        //애니메이션 종료시 실행할작업
+        path.attr(
+          "d", //새로운 경로를 정의한다.
+          `M${xScale(currentOht["location"]["point-x"])},${yScale(currentOht["location"]["point-y"])},
+          ${xScale(nextOht["location"]["point-x"])},${yScale(nextOht["location"]["point-y"])}`
+        );
 
-      ohtTexts[idx]
-        .transition()
-        .duration(1000) //1초의 시간을 할당
-        .attr("x", xScale(currentOht.x)) //현재ohtx좌표 설정
-        .attr("y", yScale(currentOht.y - length / 2 - 1)) //현재ohty좌표 설정
-        .on("end", () => {
-          //애니메이션 종료시 실행할작업
-          ohtTexts[idx].attr(
-            "d", //새로운 경로를 정의한다.
-            `M${xScale(currentOht.x)},${yScale(currentOht.y)},${xScale(
-              nextOht.x
-            )},${yScale(nextOht.y)}`
-          );
-        });
-
-      point
-        .transition()
-        .duration(1000) //1초의 시간을 할당
-        .attr("x", xScale(currentOht.x - length / 2 - 4)) //현재ohtx좌표 설정
-        .attr("y", yScale(currentOht.y - length / 2 - 1)) //현재ohty좌표 설정
-        .on("end", () => {
-          //애니메이션 종료시 실행할작업
-          path.attr(
-            "d", //새로운 경로를 정의한다.
-            `M${xScale(currentOht.x)},${yScale(currentOht.y)},${xScale(
-              nextOht.x
-            )},${yScale(nextOht.y)}`
-          );
-
-          if (idx == 29) {
-            currentTime = currentTime + 1; //현재인덱스를 다음으로 변경
-            if (currentTime + 1 >= 60) return true;
-
-            movePoint();
+        if(idx == ohtLogs.value["simulation-log"][0]["data"].length - 1){ //해당 시간초 점을 모두 이동하면 다음 시간초 이동으로 넘어가기
+          // currentTime = currentTime + 1; //현재인덱스를 다음으로 변경
+          if (currentTime + 2 >= ohtLogs.value["simulation-log"].length){ //현재 시간 시뮬레이션이 끝나면 다음 시뮬레이션 api 호출해야함. 다음초 + 인덱스 = +2
+            nowTime = 0
+            timeOrder.value += 1
+            return;
           }
-        });
-    });
-  }
+          currentTimeText.value = formatTime(ohtLogs.value["simulation-log"][currentTime + 1]['time'])
+          movePoint(currentTime + 1);
+        }
+      });
+  });
+}
 
-  movePoint();
+watch(timeOrder, async (newTimeOrder) => {
+  if(!(intervals.length === newTimeOrder)){
+    ohtLogs.value = await getSimulation(newTimeOrder, []);
+    currentTimeText.value = formatTime(ohtLogs.value["simulation-log"][0]['time'])
+    movePoint(nowTime)
+  }
+});
+
+onMounted(async () => { ///////////////////////////////////////////////////onMounted//////////////////////////////////////////////////////////////
+  parentElement.value = document.querySelector(".white-box");
+    //== 시뮬레이션 데이터 로드 : 시간단위로 잘라서 연속적으로 요청해야함
+  splitTimeRange(startDate, endDate)
+  ohtLogs.value = await getSimulation(0, []);
+  
+  // 부모 요소의 가로와 세로 크기를 가져옵니다.
+  const parentWidth = parentElement.value.clientWidth;
+  const parentHeight = parentElement.value.clientHeight;
+  width = parentWidth;
+  height = parentHeight * 0.7;
+  padding = 43;
+
+  xScale = d3
+    .scaleLinear()
+    .domain([xExtent[0], xExtent[1]])
+    .range([padding, width - padding]);
+
+  yScale = d3
+    .scaleLinear()
+    .domain([yExtent[0], yExtent[1]])
+    .range([padding, height - padding]);
+
+  drawSimulation(width, height);
+  movePoint(nowTime);
 });
 </script>
 
@@ -2958,7 +1911,7 @@ onMounted(() => {
     @mousemove.prevent="drag"
     @mouseup.prevent="endDrag"
   >
-    <div class="timer">{{ currentTime }}</div>
+    <div class="timer">{{ currentTimeText }}</div>
     <div ref="svgContainer"></div>
   </div>
 </template>
