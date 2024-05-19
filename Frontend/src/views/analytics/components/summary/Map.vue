@@ -1204,7 +1204,7 @@ onMounted(() => {
         return;
       }
     }
-    console.log(path_link[item.path])
+
     congestion_data.value.push({
       path: item.path, 
       links: [
@@ -1213,9 +1213,6 @@ onMounted(() => {
       count: 1, 
       level: 1});
   });
-
-
-  console.log(congestion_data.value);
 
   // 정체 구간 데이터
   const congestion_links = [

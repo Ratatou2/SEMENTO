@@ -39,6 +39,7 @@ const props = defineProps({
     default: "15px",
   },
 });
+
 const emits = defineEmits(["toggle-side-page"]);
 const selectedRowIndex = ref(null);
 

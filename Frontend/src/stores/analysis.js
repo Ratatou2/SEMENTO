@@ -4,15 +4,14 @@ import { instance } from "@/util/axios-util";
 import moment from "moment";
 
 export const useAnalysisStore = defineStore("analysisStore", () => {
-  const startDate = ref("2024-05-11T20:30:00");
-  const endDate = ref("2024-05-11T20:40:00");
+  const startDate = ref("2024-05-11T20:00:00");
+  const endDate = ref("2024-05-11T20:30:00");
   const detectionResult = ref([]);
   const totalTime = ref(0);
   const totalCongestionTime = ref(0);
   const congestionRatio = ref(0);
 
   const getAiDetection = async () => {
-    console.log(startDate.value, endDate.value);
     const resp = await instance.post("/analytics/ai-detection", {
       "start-time": startDate.value,
       "end-time": endDate.value,
@@ -33,11 +32,11 @@ export const useAnalysisStore = defineStore("analysisStore", () => {
 
     congestionRatio.value = (totalCongestionTime.value / totalTime.value) * 100;
 
-    console.log("analysis.js안에서");
-    console.log("detectionResult.value:", detectionResult.value);
-    console.log("totalCongestionTime.value", totalCongestionTime.value);
-    console.log("totalTime.value", totalTime.value);
-    console.log("congestionRatio.value: ", congestionRatio.value);
+    // console.log("analysis.js안에서");
+    // console.log("detectionResult.value:", detectionResult.value);
+    // console.log("totalCongestionTime.value", totalCongestionTime.value);
+    // console.log("totalTime.value", totalTime.value);
+    // console.log("congestionRatio.value: ", congestionRatio.value);
   };
   const computedDetectionResult = computed(() => detectionResult.value);
   const computedCongestionRatio = computed(() => congestionRatio.value);
@@ -75,6 +74,7 @@ export const useAnalysisStore = defineStore("analysisStore", () => {
     computedStartDate,
     computedEndDate,
     getAiDetection,
+    detectionResult,
     getNewAIDetection,
   };
 });
