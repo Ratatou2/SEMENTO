@@ -215,30 +215,49 @@ public class SimulationService {
                 "unique_combinations",
                 Arrays.asList(
                         new TermsValuesSourceBuilder("oht_id").field("oht_id").missingBucket(true),
-                        new TermsValuesSourceBuilder("current_node").field("current_node").missingBucket(true),
                         new TermsValuesSourceBuilder("error").field("error").missingBucket(true),
                         new TermsValuesSourceBuilder("start_time").field("start_time").missingBucket(true)
 
                 ))
                 .size(1000);
 
-        // ElasticSearch 요청 및 응답
-        SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime, boolQuery, compositeAgg);
 
-        // 결과에서 집계 데이터 추출
-        CompositeAggregation compositeAggregation = searchResponse.getAggregations().get("unique_combinations");
+        // 결과 저장을 위한 리스트 초기화
+        List<CompositeAggregation.Bucket> allBuckets = new ArrayList<>();
+        Map<String, Object> afterKey = null;
+
+        do {
+            // afterKey 설정
+            if (afterKey != null) {
+                compositeAgg.aggregateAfter(afterKey);
+            }
+
+            // ElasticSearch 요청 및 응답
+            SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime, boolQuery, compositeAgg);
+
+            // 결과에서 집계 데이터 추출
+            CompositeAggregation compositeAggregation = searchResponse.getAggregations().get("unique_combinations");
+
+            // 현재 집계 결과 추가
+            allBuckets.addAll(compositeAggregation.getBuckets());
+
+            // 다음 after_key 업데이트
+            afterKey = compositeAggregation.afterKey();
+
+        } while (afterKey != null);
 
         int ohtError = 0;
-        int overallError = compositeAggregation.getBuckets().size();
-        double overallErrorAvg = (double) overallError/runningOhtCnt;
-
-        // 각 버킷에서 OHT ID와 에러 수 추출
-        for (CompositeAggregation.Bucket bucket : compositeAggregation.getBuckets()) {
+        for (CompositeAggregation.Bucket bucket : allBuckets) {
             Map<String, Object> bucketKey = bucket.getKey();
-            if((int) bucketKey.get("oht_id") == ohtId.intValue()) ohtError++;
+            if ((int) bucketKey.get("oht_id") == ohtId.intValue()) {
+                ohtError++;
+            }
         }
 
+        int overallError = allBuckets.size();
+        double overallErrorAvg = (double) overallError / runningOhtCnt;
         double differencePercentage = CalculateData.getDifferencePercentage(ohtError, overallErrorAvg);
+
         return IntegerDataDto.builder().data(ohtError).percent(differencePercentage).build();
     }
 
