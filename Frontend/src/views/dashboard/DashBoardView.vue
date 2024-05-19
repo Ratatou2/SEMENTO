@@ -82,7 +82,7 @@ const maxIdleTime = ref({
 
 onMounted(async() => {
   if(dashboardStore.startTime == "" && dashboardStore.endTime == "") {  
-    console.log("데이터가 없네용");
+    console.log("대시보드 데이터를 가져옵니다.");
     await dashboardStore.getOhtJobAnalysis(startTime, endTime);
     await dashboardStore.getJobResultAnalysis(startTime, endTime);
     await dashboardStore.getStateAnalysis(startTime, endTime);
@@ -125,13 +125,16 @@ onMounted(async() => {
     maxIdleTime
   );
 
+  // 에러 로그 데이터 전처리
+  errorLog.value = [];
+  errorLog.value = dashboardStore.jobResultAnalysisData['job-result-error-log'].map((item, index) => [index+1, String(item['oht-id']), String(item['error']), String(item['count'])])
+  console.log(errorLog.value)
+
   nowLoading.value = false;   
 });
 
 watch(() => dashboardStore.watchedJobResultAnalysisData, (oldValue, newValue) => {
-  errorLog.value = [];
-  errorLog.value = dashboardStore.jobResultAnalysisData['job-result-error-log'].map((item, index) => [index+1, String(item['oht-id']), String(item['error']), String(item['count'])])
-  console.log(errorLog.value)
+
 },{ deep: true }); 
 
 function timeDataFormatting(temp, refData) {

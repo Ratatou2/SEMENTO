@@ -3,12 +3,12 @@ import { defineStore } from 'pinia'
 import { instance } from '@/util/axios-util'
 
 
-export const useNotificationStore = defineStore('notification', () => {
+export const useNotificationStore = defineStore('notificationStore', () => {
   //플로팅알림 변수
-  const showNotification = ref(true);
+  const showNotification = ref(false);
 
   //플로팅 알림 띄우기
-  const sendNotification = async (data) => {
+  const sendNotification = async () => {
     showNotification.value = true;
     setTimeout(() => {
       closeNotification();
