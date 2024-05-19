@@ -72,13 +72,13 @@ public class SimulationService {
         FilterAggregationBuilder specificOhtCount = AggregationBuilders.filter("specific_oht_count",
                 QueryBuilders.boolQuery()
                         .must(QueryBuilders.termQuery("oht_id", ohtId))
-                        .must(QueryBuilders.termQuery("status.keyword", "W"))
+                        .must(QueryBuilders.termQuery("status", "W"))
         ).subAggregation(
                 AggregationBuilders.cardinality("unique_starts").field("start_time")
         );
 
         FilterAggregationBuilder overallOhtCount = AggregationBuilders.filter("overall_oht_count",
-                QueryBuilders.termQuery("status.keyword", "W")
+                QueryBuilders.termQuery("status", "W")
         ).subAggregation(
                 AggregationBuilders.cardinality("unique_starts").field("start_time")
         );
@@ -172,7 +172,7 @@ public class SimulationService {
         double overallTotalWorkAvg = (double) dashboardService.getOhtTotalWorkByStartTimeAndEndTime(startTime, endTime) / runningOhtCnt;
 
         // 작업 중인 로그만 검색하도록 설정
-        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status.keyword", "W");
+        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status", "W");
         // 특정 OHT_ID만 필터링
         TermQueryBuilder ohtIdFilter = QueryBuilders.termQuery("oht_id", ohtId);
 
@@ -215,7 +215,7 @@ public class SimulationService {
                 "unique_combinations",
                 Arrays.asList(
                         new TermsValuesSourceBuilder("oht_id").field("oht_id").missingBucket(true),
-                        new TermsValuesSourceBuilder("current_node").field("current_node.keyword").missingBucket(true),
+                        new TermsValuesSourceBuilder("current_node").field("current_node").missingBucket(true),
                         new TermsValuesSourceBuilder("error").field("error").missingBucket(true),
                         new TermsValuesSourceBuilder("start_time").field("start_time").missingBucket(true)
 
@@ -270,7 +270,7 @@ public class SimulationService {
                                 );
 
         BoolQueryBuilder filter = QueryBuilders.boolQuery()
-                .must(QueryBuilders.termQuery("status.keyword", "W"))
+                .must(QueryBuilders.termQuery("status", "W"))
                 .must(QueryBuilders.termQuery("is_fail", true));
 
         SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime, filter,
