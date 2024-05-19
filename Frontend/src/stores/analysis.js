@@ -11,6 +11,7 @@ export const useAnalysisStore = defineStore("analysisStore", () => {
   const totalTime = ref(0);
   const totalCongestionTime = ref(0);
   const congestionRatio = ref(0);
+  const nowLoading = ref(false);
 
   const getAiDetection = async () => {
     const resp = await instance.post("/analytics/ai-detection", {
@@ -65,6 +66,7 @@ export const useAnalysisStore = defineStore("analysisStore", () => {
   };
 
   return {
+    nowLoading,
     startDate,
     endDate,
     computedDetectionResult,

@@ -26,7 +26,7 @@ import Loading from "@/components/loading/Loading.vue";
 const analysisStore = useAnalysisStore();
 const notificationStore = useNotificationStore();
 
-const nowLoading = ref(false); //로딩창 기본 비활성화
+// const nowLoading = ref(false); //로딩창 기본 비활성화
 //==초기 화면
 // const initialPage = ref(true);
 const cnt = ref(11);
@@ -151,14 +151,14 @@ const handleEndDate = (newDate) => {
 };
 //AI 버튼 핸들링 이벤트
 const handleAIDetectionButton = async () => {
-  nowLoading.value = true;
+  analysisStore.nowLoading = true;
   await analysisStore.getNewAIDetection(startTime, endTime);
   cnt.value = analysisStore.computedDetectionResult.length;
   analysisStore.computedDetectionResult.forEach((result) => {
     congTime.value +=
       (new Date(result["end-date"]) - new Date(result["start-date"])) / 1000;
   });
-  nowLoading.value = false;
+  analysisStore.nowLoading = false;
   // initialPage.value = false;
   notificationStore.sendNotification(); // 알림 띄우기
 };
@@ -167,8 +167,8 @@ onMounted(async () => {});
 </script>
 
 <template>
-  <div v-if="nowLoading"><Loading title="AI가 로그를 분석중입니다." /></div>
-  <div v-else="!nowLoading" class="body-container">
+  <div v-if="analysisStore.nowLoading"><Loading title="AI가 로그를 분석중입니다." /></div>
+  <div v-else="!analysisStore.nowLoading" class="body-container">
     <!-- 설명 및 검색창 -->
     <section class="input">
       <Text
