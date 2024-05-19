@@ -2,8 +2,14 @@
 import { ref, onMounted, watch } from "vue";
 import * as d3 from "d3";
 import { simulationComponentStore } from "@/stores/simulationComponent";
-const { startDate, endDate, splitTimeRange, getSimulation, intervals } =
-  simulationComponentStore();
+const { getCongestionSimulation } = simulationComponentStore();
+
+const props = defineProps({
+  errorData: {
+    type: Object,
+    default: [],
+  },
+});
 
 const timeOrder = ref(0);
 const ohtLogs = ref({
@@ -1823,15 +1829,22 @@ function drawSimulation(width, height) {
             ohtLogs.value["simulation-log"][0]["data"][i]["location"][
               "point-y"
             ] -
-              length / 2 -
-              1
+              length / 2
           )
         )
         .attr("rx", 3) // 모서리 둥근 처리를 위한 x축 반경
         .attr("fill", ohtColor) // 각 원의 색상을 동적으로 설정합니다.
         .attr("text-anchor", "middle")
-        .attr("font-size", 9)
+        .attr("font-size", 7)
         .text(ohtLogs.value["simulation-log"][0]["data"][i]["oht-id"]);
+
+      if (
+        ohtLogs.value["simulation-log"][0]["data"][i]["oht-id"] ===
+        props.errorData["cause-oht"]
+      ) {
+        point.attr("stroke", "#AD29B6").attr("stroke-width", 2);
+        ohtId.attr("fill", "#AD29B6").attr("font-weight", 10);
+      }
 
       // 생성된 원을 배열에 추가합니다.
       ohts.push(point);
@@ -1856,8 +1869,8 @@ function movePoint(currentTime) {
     ohtTexts[idx]
       .transition()
       .duration(1000) //1초의 시간을 할당
-      .attr("x", xScale(currentOht["location"]["point-x"])) //현재ohtx좌표 설정
-      .attr("y", yScale(currentOht["location"]["point-y"] - length / 2 - 1)) //현재ohty좌표 설정
+      .attr("x", xScale(currentOht["location"]["point-x"]) - 1) //현재ohtx좌표 설정
+      .attr("y", yScale(currentOht["location"]["point-y"] - length / 2 - 2)) //현재ohty좌표 설정
       .on("end", () => {
         //애니메이션 종료시 실행할작업
         ohtTexts[idx].attr(
@@ -1888,6 +1901,10 @@ function movePoint(currentTime) {
     } else if (currentOht["error"] === 300) {
       ohtTexts[idx].attr("fill", "blue");
       point.attr("fill", "blue");
+    }
+
+    if (currentOht["oht-id"] === props.errorData["cause-oht"]) {
+      ohtTexts[idx].attr("fill", "#AD29B6");
     }
 
     point
@@ -1925,22 +1942,28 @@ function movePoint(currentTime) {
   });
 }
 
-watch(timeOrder, async (newTimeOrder) => {
-  if (!(intervals.length === newTimeOrder)) {
-    ohtLogs.value = await getSimulation(newTimeOrder, []);
-    currentTimeText.value = formatTime(
-      ohtLogs.value["simulation-log"][0]["time"]
-    );
-    movePoint(nowTime);
-  }
+watch(timeOrder, async () => {
+  currentTimeText.value = formatTime(
+    ohtLogs.value["simulation-log"][0]["time"]
+  );
+  movePoint(nowTime);
 });
 
 onMounted(async () => {
-  ///////////////////////////////////////////////////onMounted//////////////////////////////////////////////////////////////
+  const start = new Date(props.errorData["start-date"]); //에러 시작 시간을 마지막 시간으로 설정해야함
+  const end = new Date(props.errorData["end-date"]);
+  start.setSeconds(start.getSeconds() - 30);
+  start.setHours(start.getHours() + 9);
+  end.setHours(end.getHours() + 9);
+
+  ohtLogs.value = await getCongestionSimulation(
+    start.toISOString().slice(0, -5),
+    end.toISOString().slice(0, -5),
+    []
+    // [props.errorData["cause-oht"]]
+  );
+
   parentElement.value = document.querySelector(".white-box");
-  //== 시뮬레이션 데이터 로드 : 시간단위로 잘라서 연속적으로 요청해야함
-  splitTimeRange(startDate, endDate);
-  ohtLogs.value = await getSimulation(0, []);
 
   // 부모 요소의 가로와 세로 크기를 가져옵니다.
   const parentWidth = parentElement.value.clientWidth;

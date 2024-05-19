@@ -3,8 +3,8 @@ import { defineStore } from "pinia";
 import { instance } from "@/util/axios-util";
 
 export const useAnalysisStore = defineStore("analysisStore", () => {
-  const startDate = ref("2024-05-11T20:30:00");
-  const endDate = ref("2024-05-11T20:50:00");
+  const startDate = ref("2024-05-11T20:00:00");
+  const endDate = ref("2024-05-11T20:30:00");
   const detectionResult = ref([]);
   const totalTime = ref(0);
   const totalCongestionTime = ref(0);

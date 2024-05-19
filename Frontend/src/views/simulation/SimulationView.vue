@@ -221,9 +221,7 @@ onMounted(async () => {
       <div class="white-box log-table-box">
         <section class="title">
           <Cardhead
-            :headerText="
-              'Log By Total Work(' + simulationStore().totalCnt + '건)'
-            "
+            :headerText="'Log By Total Work(' + simulationStore().totalCnt + '건)'"
             contentText="각 작업을 클릭하여 해당하는 로그를 시뮬레이션과 함께 확인하실 수 있습니다."
           />
         </section>

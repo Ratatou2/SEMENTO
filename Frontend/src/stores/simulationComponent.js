@@ -1,12 +1,10 @@
-import { ref, computed } from "vue";
+import { ref } from "vue";
 import { defineStore } from "pinia";
 import { instance } from "@/util/axios-util";
 
 export const simulationComponentStore = defineStore(
   "simulationComponentStore",
   () => {
-    const startDate = ref("2023-01-01T01:14:00");
-    const endDate = ref("2023-01-01T01:15:00");
     const intervals = ref([]);
     const ohts = ref([]);
     const emptyData = {
@@ -72,8 +70,6 @@ export const simulationComponentStore = defineStore(
     };
 
     return {
-      startDate,
-      endDate,
       intervals,
       ohts,
       splitTimeRange,
