@@ -43,7 +43,7 @@ public class ElasticsearchQueryUtil {
         // 인덱스 리스트를 생성
         List<String> indices = new ArrayList<>();
         while (!start.isAfter(end)) {
-            log.debug("인덱스명 [semento-mysql-logs-" + start.format(formatter)+"] 생성됨.");
+            // log.debug("인덱스명 [semento-mysql-logs-" + start.format(formatter)+"] 생성됨.");
             indices.add("semento-mysql-logs-" + start.format(formatter));
             start = start.plusDays(1);
         }
@@ -104,7 +104,7 @@ public class ElasticsearchQueryUtil {
 
         log.debug("[ES request] : "+ searchSourceBuilder);
         SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
-        log.debug("[ES response] : "+searchResponse.toString());
+        // log.debug("[ES response] : "+searchResponse.toString());
 
         return searchResponse;
     }
