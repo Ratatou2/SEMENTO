@@ -26,18 +26,46 @@ const analysisStore = useAnalysisStore();
 const nowLoading = ref(true); //로딩창 기본 비활성화
 const cnt = ref(11);
 const congTime = ref(0);
-const eachCongestTime = ref(0);
+
+const startTime = ref(); // 검사 시작 시간
+const endTime = ref(); // 검사 끝 시간
+
+watch(
+  () => analysisStore.computedStartDate,
+  (newValue, oldValue) => {
+    startTime.value = newValue;
+  },
+  { immediate: true }
+);
+
+watch(
+  () => analysisStore.computedEndDate,
+  (newValue, oldValue) => {
+    endTime.value = newValue;
+  },
+  { immediate: true }
+);
 
 const detectionReportText = computed(() => {
   return "# Detection Report (" + cnt.value + ")";
 });
 
+watch(
+  () => analysisStore.computedDetectionResult,
+  (newValue, oldValue) => {
+    cnt.value = newValue.length;
+  },
+  { immediate: true }
+);
+
 const formattedStartDate = computed(() => {
-  return moment(analysisStore.startDate.value).format("YYYY.MM.DD HH:mm:ss");
+  console.log("startTime: ", startTime.value);
+  return moment(startTime.value).format("YYYY.MM.DD HH:mm:ss");
 });
 
 const formattedEndDate = computed(() => {
-  return moment(analysisStore.endDate.value).format("YYYY.MM.DD HH:mm:ss");
+  console.log("endTime: ", endTime.value);
+  return moment(endTime.value).format("YYYY.MM.DD HH:mm:ss");
 });
 
 const summaryText = computed(() => {
@@ -55,6 +83,19 @@ const congestionText = computed(() => {
   text += `${seconds}초의 정체시간이 소요되었습니다.`;
   return text;
 });
+
+watch(
+  () => analysisStore.computedDetectionResult,
+  (newValue, oldValue) => {
+    congTime.value = newValue.reduce((total, result) => {
+      return (
+        total +
+        (new Date(result["end-date"]) - new Date(result["start-date"])) / 1000
+      );
+    }, 0);
+  },
+  { immediate: true }
+);
 
 const detectionReports = computed(() => {
   return analysisStore.computedDetectionResult.map((result, index) => {
@@ -91,6 +132,21 @@ const detectionReports = computed(() => {
   });
 });
 
+const handleStartDate = (newDate) => {
+  console.log("handleStartDate");
+  startTime.value = newDate;
+};
+const handleEndDate = (newDate) => {
+  console.log("handleEndDate");
+  endTime.value = newDate;
+};
+//AI 버튼 핸들링 이벤트
+const handleAIDetectionButton = async () => {
+  nowLoading.value = true;
+  await analysisStore.getNewAIDetection(startTime, endTime);
+  nowLoading.value = false;
+};
+
 onMounted(async () => {
   await analysisStore.getAiDetection();
   cnt.value = analysisStore.computedDetectionResult.length;
@@ -111,12 +167,18 @@ onMounted(async () => {
         text="기간을 설정하여 혼잡/정체 상황에 대한 AI 분석을 받아보세요."
       />
       <div class="input-data">
-        <SearchInput />
+        <SearchInput
+          :props-start-date="startTime"
+          :props-end-date="endTime"
+          @update-start="handleStartDate"
+          @update-end="handleEndDate"
+        />
         <Button
           title="AI 분석"
           backgroundColor="#003CB0"
           fontColor="white"
           width="100px"
+          @click="handleAIDetectionButton"
         />
       </div>
     </section>
