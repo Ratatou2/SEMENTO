@@ -1,13 +1,70 @@
 <script setup>
+import { ref, onMounted, watch } from "vue";
 import HeadText from "@/components/Text/HeadText.vue";
 import DeadLineSimulation from "@/components/simulation/DeadLineSimulation.vue";
-import Table from "@/components/table/Table.vue";
+import Table from "@/components/table/SideTabInfoTable.vue";
 import Cardhead from "@/components/Text/Cardhead.vue";
-import moment from "moment";
+import { defineExpose } from 'vue';
+import { simulationComponentStore } from "@/stores/simulationComponent";
+const { getCongestionSimulation } = simulationComponentStore();
 
-function transformatDate(date) {
-  return moment(date).format("YYYY.MM.DD HH:MM:SS");
+const headerText = ref("")
+const tapNum = ref(0)
+const datas = ref([])
+const responseData = ref(null)
+const tableView = ref(null);
+const simulationView = ref(null);
+
+async function setPage(data, ohtId, idx) {
+  if(idx === -1){
+    simulationView.value.checkPropsChange(null)
+    return
+  }
+  // 문자열을 분리하여 각 시간 부분을 추출
+  const [startString, endString] = data[1].split(' - ');
+  headerText.value = data[1]
+  tapNum.value = idx + 1
+
+  // 각각의 문자열을 Date 객체로 변환
+  const startDate = new Date(startString);
+  const endDate = new Date(endString);
+
+  startDate.setHours(startDate.getHours() + 9)
+  endDate.setHours(endDate.getHours() + 9)
+
+  const response = await getCongestionSimulation(
+    startDate.toISOString(),
+    endDate.toISOString(),
+    [ohtId]
+  )
+  
+  responseData.value = response
+  
+  const newDatas = []
+
+  response["simulation-log"].forEach(log => {
+    const data = [
+      log["time"],
+      log["data"][0]["oht-id"],
+      log["data"][0]["location"]["path"],
+      log["data"][0]["status"],
+      log["data"][0]["carrier"],
+      log["data"][0]["error"],
+      log["data"][0]["speed"],
+      log["data"][0]["fail"]
+    ]
+
+    newDatas.push(data)
+  });
+
+  datas.value = newDatas
+  tableView.value.checkPropsChange(datas.value)
+  simulationView.value.checkPropsChange(responseData.value)
 }
+
+defineExpose({
+  setPage
+})
 </script>
 
 <template>
@@ -15,8 +72,8 @@ function transformatDate(date) {
     <div class="container">
       <div class="left">
         <section class="head-title">
-          <div class="badge">#6</div>
-          <HeadText headerText="2024.01.07 12:03:21 - 2024.01.07 12:10:30" />
+          <div class="badge">#{{ tapNum }}</div>
+          <HeadText :headerText=headerText />
         </section>
       </div>
       <section class="white-box simulation-box">
@@ -24,11 +81,14 @@ function transformatDate(date) {
           <Cardhead headerText="Simulation" contentText=""></Cardhead>
         </section>
         <section class="content">
-          <DeadLineSimulation/>
+          <DeadLineSimulation
+            ref = "simulationView"
+          />
         </section>
       </section>
       <section class="table">
         <Table
+          ref="tableView"
           width="100%"
           bodyFontSize="14px"
           headerFontSize="12px"
@@ -44,69 +104,8 @@ function transformatDate(date) {
             'SPEED',
             'IS_FAIL',
           ]"
-          :data="[
-            [
-              '2024.01.07 12:03:21',
-              '1817',
-              'path230',
-              'IDLE',
-              'FALSE',
-              '300',
-              '2.3m/s',
-              'FALSE',
-            ],
-            [
-              '2024.01.07 12:03:21',
-              '1817',
-              'path230',
-              'IDLE',
-              'FALSE',
-              '300',
-              '2.3m/s',
-              'FALSE',
-            ],
-            [
-              '2024.01.07 12:03:21',
-              '1817',
-              'path230',
-              'IDLE',
-              'FALSE',
-              '300',
-              '2.3m/s',
-              'FALSE',
-            ],
-            [
-              '2024.01.07 12:03:21',
-              '1817',
-              'path230',
-              'IDLE',
-              'FALSE',
-              '300',
-              '2.3m/s',
-              'FALSE',
-            ],
-            [
-              '2024.01.07 12:03:21',
-              '1817',
-              'path230',
-              'IDLE',
-              'FALSE',
-              '300',
-              '2.3m/s',
-              'FALSE',
-            ],
-            [
-              '2024.01.07 12:03:21',
-              '1817',
-              'path230',
-              'IDLE',
-              'FALSE',
-              '300',
-              '2.3m/s',
-              'FALSE',
-            ],
-          ]"
-        />
+          :data="datas"
+        ></Table>
       </section>
     </div>
   </div>

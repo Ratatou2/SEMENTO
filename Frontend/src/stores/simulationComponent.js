@@ -33,6 +33,7 @@ export const simulationComponentStore = defineStore(
           start: start.toISOString().slice(0, -5),
           end: intervalEnd.toISOString().slice(0, -5),
         });
+
         start.setSeconds(start.getSeconds() + 30);
       }
     };

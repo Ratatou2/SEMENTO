@@ -1,17 +1,23 @@
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, defineExpose } from "vue";
 import * as d3 from "d3";
 import { simulationComponentStore } from "@/stores/simulationComponent";
-const { getCongestionSimulation } = simulationComponentStore();
+import { faL } from "@fortawesome/free-solid-svg-icons";
+const { getCongestionSimulation, sideViewSimulationData } = simulationComponentStore();
 
-const props = defineProps({
-  errorData: {
-    type: Object,
-    default: [],
-  },
-});
+function checkPropsChange(datas){
+  if(datas === null){
+    resetPoint(nowTime)
+    return
+  }
+    ohtLogs.value = datas;
+    nowTime = 0
+    resetPoint(nowTime)
+    movePoint(nowTime)
+}
 
 const timeOrder = ref(0);
+const reset = ref(false)
 const ohtLogs = ref({
   "simulation-log": [
     {
@@ -31,412 +37,6 @@ const ohtLogs = ref({
           speed: 0.0,
           fail: false,
         },
-        {
-          "oht-id": 2587,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 103.988,
-            "point-y": 373.837,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2588,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 74.601,
-            "point-y": 361.889,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2589,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 72.977,
-            "point-y": 397.697,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2590,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 164.901,
-            "point-y": 455.516,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2591,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 146.53,
-            "point-y": 361.485,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2592,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 125.712,
-            "point-y": 441.864,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2593,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 92.834,
-            "point-y": 421.956,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2594,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 113.684,
-            "point-y": 423.616,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2595,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 80.53,
-            "point-y": 406.078,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2596,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 124.813,
-            "point-y": 419.596,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2597,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 188.738,
-            "point-y": 406.428,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2598,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 161.378,
-            "point-y": 366.059,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2599,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 183.06,
-            "point-y": 417.662,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2600,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 125.507,
-            "point-y": 437.985,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2601,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 169.553,
-            "point-y": 387.306,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2602,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 174.441,
-            "point-y": 445.753,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2603,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 67.067,
-            "point-y": 415.047,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2604,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 73.438,
-            "point-y": 415.316,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2605,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 106.169,
-            "point-y": 413.25,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2606,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 150.538,
-            "point-y": 376.329,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2607,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 172.346,
-            "point-y": 362.028,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2608,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 138.067,
-            "point-y": 392.523,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2609,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 158.06,
-            "point-y": 446.283,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2610,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 88.453,
-            "point-y": 431.255,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2611,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 174.27,
-            "point-y": 433.468,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2612,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 163.823,
-            "point-y": 398.983,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2613,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 87.83,
-            "point-y": 440.167,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2614,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 186.766,
-            "point-y": 459.99,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2615,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 148.092,
-            "point-y": 386.196,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
       ],
     },
     {
@@ -449,412 +49,6 @@ const ohtLogs = ref({
             "curr-node": null,
             "point-x": 128.08,
             "point-y": 451.96,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2587,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 103.988,
-            "point-y": 373.837,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2588,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 74.601,
-            "point-y": 361.889,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2589,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 72.977,
-            "point-y": 397.697,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2590,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 164.901,
-            "point-y": 455.516,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2591,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 146.53,
-            "point-y": 361.485,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2592,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 125.712,
-            "point-y": 441.864,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2593,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 92.834,
-            "point-y": 421.956,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2594,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 113.684,
-            "point-y": 423.616,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2595,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 80.53,
-            "point-y": 406.078,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2596,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 124.813,
-            "point-y": 419.596,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2597,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 188.738,
-            "point-y": 406.428,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2598,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 161.378,
-            "point-y": 366.059,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2599,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 183.06,
-            "point-y": 417.662,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2600,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 125.507,
-            "point-y": 437.985,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2601,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 169.553,
-            "point-y": 387.306,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2602,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 174.441,
-            "point-y": 445.753,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2603,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 67.067,
-            "point-y": 415.047,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2604,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 73.438,
-            "point-y": 415.316,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2605,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 106.169,
-            "point-y": 413.25,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2606,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 150.538,
-            "point-y": 376.329,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2607,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 172.346,
-            "point-y": 362.028,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2608,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 138.067,
-            "point-y": 392.523,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2609,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 158.06,
-            "point-y": 446.283,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2610,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 88.453,
-            "point-y": 431.255,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2611,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 174.27,
-            "point-y": 433.468,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2612,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 163.823,
-            "point-y": 398.983,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2613,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 87.83,
-            "point-y": 440.167,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2614,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 186.766,
-            "point-y": 459.99,
-          },
-          status: "I",
-          carrier: false,
-          error: 0,
-          speed: 0.0,
-          fail: false,
-        },
-        {
-          "oht-id": 2615,
-          location: {
-            path: null,
-            "curr-node": null,
-            "point-x": 148.092,
-            "point-y": 386.196,
           },
           status: "I",
           carrier: false,
@@ -1838,14 +1032,6 @@ function drawSimulation(width, height) {
         .attr("font-size", 7)
         .text(ohtLogs.value["simulation-log"][0]["data"][i]["oht-id"]);
 
-      if (
-        ohtLogs.value["simulation-log"][0]["data"][i]["oht-id"] ===
-        props.errorData["cause-oht"]
-      ) {
-        point.attr("stroke", "#AD29B6").attr("stroke-width", 2);
-        ohtId.attr("fill", "#AD29B6").attr("font-weight", 10);
-      }
-
       // 생성된 원을 배열에 추가합니다.
       ohts.push(point);
       ohtTexts.push(ohtId);
@@ -1884,6 +1070,23 @@ function movePoint(currentTime) {
         );
       });
 
+    point
+      .transition()
+      .duration(1000) //1초의 시간을 할당
+      .attr("x", xScale(currentOht["location"]["point-x"] - length / 2 - 4)) //현재ohtx좌표 설정
+      .attr("y", yScale(currentOht["location"]["point-y"] - length / 2 - 1)) //현재ohty좌표 설정
+      .on("end", async () => {
+        //애니메이션 종료시 실행할작업
+        path.attr(
+          "d", //새로운 경로를 정의한다.
+          `M${xScale(currentOht["location"]["point-x"])},${yScale(
+            currentOht["location"]["point-y"]
+          )},
+          ${xScale(nextOht["location"]["point-x"])},${yScale(
+            nextOht["location"]["point-y"]
+          )}`
+        );
+        
     if (currentOht["status"] === "W") {
       ohtTexts[idx].attr("fill", "#F27A16");
       point.attr("fill", "#F27A16");
@@ -1903,66 +1106,51 @@ function movePoint(currentTime) {
       point.attr("fill", "blue");
     }
 
-    if (currentOht["oht-id"] === props.errorData["cause-oht"]) {
-      ohtTexts[idx].attr("fill", "#AD29B6");
+    if(reset.value){
+      reset.value = false
+      ohtTexts[idx].attr("visibility", "visible");
+      point.attr("visibility", "visible"); 
     }
 
-    point
-      .transition()
-      .duration(1000) //1초의 시간을 할당
-      .attr("x", xScale(currentOht["location"]["point-x"] - length / 2 - 4)) //현재ohtx좌표 설정
-      .attr("y", yScale(currentOht["location"]["point-y"] - length / 2 - 1)) //현재ohty좌표 설정
-      .on("end", async () => {
-        //애니메이션 종료시 실행할작업
-        path.attr(
-          "d", //새로운 경로를 정의한다.
-          `M${xScale(currentOht["location"]["point-x"])},${yScale(
-            currentOht["location"]["point-y"]
-          )},
-          ${xScale(nextOht["location"]["point-x"])},${yScale(
-            nextOht["location"]["point-y"]
-          )}`
-        );
-
-        if (idx == ohtLogs.value["simulation-log"][0]["data"].length - 1) {
-          //해당 시간초 점을 모두 이동하면 다음 시간초 이동으로 넘어가기
-          // currentTime = currentTime + 1; //현재인덱스를 다음으로 변경
-          if (currentTime + 2 >= ohtLogs.value["simulation-log"].length) {
-            //현재 시간 시뮬레이션이 끝나면 다음 시뮬레이션 api 호출해야함. 다음초 + 인덱스 = +2
-            nowTime = 0;
-            timeOrder.value += 1;
-            return;
-          }
-          currentTimeText.value = formatTime(
-            ohtLogs.value["simulation-log"][currentTime + 1]["time"]
-          );
-          movePoint(currentTime + 1);
-        }
+    if (idx == ohtLogs.value["simulation-log"][0]["data"].length - 1) {
+      //해당 시간초 점을 모두 이동하면 다음 시간초 이동으로 넘어가기
+      // currentTime = currentTime + 1; //현재인덱스를 다음으로 변경
+      if (currentTime + 2 >= ohtLogs.value["simulation-log"].length) {
+        //현재 시간 시뮬레이션이 끝나면 다음 시뮬레이션 api 호출해야함. 다음초 + 인덱스 = +2
+        nowTime = 0;
+        timeOrder.value += 1;
+        return;
+      }
+      currentTimeText.value = formatTime(
+        ohtLogs.value["simulation-log"][currentTime + 1]["time"]
+      );
+      movePoint(currentTime + 1);
+    }
       });
   });
 }
 
-watch(timeOrder, async () => {
-  currentTimeText.value = formatTime(
-    ohtLogs.value["simulation-log"][0]["time"]
-  );
-  movePoint(nowTime);
-});
+function resetPoint(currentTime) {
+  ohts.forEach((point, idx) => {
+    ohtTexts[idx].attr("visibility", "hidden");
+    point.attr("visibility", "hidden");
+
+    const currentOht =
+      ohtLogs.value["simulation-log"][currentTime]["data"][idx];
+
+    ohtTexts[idx]
+      .attr("x", xScale(currentOht["location"]["point-x"]) - 1) //현재ohtx좌표 설정
+      .attr("y", yScale(currentOht["location"]["point-y"] - length / 2 - 2)) //현재ohty좌표 설정
+
+    point
+      .attr("x", xScale(currentOht["location"]["point-x"] - length / 2 - 4)) //현재ohtx좌표 설정
+      .attr("y", yScale(currentOht["location"]["point-y"] - length / 2 - 1)) //현재ohty좌표 설정
+    });
+
+    reset.value=true
+}
 
 onMounted(async () => {
-  const start = new Date(props.errorData["start-date"]); //에러 시작 시간을 마지막 시간으로 설정해야함
-  const end = new Date(props.errorData["end-date"]);
-  start.setSeconds(start.getSeconds() - 30);
-  start.setHours(start.getHours() + 9);
-  end.setHours(end.getHours() + 9);
-
-  ohtLogs.value = await getCongestionSimulation(
-    start.toISOString().slice(0, -5),
-    end.toISOString().slice(0, -5),
-    []
-    // [props.errorData["cause-oht"]]
-  );
-
   parentElement.value = document.querySelector(".white-box");
 
   // 부모 요소의 가로와 세로 크기를 가져옵니다.
@@ -1985,6 +1173,10 @@ onMounted(async () => {
   drawSimulation(width, height);
   movePoint(nowTime);
 });
+
+defineExpose({
+  checkPropsChange
+})
 </script>
 
 <template>

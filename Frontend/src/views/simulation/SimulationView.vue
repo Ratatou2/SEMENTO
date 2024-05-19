@@ -12,7 +12,7 @@ import "vue-multiselect/dist/vue-multiselect.css";
 import StickChart from "./components/StickChart.vue";
 import BlackDataCard from "@/components/card/BlackDataCard.vue";
 import SimulationSideTapView from "./SimulationSideTapView.vue";
-import Table from "@/components/table/Table.vue";
+import SideTabTable from "@/components/table/SideTabTable.vue";
 import Loading from "@/components/loading/Loading.vue";
 import { simulationStore } from "@/stores/simulation";
 import moment from "moment";
@@ -100,11 +100,6 @@ function toggleSidePageHandler(data) {
   toggleSidePage(data);
 }
 
-//== axios 통신 ==
-// onMounted(async () => {
-//   await getNewResult(newStartDate, newEndDate, selectedOhtId);
-//   nowLoading.value = false;
-// });
 </script>
 
 <template>
@@ -280,22 +275,6 @@ function toggleSidePageHandler(data) {
 </template>
 
 <style scoped>
-.side-page {
-  width: 48%;
-  height: 100%;
-  background-color: #f3f2f7;
-  position: fixed;
-  top: 0;
-  right: -48%; /* 초기 위치는 오른쪽 바깥에 있습니다 */
-  transition: right 0.5s;
-  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.09);
-  overflow: scroll;
-}
-
-.side-page.open {
-  right: 0; /* 열릴 때 위치 */
-}
-
 .garo {
   width: 97%;
   display: flex;
