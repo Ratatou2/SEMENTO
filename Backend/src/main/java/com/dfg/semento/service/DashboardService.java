@@ -543,7 +543,7 @@ public class DashboardService {
         // ==== 집계 검색 ====
         CardinalityAggregationBuilder cardinalityAggregation = AggregationBuilders
             .cardinality("count_working")
-            .field("doc_id");
+            .script(new Script("doc['oht_id'].value + ' ' + doc['curr_time'].value"));
 
         // ==== 질의 ====
         SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime, boolQueryBuilder, cardinalityAggregation);
@@ -568,7 +568,7 @@ public class DashboardService {
         // ==== 집계 검색 ====
         CardinalityAggregationBuilder cardinalityAggregation = AggregationBuilders
             .cardinality("count_working")
-            .field("doc_id");
+            .script(new Script("doc['oht_id'].value + ' ' + doc['curr_time'].value"));
 
         // ==== 질의 ====
         SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime, boolQueryBuilder, cardinalityAggregation);
