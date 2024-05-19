@@ -1,7 +1,6 @@
 <script setup>
 import Simulation from "@/components/simulation/Simulation.vue";
 import Cardhead from "@/components/Text/Cardhead.vue";
-import Text from "@/components/Text/Text.vue";
 import Text2 from "@/components/Text/Text2.vue";
 import SearchInput from "@/components/searchBar/SearchInput.vue";
 import Button from "@/components/button/Button.vue";
@@ -34,36 +33,36 @@ function transformatDate(date) {
 
 //== 인풋창 설정 => 디폴트 셋팅
 const options = [
-  { name: "2586호기", value: 2586 },
-  { name: "2587호기", value: 2587 },
-  { name: "2588호기", value: 2588 },
-  { name: "2589호기", value: 2589 },
-  { name: "2590호기", value: 2590 },
-  { name: "2591호기", value: 2591 },
-  { name: "2592호기", value: 2592 },
-  { name: "2593호기", value: 2593 },
-  { name: "2594호기", value: 2594 },
-  { name: "2595호기", value: 2595 },
-  { name: "2596호기", value: 2596 },
-  { name: "2597호기", value: 2597 },
-  { name: "2598호기", value: 2598 },
-  { name: "2599호기", value: 2599 },
-  { name: "2600호기", value: 2600 },
-  { name: "2601호기", value: 2601 },
-  { name: "2602호기", value: 2602 },
-  { name: "2603호기", value: 2603 },
-  { name: "2604호기", value: 2604 },
-  { name: "2605호기", value: 2605 },
-  { name: "2606호기", value: 2606 },
-  { name: "2607호기", value: 2607 },
-  { name: "2608호기", value: 2608 },
-  { name: "2609호기", value: 2609 },
-  { name: "2610호기", value: 2610 },
-  { name: "2611호기", value: 2611 },
-  { name: "2612호기", value: 2612 },
-  { name: "2613호기", value: 2613 },
-  { name: "2614호기", value: 2614 },
-  { name: "2615호기", value: 2615 },
+  { name: "5205호기", value: 5205 },
+  { name: "5206호기", value: 5206 },
+  { name: "5207호기", value: 5207 },
+  { name: "5208호기", value: 5208 },
+  { name: "5209호기", value: 5209 },
+  { name: "5210호기", value: 5210 },
+  { name: "5211호기", value: 5211 },
+  { name: "5212호기", value: 5212 },
+  { name: "5213호기", value: 5213 },
+  { name: "5214호기", value: 5214 },
+  { name: "5215호기", value: 5215 },
+  { name: "5216호기", value: 5216 },
+  { name: "5217호기", value: 5217 },
+  { name: "5218호기", value: 5218 },
+  { name: "5219호기", value: 5219 },
+  { name: "5220호기", value: 5220 },
+  { name: "5221호기", value: 5221 },
+  { name: "5222호기", value: 5222 },
+  { name: "5223호기", value: 5223 },
+  { name: "5224호기", value: 5224 },
+  { name: "5225호기", value: 5225 },
+  { name: "5226호기", value: 5226 },
+  { name: "5227호기", value: 5227 },
+  { name: "5228호기", value: 5228 },
+  { name: "5229호기", value: 5229 },
+  { name: "5230호기", value: 5230 },
+  { name: "5231호기", value: 5231 },
+  { name: "5232호기", value: 5232 },
+  { name: "5233호기", value: 5233 },
+  { name: "5234호기", value: 5234 },
 ];
 const selectedOhtId = ref();
 const newStartDate = ref();
@@ -238,7 +237,7 @@ function toggleSidePageHandler(data) {
             />
           </section>
           <section class="table-container">
-            <Table
+            <SideTabTable
               class="table-component"
               width="100%"
               bodyFontSize="14px"
@@ -256,19 +255,19 @@ function toggleSidePageHandler(data) {
             />
           </section>
         </div>
-      </section>
-      <!-- Log By Total-work -->
+        <!-- Log By Total-work -->
         <div class="side-page" :class="{ open: isSidePageOpen }">
-        <section class="back-icon">
-          <font-awesome-icon
-            @click="toggleSidePage"
-            :icon="['fas', 'angles-right']"
-            size="2xl"
-            style="color: #383839; margin-left: 15px; margin-top: 20px"
-          />
-        </section>
-        <SimulationSideTapView />
-      </div>
+          <section class="back-icon">
+            <font-awesome-icon
+              @click="toggleSidePage"
+              :icon="['fas', 'angles-right']"
+              size="2xl"
+              style="color: #383839; margin-left: 15px; margin-top: 20px"
+            />
+          </section>
+          <SimulationSideTapView />
+        </div>
+      </section>
     </div>
   </div>
 </template>
