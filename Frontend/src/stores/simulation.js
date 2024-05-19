@@ -4,9 +4,9 @@ import { instance } from "@/util/axios-util";
 import moment from "moment";
 
 export const simulationStore = defineStore("simulationStore", () => {
-  const startDate = ref("2023-01-01T00:00:00");
-  const endDate = ref("2023-01-01T23:59:59");
-  const ohtId = ref(2600);
+  const startDate = ref();
+  const endDate = ref();
+  const ohtId = ref();
 
   //==결과 데이터
   const simulationData = ref(null);
@@ -123,7 +123,7 @@ export const simulationStore = defineStore("simulationStore", () => {
 
       //현재 날짜에서 24-05-11로 default 날짜 설정 변경(날짜 임의로 임시 설정함)
       newStartDate.value = new Date(2024, 4, 11).setHours(20, 30, 0, 0);
-      newEndDate.value = new Date(2024, 4, 11).setHours(20 ,50, 0, 0);
+      newEndDate.value = new Date(2024, 4, 11).setHours(20, 50, 0, 0);
     }
 
     setStartDate(newStartDate);
@@ -179,9 +179,6 @@ export const simulationStore = defineStore("simulationStore", () => {
 
   //==각종 비교 컴포넌트용==
   const getComparedData = async () => {
-    console.log(startDate.value);
-    console.log(endDate.value);
-    console.log(ohtId.value);
     const resp = await instance.post("/simulation/work-information", {
       "start-date": startDate.value,
       "end-date": endDate.value,

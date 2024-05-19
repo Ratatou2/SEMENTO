@@ -159,11 +159,16 @@ onUnmounted(() => {
           >
             <div
               :class="{
-                'error-cell': columns[columnIndex] === 'ERROR',
+                'error-cell': columns[columnIndex] === 'ERROR' && cell != 0,
                 'status-cell': columns[columnIndex] === 'STATUS',
               }"
             >
-              <div class="inner-content">
+              <div
+                class="inner-content"
+                :class="{
+                  'no-error': columns[columnIndex] === 'ERROR' && cell === 0,
+                }"
+              >
                 {{ cell }}
               </div>
             </div>
@@ -223,6 +228,7 @@ td.table-cell div.error-cell div.inner-content {
   display: inline-block;
   color: #ac2e2e;
   font-weight: bold;
+  border-radius: 5px;
 }
 td.table-cell div.status-cell div.inner-content {
   padding: 5px 10px;
@@ -230,6 +236,11 @@ td.table-cell div.status-cell div.inner-content {
   display: inline-block;
   color: #2e5aac;
   font-weight: bold;
+}
+
+td.table-cell div.error-cell div.inner-content.no-error {
+  border: none;
+  color: black; /* 오류가 없을 때 텍스트 색상 변경 가능 */
 }
 
 /* 마우스 호버 시 행의 배경색을 변경 */

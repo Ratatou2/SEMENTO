@@ -17,8 +17,7 @@ import LineChart from "./components/state-analysis/LineChart.vue";
 // vue
 import { useDashboardStore } from "@/stores/dashboard";
 const dashboardStore = useDashboardStore();
-import { onMounted, watch, ref } from 'vue';
-
+import { onMounted, watch, ref } from "vue";
 
 // 날짜 계산
 const months = [
@@ -39,17 +38,28 @@ const currentDate = new Date();
 const year = currentDate.getFullYear(); // 년도 가져오기
 const month = currentDate.getMonth(); // 월 가져오기 (0부터 시작하므로 +1 해줘야 함)
 const firstDayOfMonth = new Date(year, month, 1);
-const lastDayOfMonth = new Date(year, month+1, 0);
+const lastDayOfMonth = new Date(year, month + 1, 0);
 
 // 시작 일이랑 마지막 일 계산
-const options = { timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit' };
-const dateFormatter = new Intl.DateTimeFormat('ko-KR', options);
-const startTime = dateFormatter.format(firstDayOfMonth).replace(/(\d{4})\. (\d{2})\. (\d{2})\./, '$1-$2-$3') + 'T00:00:00';
-const endTime = dateFormatter.format(lastDayOfMonth).replace(/(\d{4})\. (\d{2})\. (\d{2})\./, '$1-$2-$3') + 'T23:59:59';
+const options = {
+  timeZone: "Asia/Seoul",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+};
+const dateFormatter = new Intl.DateTimeFormat("ko-KR", options);
+const startTime =
+  dateFormatter
+    .format(firstDayOfMonth)
+    .replace(/(\d{4})\. (\d{2})\. (\d{2})\./, "$1-$2-$3") + "T00:00:00";
+const endTime =
+  dateFormatter
+    .format(lastDayOfMonth)
+    .replace(/(\d{4})\. (\d{2})\. (\d{2})\./, "$1-$2-$3") + "T23:59:59";
 console.log(startTime, endTime);
 
 // ===========================
-const nowLoading = ref(true); //로딩창 기본 비활성화
+const nowLoading = ref(true); //로딩창 기본 활성화
 
 // ===========================
 // 실패 에러 로그
@@ -58,16 +68,16 @@ const deadline = ref("");
 const averageWork = ref("");
 const averageIdle = ref("");
 const maxJobTime = ref({
-  "startTime":"",
-  "endTime":""
+  startTime: "",
+  endTime: "",
 });
 const maxWorkTime = ref({
-  "startTime":"",
-  "endTime":""
+  startTime: "",
+  endTime: "",
 });
 const maxIdleTime = ref({
-  "startTime":"",
-  "endTime":""
+  startTime: "",
+  endTime: "",
 });
 
 onMounted(async() => {
@@ -81,35 +91,58 @@ onMounted(async() => {
     dashboardStore.endTime = endTime;
   }
   // 상태 분석 데이터 전처리
-  deadline.value = Math.floor(dashboardStore.stateAnalysisData['deadline'].data/60) +"m "+dashboardStore.stateAnalysisData['deadline'].data%60+"s";
-  averageWork.value = Math.floor(dashboardStore.stateAnalysisData['average-work-time'].data/60) +"m "+dashboardStore.stateAnalysisData['average-work-time'].data%60+"s";
-  averageIdle.value = Math.floor(dashboardStore.stateAnalysisData['average-idle-time'].data/60) +"m "+dashboardStore.stateAnalysisData['average-idle-time'].data%60+"s";
+  deadline.value =
+    Math.floor(dashboardStore.stateAnalysisData["deadline"].data / 60) +
+    "m " +
+    (dashboardStore.stateAnalysisData["deadline"].data % 60) +
+    "s";
+  averageWork.value =
+    Math.floor(
+      dashboardStore.stateAnalysisData["average-work-time"].data / 60
+    ) +
+    "m " +
+    (dashboardStore.stateAnalysisData["average-work-time"].data % 60) +
+    "s";
+  averageIdle.value =
+    Math.floor(
+      dashboardStore.stateAnalysisData["average-idle-time"].data / 60
+    ) +
+    "m " +
+    (dashboardStore.stateAnalysisData["average-idle-time"].data % 60) +
+    "s";
 
   // 상태 시간대 분석 데이터 전처리
-  timeDataFormatting(dashboardStore.stateHourlyAnalysisData['max-job-time'], maxJobTime);
-  timeDataFormatting(dashboardStore.stateHourlyAnalysisData['max-work-time'], maxWorkTime);
-  timeDataFormatting(dashboardStore.stateHourlyAnalysisData['max-idle-time'], maxIdleTime);
-
-  // 작업 결과 에러 로그 데이터 전처리
-  errorLog.value = [];
-  errorLog.value = dashboardStore.jobResultAnalysisData['job-result-error-log'].map((item, index) => [index+1, String(item['oht-id']), String(item['error']), String(item['count'])])
+  timeDataFormatting(
+    dashboardStore.stateHourlyAnalysisData["max-job-time"],
+    maxJobTime
+  );
+  timeDataFormatting(
+    dashboardStore.stateHourlyAnalysisData["max-work-time"],
+    maxWorkTime
+  );
+  timeDataFormatting(
+    dashboardStore.stateHourlyAnalysisData["max-idle-time"],
+    maxIdleTime
+  );
 
   nowLoading.value = false;   
 });
 
-// watch(() => dashboardStore.watchedJobResultAnalysisData, (oldValue, newValue) => {
-  
-// },{ deep: true }); 
+watch(() => dashboardStore.watchedJobResultAnalysisData, (oldValue, newValue) => {
+  errorLog.value = [];
+  errorLog.value = dashboardStore.jobResultAnalysisData['job-result-error-log'].map((item, index) => [index+1, String(item['oht-id']), String(item['error']), String(item['count'])])
+  console.log(errorLog.value)
+},{ deep: true }); 
 
 function timeDataFormatting(temp, refData) {
-  if(temp < 10) {
-    refData.value.startTime = "0"+temp+":00";
-    if(temp + 1 == 24) refData.value.endTime = "00:00";
-    else refData.value.endTime = "0"+(temp+1)+":00";
+  if (temp < 10) {
+    refData.value.startTime = "0" + temp + ":00";
+    if (temp + 1 == 24) refData.value.endTime = "00:00";
+    else refData.value.endTime = "0" + (temp + 1) + ":00";
   } else {
-    refData.value.startTime = temp+":00";
-    if(temp + 1 == 24) refData.value.endTime = "00:00";
-    else refData.value.endTime = "0"+(temp+1)+":00";
+    refData.value.startTime = temp + ":00";
+    if (temp + 1 == 24) refData.value.endTime = "00:00";
+    else refData.value.endTime = "0" + (temp + 1) + ":00";
   }
 }
 
@@ -119,7 +152,6 @@ const formatNumber = (value) => {
     ? parseInt(formattedValue)
     : formattedValue;
 };
-
 </script>
 <template>
   <div v-if="nowLoading"><Loading /></div>
@@ -140,23 +172,47 @@ const formatNumber = (value) => {
           <div class="col">
             <BlackDataCard
               title="가용 중인 OHT 수"
-              :content="dashboardStore.ohtJobAnalysisData['oht-count'].data+' 대'"
+              :content="
+                dashboardStore.ohtJobAnalysisData['oht-count'].data + ' 대'
+              "
               :width="'320px'"
               :height="'130px'"
             />
             <BlackDataCard
               title="총 작업량"
-              :content="dashboardStore.ohtJobAnalysisData['total-work'].data+' 건'"
-              :percentage="formatNumber(dashboardStore.ohtJobAnalysisData['total-work'].percent)+'%'"
-              :fontColor="dashboardStore.ohtJobAnalysisData['total-work'].percent >= 0 ? 'red' : 'blue'"
+              :content="
+                dashboardStore.ohtJobAnalysisData['total-work'].data + ' 건'
+              "
+              :percentage="
+                formatNumber(
+                  dashboardStore.ohtJobAnalysisData['total-work'].percent
+                ) + '%'
+              "
+              :fontColor="
+                dashboardStore.ohtJobAnalysisData['total-work'].percent >= 0
+                  ? 'red'
+                  : 'blue'
+              "
               :width="'320px'"
               :height="'130px'"
             />
             <BlackDataCard
               title="OHT 한달 평균 작업량"
-              :content="formatNumber(dashboardStore.ohtJobAnalysisData['average-work'].data) +' 건'"
-              :percentage="formatNumber(dashboardStore.ohtJobAnalysisData['average-work'].percent)+'%'"
-              :fontColor="dashboardStore.ohtJobAnalysisData['average-work'].percent >= 0 ? 'red' : 'blue'"
+              :content="
+                formatNumber(
+                  dashboardStore.ohtJobAnalysisData['average-work'].data
+                ) + ' 건'
+              "
+              :percentage="
+                formatNumber(
+                  dashboardStore.ohtJobAnalysisData['average-work'].percent
+                ) + '%'
+              "
+              :fontColor="
+                dashboardStore.ohtJobAnalysisData['average-work'].percent >= 0
+                  ? 'red'
+                  : 'blue'
+              "
               :width="'320px'"
               :height="'130px'"
             />
@@ -169,7 +225,12 @@ const formatNumber = (value) => {
               />
             </div>
             <div class="padding-left-20">
-              <StickChart width="100%" height="310px" :startTime="startTime" :endTime="endTime" />
+              <StickChart
+                width="100%"
+                height="310px"
+                :startTime="startTime"
+                :endTime="endTime"
+              />
             </div>
           </div>
         </div>
@@ -230,16 +291,34 @@ const formatNumber = (value) => {
             <BlackDataCard
               title="평균 작업 시간"
               :content="averageWork"
-              :percentage="formatNumber(dashboardStore.stateAnalysisData['average-work-time'].percent)+'%'"
-              :fontColor="dashboardStore.stateAnalysisData['average-work-time'].percent >= 0 ? 'red' : 'blue'"
+              :percentage="
+                formatNumber(
+                  dashboardStore.stateAnalysisData['average-work-time'].percent
+                ) + '%'
+              "
+              :fontColor="
+                dashboardStore.stateAnalysisData['average-work-time'].percent >=
+                0
+                  ? 'red'
+                  : 'blue'
+              "
               :width="'320px'"
               :height="'130px'"
             />
             <BlackDataCard
               title="평균 유휴 시간"
               :content="averageIdle"
-              :percentage="formatNumber(dashboardStore.stateAnalysisData['average-idle-time'].percent)+'%'"
-              :fontColor="dashboardStore.stateAnalysisData['average-idle-time'].percent >= 0 ? 'red' : 'blue'"
+              :percentage="
+                formatNumber(
+                  dashboardStore.stateAnalysisData['average-idle-time'].percent
+                ) + '%'
+              "
+              :fontColor="
+                dashboardStore.stateAnalysisData['average-idle-time'].percent >=
+                0
+                  ? 'red'
+                  : 'blue'
+              "
               :width="'320px'"
               :height="'130px'"
             />
@@ -283,7 +362,6 @@ const formatNumber = (value) => {
         </div>
       </div>
     </div>
-
   </div>
   <div class="footer"></div>
 </template>

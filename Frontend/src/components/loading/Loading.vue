@@ -13,7 +13,7 @@ function onCancel() {
 <template>
   <div class="loading-overlay">
     <div class="loading-content">
-      <p>Now Loading</p>
+      <p>로그를 분석중입니다.</p>
       <span class="loader"></span>
     </div>
   </div>
@@ -32,8 +32,8 @@ function onCancel() {
 .loading-overlay {
   position: fixed;
   top: 0;
-  left: 0;
-  width: 100%;
+  left: 17.5%; /* SideBar 너비만큼 왼쪽에서 시작 */
+  width: 82.5%; /* 전체 너비에서 SideBar 너비를 제외한 나머지 */
   height: 100%;
   background-color: rgba(0, 0, 0, 0.8);
   display: flex;
@@ -53,7 +53,8 @@ function onCancel() {
 
 .loading-content p {
   color: white;
-  font-size: 20px;
+  font-size: 3rem;
+  font-weight: bold;
   margin-top: 20px;
 }
 
@@ -75,25 +76,5 @@ function onCancel() {
   100% {
     transform: rotate(360deg);
   }
-}
-
-.loading-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.8);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.loading-content p {
-  color: white;
-  font-size: 3rem;
-  font-weight: bold;
-  margin-top: 20px;
 }
 </style>
