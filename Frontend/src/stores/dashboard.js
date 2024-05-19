@@ -4,6 +4,8 @@ import { instance } from '@/util/axios-util'
 
 
 export const useDashboardStore = defineStore('dashboard', () => {
+  const startTime = ref("");
+  const endTime = ref("");
   const ohtJobAnalysisData = ref({
       "oht-count": {
           "data": "loading..",
@@ -83,5 +85,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
     stateHourlyAnalysisData,
     getStateHourlyAnalysis,
     watchedStateHourlyAnalysisData,
+    startTime,
+    endTime
   }
 })
