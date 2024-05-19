@@ -90,11 +90,11 @@ const chartOptions = reactive({
         legend: { // 범례 제거
             display: false
         },
-        deferred: {
-          xOffset: 150,   // defer until 150px of the canvas width are inside the viewport
-          yOffset: '50%', // defer until 50% of the canvas height are inside the viewport
-          delay: 500      // delay of 500 ms after the canvas is considered inside the viewport
-        }
+        // deferred: {
+        //   xOffset: 150,   // defer until 150px of the canvas width are inside the viewport
+        //   yOffset: '50%', // defer until 50% of the canvas height are inside the viewport
+        //   delay: 500      // delay of 500 ms after the canvas is considered inside the viewport
+        // }
     },
     scales: {
         x: {
@@ -132,9 +132,6 @@ function drawChart() {
 }
 
 onMounted(async() => {
-    if(dashboardStore.startTime == "" && dashboardStore.endTime == "") {  
-        await dashboardStore.getOhtJobHourly(props.startTime, props.endTime);
-    }
     ohtJobHourlyCount.value = dashboardStore.ohtJobHourlyData.map(item => item.work);
     chartData.datasets[0].data = [...ohtJobHourlyCount.value];
     drawChart();

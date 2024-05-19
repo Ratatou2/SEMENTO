@@ -87,6 +87,7 @@ onMounted(async() => {
     await dashboardStore.getJobResultAnalysis(startTime, endTime);
     await dashboardStore.getStateAnalysis(startTime, endTime);
     await dashboardStore.getStateHourlyAnalysis(startTime, endTime);
+    await dashboardStore.getOhtJobHourly(startTime, endTime);
     dashboardStore.startTime = startTime;
     dashboardStore.endTime = endTime;
   }
