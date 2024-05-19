@@ -8,6 +8,7 @@ import Line from "@/components/line/Line.vue";
 import "vue-multiselect/dist/vue-multiselect.css";
 import Map from "./components/summary/Map.vue";
 import Info from "@/components/info/Info.vue";
+import InitialPage from "@/components/loading/InitialPage.vue";
 // chart
 import DurationChart from "./components/summary/DurationChart.vue";
 import ErrorChart from "./components/summary/ErrorChart.vue";
@@ -25,7 +26,9 @@ import Loading from "@/components/loading/Loading.vue";
 const analysisStore = useAnalysisStore();
 const notificationStore = useNotificationStore();
 
-const nowLoading = ref(true); //로딩창 기본 비활성화
+const nowLoading = ref(false); //로딩창 기본 비활성화
+//==초기 화면
+const initialPage = ref(true);
 const cnt = ref(11);
 const congTime = ref(0);
 
@@ -135,35 +138,34 @@ const detectionReports = computed(() => {
 });
 
 const handleStartDate = (newDate) => {
-  console.log("handleStartDate");
+  // console.log("handleStartDate");
   startTime.value = newDate;
 };
 const handleEndDate = (newDate) => {
-  console.log("handleEndDate");
+  // console.log("handleEndDate");
   endTime.value = newDate;
 };
 //AI 버튼 핸들링 이벤트
 const handleAIDetectionButton = async () => {
   nowLoading.value = true;
   await analysisStore.getNewAIDetection(startTime, endTime);
-  nowLoading.value = false;
-  notificationStore.sendNotification(); // 알림 띄우기
-};
-
-onMounted(async () => {
-  await analysisStore.getAiDetection();
   cnt.value = analysisStore.computedDetectionResult.length;
   analysisStore.computedDetectionResult.forEach((result) => {
     congTime.value +=
       (new Date(result["end-date"]) - new Date(result["start-date"])) / 1000;
   });
   nowLoading.value = false;
+  initialPage.value = false;
+  notificationStore.sendNotification(); // 알림 띄우기
+};
+
+onMounted(async () => {
   notificationStore.sendNotification(); // 알림 띄우기
 });
 </script>
 
 <template>
-  <div v-if="nowLoading"><Loading /></div>
+  <div v-if="nowLoading"><Loading title="AI가 로그를 분석중입니다." /></div>
   <div v-else="!nowLoading" class="body-container">
     <!-- 설명 및 검색창 -->
     <section class="input">
@@ -187,87 +189,91 @@ onMounted(async () => {
       </div>
     </section>
     <Line></Line>
+    <!-- 아직 검색 안했을때 -->
+    <div v-if="initialPage"><InitialPage /></div>
     <!-- 검색결과 -->
-    <section class="header">
-      <!--제목 -->
-      <HeadText header-text="# Summary" />
-      <Text :text="summaryText" />
-    </section>
+    <div v-else>
+      <section class="header">
+        <!--제목 -->
+        <HeadText header-text="# Summary" />
+        <Text :text="summaryText" />
+      </section>
 
-    <section class="result">
-      <!-- 시뮬레이션 -->
-      <div class="white-box simulation-box">
-        <div class="info-box">
-          <Info />
-        </div>
-        <div class="content">
-          <Map />
-        </div>
-      </div>
-    </section>
-    <!-- 그래프 분석 -->
-    <section class="chart">
-      <div class="white-box error-chart-box">
-        <section class="title">
-          <Cardhead
-            headerText="Error Chart"
-            contentText="탐지된 정체 상황들의 AI 분석 결과 비율입니다."
-          ></Cardhead>
-        </section>
-        <div class="error-chart">
-          <div class="error-chart-content">
-            <ErrorChart />
+      <section class="result">
+        <!-- 시뮬레이션 -->
+        <div class="white-box simulation-box">
+          <div class="info-box">
+            <Info />
+          </div>
+          <div class="content">
+            <Map />
           </div>
         </div>
-      </div>
-      <div class="right-chart-box">
-        <div class="white-box">
+      </section>
+      <!-- 그래프 분석 -->
+      <section class="chart">
+        <div class="white-box error-chart-box">
           <section class="title">
             <Cardhead
-              headerText="Congestion Time"
-              contentText="기간동안 소요된 총 정체시간 입니다."
+              headerText="Error Chart"
+              contentText="탐지된 정체 상황들의 AI 분석 결과 비율입니다."
             ></Cardhead>
           </section>
-          <div class="congestion-chart">
-            <div class="congestion-chart-content">
-              <CongestionChart />
+          <div class="error-chart">
+            <div class="error-chart-content">
+              <ErrorChart />
             </div>
           </div>
-          <div class="congestion-chart-text">
-            <Text :text="congestionText" size="19px" />
+        </div>
+        <div class="right-chart-box">
+          <div class="white-box">
+            <section class="title">
+              <Cardhead
+                headerText="Congestion Time"
+                contentText="기간동안 소요된 총 정체시간 입니다."
+              ></Cardhead>
+            </section>
+            <div class="congestion-chart">
+              <div class="congestion-chart-content">
+                <CongestionChart />
+              </div>
+            </div>
+            <div class="congestion-chart-text">
+              <Text :text="congestionText" size="19px" />
+            </div>
+          </div>
+          <div class="white-box duration-chart-box">
+            <section class="title">
+              <Cardhead
+                headerText="Duration Time Chart"
+                contentText="각 정체 상황별 소요시간 그래프입니다."
+              ></Cardhead>
+            </section>
+            <div class="duration-chart">
+              <div class="duration-chart-content"><DurationChart /></div>
+            </div>
           </div>
         </div>
-        <div class="white-box duration-chart-box">
-          <section class="title">
-            <Cardhead
-              headerText="Duration Time Chart"
-              contentText="각 정체 상황별 소요시간 그래프입니다."
-            ></Cardhead>
-          </section>
-          <div class="duration-chart">
-            <div class="duration-chart-content"><DurationChart /></div>
-          </div>
-        </div>
-      </div>
-    </section>
-    <!-- 각 정체별 상세분석 -->
-    <Line />
-    <section class="header">
-      <!--제목 -->
-      <HeadText :header-text="detectionReportText" />
-    </section>
-    <section
-      v-for="report in detectionReports"
-      :key="report.index"
-      class="detection-report-container"
-    >
-      <SementoAiResultCard
-        :location="true"
-        :number="report.index"
-        :text="`${report.startDate} ~ ${report.endDate} [총 ${report.durationText}]`"
-        :cause="report.cause"
-      />
-    </section>
+      </section>
+      <!-- 각 정체별 상세분석 -->
+      <Line />
+      <section class="header">
+        <!--제목 -->
+        <HeadText :header-text="detectionReportText" />
+      </section>
+      <section
+        v-for="report in detectionReports"
+        :key="report.index"
+        class="detection-report-container"
+      >
+        <SementoAiResultCard
+          :location="true"
+          :number="report.index"
+          :text="`${report.startDate} ~ ${report.endDate} [총 ${report.durationText}]`"
+          :cause="report.cause"
+        />
+      </section>
+    </div>
   </div>
   <div class="footer"></div>
 </template>

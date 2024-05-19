@@ -8,12 +8,19 @@ function onCancel() {
   console.log("Loading cancelled by user");
   isLoading.value = false;
 }
+
+const props = defineProps({
+  title: {
+    type: String,
+    default: "로그를 분석중입니다",
+  },
+});
 </script>
 
 <template>
   <div class="loading-overlay">
     <div class="loading-content">
-      <p>로그를 분석중입니다.</p>
+      <p>{{ props.title }}</p>
       <span class="loader"></span>
     </div>
   </div>
