@@ -243,6 +243,7 @@ onMounted(async () => {
             :data="simulationStore().logPerWork"
           />
         </section>
+        <div class="footer"></div>
       </div>
     </section>
   </div>
@@ -258,7 +259,6 @@ onMounted(async () => {
     </section>
     <SimulationSideTapView />
   </div>
-  <div class="footer"></div>
 </template>
 
 <style scoped>
