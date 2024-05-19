@@ -1,6 +1,7 @@
 <script setup>
 import Cardhead from "@/components/Text/Cardhead.vue";
 import Text from "@/components/Text/Text.vue";
+import Text2 from "@/components/Text/Text2.vue";
 import HeadText from "@/components/Text/HeadText.vue";
 import SearchInput from "@/components/searchBar/SearchInput.vue";
 import Button from "@/components/button/Button.vue";
@@ -171,7 +172,7 @@ onMounted(async () => {});
   <div v-else="!nowLoading" class="body-container">
     <!-- 설명 및 검색창 -->
     <section class="input">
-      <Text
+      <Text2
         text="기간을 설정하여 혼잡/정체 상황에 대한 AI 분석을 받아보세요."
       />
       <div class="input-data">
@@ -194,7 +195,7 @@ onMounted(async () => {});
     <!-- 아직 검색 안했을때 -->
     <div v-if="initialPage"><InitialPage /></div>
     <!-- 검색결과 -->
-    <div v-else>
+    <div class="results" v-else>
       <section class="header">
         <!--제목 -->
         <HeadText header-text="# Summary" />
@@ -281,6 +282,11 @@ onMounted(async () => {});
 </template>
 
 <style scoped>
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
 .detection-report-container {
   /* border: 1px solid black; */
   width: 100%;
@@ -381,10 +387,11 @@ onMounted(async () => {});
   width: 100%;
   padding: 0 20px;
 }
-
+/* 
 .white-box {
   min-width: 400px;
-}
+  width: 100%;
+} */
 
 .simulation-box {
   min-height: 400px;
