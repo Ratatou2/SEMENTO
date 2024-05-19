@@ -258,18 +258,17 @@ function toggleSidePageHandler(data) {
         </div>
       </section>
       <!-- Log By Total-work -->
-    </div>
-    <div class="side-page" :class="{ open: isSidePageOpen }">
-      <!-- 사이드 페이지 내용을 여기에 추가하세요 -->
-      <section class="back-icon">
-        <font-awesome-icon
-          @click="toggleSidePage"
-          :icon="['fas', 'angles-right']"
-          size="2xl"
-          style="color: #383839; margin-left: 15px; margin-top: 20px"
-        />
-      </section>
-      <SimulationSideTapView />
+        <div class="side-page" :class="{ open: isSidePageOpen }">
+        <section class="back-icon">
+          <font-awesome-icon
+            @click="toggleSidePage"
+            :icon="['fas', 'angles-right']"
+            size="2xl"
+            style="color: #383839; margin-left: 15px; margin-top: 20px"
+          />
+        </section>
+        <SimulationSideTapView />
+      </div>
     </div>
   </div>
 </template>

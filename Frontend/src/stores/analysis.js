@@ -5,13 +5,8 @@ import moment from "moment";
 
 
 export const useAnalysisStore = defineStore("analysisStore", () => {
-<<<<<<< HEAD
   const startDate = ref();
   const endDate = ref();
-=======
-  const startDate = ref("2024-05-11T20:30:00");
-  const endDate = ref("2024-05-11T20:47:00");
->>>>>>> feature/fe/Simulation-시뮬레이션-사이드-탭-구현
   const detectionResult = ref([]);
   const totalTime = ref(0);
   const totalCongestionTime = ref(0);
