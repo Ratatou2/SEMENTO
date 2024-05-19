@@ -7,7 +7,7 @@ import os
 from tqdm import tqdm
 
 
-async def data_preprocessing_by_time(
+def data_preprocessing_by_time(
     df: pd.DataFrame,
 ):
     try:
@@ -27,9 +27,14 @@ async def data_preprocessing_by_time(
         encoded_current = encoder.transform(df[['current_node']].rename(columns={'current_node': 'node'}))
 
         encoder_status = ce.BinaryEncoder(cols=['status'])
-        encoded_status = encoder_status.fit_transform(df['status'])
+        encoder_status.fit(pd.DataFrame(["I", "G", "W", "A"], columns=['status']))
+        encoded_status = encoder_status.transform(df['status'])
 
         df['is_idle'] = df['status'].apply(lambda x: True if x == 'I' else False)
+        # "oht_connect" 컬럼이 존재하지 않으면 추가
+        if 'oht_connect' not in df.columns:
+            df['oht_connect'] = df['error'].apply(lambda x: 1 if x == 200 else 0)
+
 
         # 인코딩된 결과를 원래의 데이터프레임에 새로운 컬럼으로 추가
         df = pd.concat([df, encoded_target.add_suffix('_target'), encoded_current.add_suffix('_current'),
@@ -130,7 +135,7 @@ async def data_preprocessing_by_time(
             path_count_arr.append(path_count)
 
         # 필요없는 컬럼 drop하고 dataset 구성
-        df.drop(['path', 'target_node', 'current_node', 'curr_time', 'status', 'mode', 'start_time', 'error', 'next_node'], axis=1,
+        df.drop(['oht_id', 'path', 'target_node', 'current_node', 'curr_time', 'status', 'mode', 'start_time', 'error', 'next_node'], axis=1,
                 inplace=True)
         
         NEW_SNAPSHOT_MATRIX = [[df.iloc[k*n_ohts + idx] for idx in range(n_ohts)] for k in range(len(df) // n_ohts)]
