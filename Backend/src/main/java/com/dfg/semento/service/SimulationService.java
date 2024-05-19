@@ -254,6 +254,7 @@ public class SimulationService {
             }
         }
 
+        System.out.println("엄마 "+allBuckets.size()+", "+runningOhtCnt+", "+ohtError);
         int overallError = allBuckets.size();
         double overallErrorAvg = (double) overallError / runningOhtCnt;
         double differencePercentage = CalculateData.getDifferencePercentage(ohtError, overallErrorAvg);
@@ -424,7 +425,7 @@ public class SimulationService {
                 .field("curr_time").size(minuteRange);//1분에 60개, 5분에 300개
 
         TopHitsAggregationBuilder ohtDetails = AggregationBuilders.topHits("oht_details")
-                .fetchSource(new String[]{"oht_id", "path", "curr_node", "point_x", "point_y", "status.keyword", "error", "carrier", "speed", "is_fail"}, null)
+                .fetchSource(new String[]{"oht_id", "path", "curr_node", "point_x", "point_y", "status", "error", "carrier", "speed", "is_fail"}, null)
                 .size(ohtCnt) //OHT 최대갯수
                 .sort("curr_time", SortOrder.DESC) // Sort by curr_time in descending order
                 .sort("oht_id", SortOrder.ASC); // Additional sort by oht_id in ascending order
@@ -437,6 +438,8 @@ public class SimulationService {
 
         List<SimulationPerDate> simulationPerDates = new ArrayList<>();
         Terms logsByCurrTimeAgg = searchResponse.getAggregations().get("logs_by_curr_time");
+
+        System.out.println(searchResponse.toString());
 
         for (Terms.Bucket bucket : logsByCurrTimeAgg.getBuckets()) {
             List<SimulationPerOhtDto> simulationPerOhtDtoList = new ArrayList<>();
@@ -454,7 +457,7 @@ public class SimulationService {
                 SimulationPerOhtDto simulationPerOhtDto = SimulationPerOhtDto.builder()
                         .ohtId(Long.parseLong(sourceAsMap.get("oht_id").toString()))
                         .location(locationDto)
-                        .status((String) sourceAsMap.get("status.keyword"))
+                        .status((String) sourceAsMap.get("status"))
                         .carrier((Boolean) sourceAsMap.get("carrier"))
                         .error((Integer) sourceAsMap.get("error"))
                         .speed((Double) sourceAsMap.get("speed"))
