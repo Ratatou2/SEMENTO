@@ -76,6 +76,7 @@ function setActive(item, path) {
 <style scoped>
 .logo-container {
   padding-left: 10%;
+  padding-bottom: 15%;
 }
 
 .logo {
@@ -90,6 +91,7 @@ function setActive(item, path) {
 }
 
 .logo-subheading {
+  padding-top: 3%;
   color: #b9bbbd;
 }
 
@@ -110,7 +112,7 @@ function setActive(item, path) {
 }
 
 .analytics-container {
-  padding: 4% 0 4% 15%;
+  padding: 6% 0 4% 15%;
   margin: 3% 0 0 3%;
   width: 90%;
   border-radius: 8px;
@@ -126,7 +128,7 @@ function setActive(item, path) {
 }
 
 .simulation-log-container {
-  padding: 4% 0 4% 15%;
+  padding: 6% 0 4% 15%;
   margin: 3% 0 0 3%;
   width: 90%;
   border-radius: 8px;

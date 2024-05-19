@@ -16,12 +16,14 @@ import SementoAiResultCard from "./components/detection-report/SementoAiResultCa
 
 // vue
 import { useAnalysisStore } from "@/stores/analysis";
+import { useNotificationStore } from "@/stores/notification";
 import { onMounted, ref, computed, watch } from "vue";
 import moment from "moment";
 
 import Loading from "@/components/loading/Loading.vue";
 
 const analysisStore = useAnalysisStore();
+const notificationStore = useNotificationStore();
 
 const nowLoading = ref(true); //로딩창 기본 비활성화
 const cnt = ref(11);
@@ -145,6 +147,7 @@ const handleAIDetectionButton = async () => {
   nowLoading.value = true;
   await analysisStore.getNewAIDetection(startTime, endTime);
   nowLoading.value = false;
+  notificationStore.sendNotification(); // 알림 띄우기
 };
 
 onMounted(async () => {
@@ -155,6 +158,7 @@ onMounted(async () => {
       (new Date(result["end-date"]) - new Date(result["start-date"])) / 1000;
   });
   nowLoading.value = false;
+  notificationStore.sendNotification(); // 알림 띄우기
 });
 </script>
 

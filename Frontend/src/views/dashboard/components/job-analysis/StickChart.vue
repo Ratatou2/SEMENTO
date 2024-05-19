@@ -2,6 +2,7 @@
 import { reactive, onMounted, ref, watchEffect, watch } from 'vue';
 import { Chart, registerables } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+import ChartDeferred from 'chartjs-plugin-deferred';
 
 import { useDashboardStore } from "@/stores/dashboard";
 const dashboardStore = useDashboardStore();
@@ -34,6 +35,9 @@ const labels = [
 // Chart.js 컴포넌트 등록
 Chart.register(...registerables);
 Chart.register(ChartDataLabels);
+Chart.register(ChartDeferred);
+
+
 const ohtJobHourlyCount = ref([]);
 const chartRef = ref(null);
 let chart = null;
@@ -86,6 +90,11 @@ const chartOptions = reactive({
         legend: { // 범례 제거
             display: false
         },
+        // deferred: {
+        //   xOffset: 150,   // defer until 150px of the canvas width are inside the viewport
+        //   yOffset: '50%', // defer until 50% of the canvas height are inside the viewport
+        //   delay: 500      // delay of 500 ms after the canvas is considered inside the viewport
+        // }
     },
     scales: {
         x: {
@@ -123,7 +132,6 @@ function drawChart() {
 }
 
 onMounted(async() => {
-    await dashboardStore.getOhtJobHourly(props.startTime, props.endTime);
     ohtJobHourlyCount.value = dashboardStore.ohtJobHourlyData.map(item => item.work);
     chartData.datasets[0].data = [...ohtJobHourlyCount.value];
     drawChart();
