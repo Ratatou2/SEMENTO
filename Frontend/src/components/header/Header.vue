@@ -5,10 +5,11 @@ import Line from "../line/Line.vue";
 
 // 페이지 제목 반응형 참조로 생성
 const pageTitle = ref("Dashboard");
-const currentDate = ref(new Date().toLocaleDateString());
-const currentYear = ref(currentDate.value.slice(0, 4));
-const currentMonth = ref(currentDate.value.slice(5, 7));
-const currentDay = ref(currentDate.value.slice(8, 10));
+const now = new Date();
+const currentDate = ref(now);
+const currentYear = ref(now.getFullYear());
+const currentMonthIdx = ref(now.getMonth()); // 0부터 시작하므로 +1
+const currentDay = ref(now.getDate());
 
 // 현재 라우트 추적
 const route = useRoute();
@@ -39,14 +40,19 @@ const monthNames = [
   "November",
   "December",
 ];
-currentMonth.value = monthNames[currentDate.value.slice(5, 7) - 1];
+
+const currentMonth = ref(monthNames[currentMonthIdx.value]);
 
 function updateDate() {
-  currentDate.value = new Date().toLocaleDateString();
+  const now = new Date();
+  currentDate.value = now;
+  currentYear.value = now.getFullYear();
+  currentMonthIdx.value = now.getMonth(); // 월 인덱스를 0부터 시작
+  currentMonth.value = monthNames[currentMonthIdx.value];
+  currentDay.value = now.getDate();
 }
 
 // 다음 자정까지의 시간을 계산
-const now = new Date();
 const nextMidnight = new Date(
   now.getFullYear(),
   now.getMonth(),
