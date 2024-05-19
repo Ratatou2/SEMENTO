@@ -65,7 +65,7 @@ def analyze_by_Path(
     
 
 @root_router.get('/analytics/time')
-async def analyze_by_Time(
+def analyze_by_Time(
     start_date: str,
     end_date: str
 ):
@@ -84,7 +84,7 @@ async def analyze_by_Time(
             return {"congestion-info": []}
 
         start_time = time.time()        
-        deadlock_paths_and_error_info = await data_preprocessing_by_time(logs)        
+        deadlock_paths_and_error_info = data_preprocessing_by_time(logs)        
         print(f"{random_number} 요청 - data_preprocessing_by_time 동작 시간: {round(time.time() - start_time)}초")
 
         if len(deadlock_paths_and_error_info["dataset"]) == 0:
