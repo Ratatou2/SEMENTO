@@ -128,7 +128,6 @@ onMounted(async() => {
   // 에러 로그 데이터 전처리
   errorLog.value = [];
   errorLog.value = dashboardStore.jobResultAnalysisData['job-result-error-log'].map((item, index) => [index+1, String(item['oht-id']), String(item['error']), String(item['count'])])
-  console.log(errorLog.value)
 
   nowLoading.value = false;   
 });

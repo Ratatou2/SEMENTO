@@ -132,7 +132,9 @@ function drawChart() {
 }
 
 onMounted(async() => {
-    await dashboardStore.getOhtJobHourly(props.startTime, props.endTime);
+    if(dashboardStore.startTime == "" && dashboardStore.endTime == "") {  
+        await dashboardStore.getOhtJobHourly(props.startTime, props.endTime);
+    }
     ohtJobHourlyCount.value = dashboardStore.ohtJobHourlyData.map(item => item.work);
     chartData.datasets[0].data = [...ohtJobHourlyCount.value];
     drawChart();
