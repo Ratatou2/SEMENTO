@@ -2,6 +2,7 @@
 import Simulation from "@/components/simulation/Simulation.vue";
 import Cardhead from "@/components/Text/Cardhead.vue";
 import Text from "@/components/Text/Text.vue";
+import Text2 from "@/components/Text/Text2.vue";
 import SearchInput from "@/components/searchBar/SearchInput.vue";
 import Button from "@/components/button/Button.vue";
 import Line from "@/components/line/Line.vue";
@@ -104,7 +105,7 @@ function toggleSidePageHandler(data) {
   <div v-else="!nowLoading" class="body-container">
     <!-- 설명 및 검색창 -->
     <section class="input">
-      <Text
+      <Text2
         text="개별이송체의 시스템로그를 통해 시뮬레이션과 분석결과를 받아보세요."
       />
       <div class="input-data">

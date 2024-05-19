@@ -24,13 +24,18 @@ const props = defineProps({
   width: {
     type: String,
     default: "",
-  }
+  },
 });
 </script>
 
 <template>
   <button
-    :style="{ border: backgroundColor, backgroundColor: backgroundColor, color: fontColor, width: width }"
+    :style="{
+      border: backgroundColor,
+      backgroundColor: backgroundColor,
+      color: fontColor,
+      width: width,
+    }"
     class="button"
   >
     {{ title }}
