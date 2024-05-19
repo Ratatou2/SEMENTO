@@ -255,46 +255,19 @@ function toggleSidePageHandler(data) {
         </div>
       </section>
       <!-- Log By Total-work -->
-      <div class="white-box log-table-box">
-        <section class="title">
-          <Cardhead
-            :headerText="'Log By Total Work(' + simulationStore().totalCnt + '건)'"
-            contentText="각 작업을 클릭하여 해당하는 로그를 시뮬레이션과 함께 확인하실 수 있습니다."
-          />
-        </section>
-        <section class="table-container">
-          <Table
-            class="table-component"
-            width="100%"
-            bodyFontSize="14px"
-            headerFontSize="12px"
-            @toggle-side-page="toggleSidePageHandler"
-            :columns="[
-              'No.',
-              'Period',
-              'Time Taken',
-              'ERROR',
-              'Average Speed',
-              'Out of DeadLine',
-            ]"
-            :data="simulationStore().logPerWork"
-          />
-        </section>
-        <div class="footer"></div>
-      </div>
-    </section>
-  </div>
-  <div class="side-page" :class="{ open: isSidePageOpen }">
-    <!-- 사이드 페이지 내용을 여기에 추가하세요 -->
-    <section class="back-icon">
-      <font-awesome-icon
-        @click="toggleSidePage"
-        :icon="['fas', 'angles-right']"
-        size="2xl"
-        style="color: #383839; margin-left: 15px; margin-top: 20px"
-      />
-    </section>
-    <SimulationSideTapView />
+    </div>
+    <div class="side-page" :class="{ open: isSidePageOpen }">
+      <!-- 사이드 페이지 내용을 여기에 추가하세요 -->
+      <section class="back-icon">
+        <font-awesome-icon
+          @click="toggleSidePage"
+          :icon="['fas', 'angles-right']"
+          size="2xl"
+          style="color: #383839; margin-left: 15px; margin-top: 20px"
+        />
+      </section>
+      <SimulationSideTapView />
+    </div>
   </div>
 </template>
 
