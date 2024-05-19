@@ -80,11 +80,16 @@ const maxIdleTime = ref({
   endTime: "",
 });
 
-onMounted(async () => {
-  await dashboardStore.getOhtJobAnalysis(startTime, endTime);
-  await dashboardStore.getJobResultAnalysis(startTime, endTime);
-  await dashboardStore.getStateAnalysis(startTime, endTime);
-  await dashboardStore.getStateHourlyAnalysis(startTime, endTime);
+onMounted(async() => {
+  if(dashboardStore.startTime == "" && dashboardStore.endTime == "") {  
+    console.log("대시보드 데이터를 가져옵니다.");
+    await dashboardStore.getOhtJobAnalysis(startTime, endTime);
+    await dashboardStore.getJobResultAnalysis(startTime, endTime);
+    await dashboardStore.getStateAnalysis(startTime, endTime);
+    await dashboardStore.getStateHourlyAnalysis(startTime, endTime);
+    dashboardStore.startTime = startTime;
+    dashboardStore.endTime = endTime;
+  }
   // 상태 분석 데이터 전처리
   deadline.value =
     Math.floor(dashboardStore.stateAnalysisData["deadline"].data / 60) +
@@ -120,25 +125,16 @@ onMounted(async () => {
     maxIdleTime
   );
 
-  nowLoading.value = false;
+  // 에러 로그 데이터 전처리
+  errorLog.value = [];
+  errorLog.value = dashboardStore.jobResultAnalysisData['job-result-error-log'].map((item, index) => [index+1, String(item['oht-id']), String(item['error']), String(item['count'])])
+
+  nowLoading.value = false;   
 });
 
-watch(
-  () => dashboardStore.watchedJobResultAnalysisData,
-  (oldValue, newValue) => {
-    errorLog.value = [];
-    errorLog.value = dashboardStore.jobResultAnalysisData[
-      "job-result-error-log"
-    ].map((item, index) => [
-      index + 1,
-      String(item["oht-id"]),
-      String(item["error"]),
-      String(item["count"]),
-    ]);
-    console.log(errorLog.value);
-  },
-  { deep: true }
-);
+watch(() => dashboardStore.watchedJobResultAnalysisData, (oldValue, newValue) => {
+
+},{ deep: true }); 
 
 function timeDataFormatting(temp, refData) {
   if (temp < 10) {
