@@ -19,6 +19,8 @@ import InitialPage from "@/components/loading/InitialPage.vue";
 const { getNewResult } = simulationStore();
 
 const nowLoading = ref(false); //로딩창 기본 비활성화
+//==초기 화면
+const initialPage = ref(true);
 const isSidePageOpen = ref(false); //사이드탭 기본 비활성화
 
 function transformatDate(date) {
@@ -77,6 +79,7 @@ const handleSimulationButton = async () => {
   nowLoading.value = true;
   await getNewResult(newStartDate, newEndDate, selectedOhtId);
   nowLoading.value = false;
+  initialPage.value = false;
 };
 
 //== 이벤트 핸들러 ==
@@ -90,13 +93,10 @@ function toggleSidePageHandler(data) {
 }
 
 //== axios 통신 ==
-onMounted(async () => {
-  //await getNewResult(newStartDate, newEndDate, selectedOhtId);
-  // nowLoading.value = false;
-});
-
-//==초기 화면
-const initialPage = ref(true);
+// onMounted(async () => {
+//   await getNewResult(newStartDate, newEndDate, selectedOhtId);
+//   nowLoading.value = false;
+// });
 </script>
 
 <template>
@@ -137,134 +137,136 @@ const initialPage = ref(true);
     <!-- 아직 검색 안했을때 -->
     <div v-if="initialPage"><InitialPage /></div>
     <!-- 검색결과 -->
-    <section v-else="initialPage" class="result">
-      <!-- 시뮬레이션 -->
-      <div class="white-box simulation-box">
-        <section class="title">
-          <Cardhead
-            headerText="Simulation"
-            :contentText="`${transformatDate(
-              simulationStore().startDate
-            )} - ${transformatDate(simulationStore().endDate)} 기간동안 ${
-              simulationStore().ohtId
-            }호기의 시뮬레이션 입니다.`"
-          ></Cardhead>
-        </section>
-        <section class="content">
-          <Simulation />
-        </section>
-      </div>
-      <!-- 가로정렬 : 작업량평균, 블랙데이터카드 -->
-      <section class="garo">
-        <!-- 작업량 평균비교 막대그래프 -->
-        <div class="white-box barchart-box">
+    <div v-else="!initialPage">
+      <section class="result">
+        <!-- 시뮬레이션 -->
+        <div class="white-box simulation-box">
           <section class="title">
             <Cardhead
-              headerText="작업량 평균 비교"
-              contentText="동시간대 전체 OHT작업량과 시간별 평균을 비교합니다"
+              headerText="Simulation"
+              :contentText="`${transformatDate(
+                simulationStore().startDate
+              )} - ${transformatDate(simulationStore().endDate)} 기간동안 ${
+                simulationStore().ohtId
+              }호기의 시뮬레이션 입니다.`"
             ></Cardhead>
           </section>
-          <div class="bar-chart">
-            <div class="bar-chart-content">
-              <StickChart
-                :labels="simulationStore().timeArray"
-                :work-per-all="simulationStore().averageArray"
-                :work-per-one="simulationStore().meArray"
-                :oht-id="`${ohtId}호기`"
+          <section class="content">
+            <Simulation />
+          </section>
+        </div>
+        <!-- 가로정렬 : 작업량평균, 블랙데이터카드 -->
+        <section class="garo">
+          <!-- 작업량 평균비교 막대그래프 -->
+          <div class="white-box barchart-box">
+            <section class="title">
+              <Cardhead
+                headerText="작업량 평균 비교"
+                contentText="동시간대 전체 OHT작업량과 시간별 평균을 비교합니다"
+              ></Cardhead>
+            </section>
+            <div class="bar-chart">
+              <div class="bar-chart-content">
+                <StickChart
+                  :labels="simulationStore().timeArray"
+                  :work-per-all="simulationStore().averageArray"
+                  :work-per-one="simulationStore().meArray"
+                  :oht-id="`${ohtId}호기`"
+                />
+              </div>
+            </div>
+          </div>
+          <!-- 블랙데이터카드 -->
+          <div class="black-card-box">
+            <div class="black-card-content">
+              <BlackDataCard
+                title="Total Work"
+                :content="simulationStore().totalWork.data"
+                :percentage="simulationStore().totalWork.percent + '%'"
+                :fontColor="
+                  simulationStore().totalWork.percent >= 0 ? 'red' : 'blue'
+                "
+                :height="'130px'"
+                width="250px"
+              />
+              <BlackDataCard
+                title="Out Of DeadLine"
+                :content="simulationStore().outOfDeadline.data"
+                :percentage="simulationStore().outOfDeadline.percent + '%'"
+                :fontColor="
+                  simulationStore().outOfDeadline.percent >= 0 ? 'red' : 'blue'
+                "
+                :height="'130px'"
+                width="250px"
+              />
+            </div>
+            <div class="black-card-content">
+              <BlackDataCard
+                title="Average Speed"
+                :content="simulationStore().averageSpeed.data"
+                :percentage="simulationStore().averageSpeed.percent + '%'"
+                :fontColor="
+                  simulationStore().averageSpeed.percent >= 0 ? 'red' : 'blue'
+                "
+                :height="'130px'"
+                width="250px"
+              />
+              <BlackDataCard
+                title="OHT ERROR"
+                :content="simulationStore().ohtError.data"
+                :percentage="simulationStore().ohtError.percent + '%'"
+                :fontColor="
+                  simulationStore().ohtError.percent >= 0 ? 'red' : 'blue'
+                "
+                :height="'130px'"
+                width="250px"
               />
             </div>
           </div>
-        </div>
-        <!-- 블랙데이터카드 -->
-        <div class="black-card-box">
-          <div class="black-card-content">
-            <BlackDataCard
-              title="Total Work"
-              :content="simulationStore().totalWork.data"
-              :percentage="simulationStore().totalWork.percent + '%'"
-              :fontColor="
-                simulationStore().totalWork.percent >= 0 ? 'red' : 'blue'
+        </section>
+        <!-- Log By Total-work -->
+        <div class="white-box log-table-box">
+          <section class="title">
+            <Cardhead
+              :headerText="
+                'Log By Total Work(' + simulationStore().totalCnt + '건)'
               "
-              :height="'130px'"
-              width="250px"
+              contentText="각 작업을 클릭하여 해당하는 로그를 시뮬레이션과 함께 확인하실 수 있습니다."
             />
-            <BlackDataCard
-              title="Out Of DeadLine"
-              :content="simulationStore().outOfDeadline.data"
-              :percentage="simulationStore().outOfDeadline.percent + '%'"
-              :fontColor="
-                simulationStore().outOfDeadline.percent >= 0 ? 'red' : 'blue'
-              "
-              :height="'130px'"
-              width="250px"
+          </section>
+          <section class="table-container">
+            <Table
+              class="table-component"
+              width="100%"
+              bodyFontSize="14px"
+              headerFontSize="12px"
+              @toggle-side-page="toggleSidePageHandler"
+              :columns="[
+                'No.',
+                'Period',
+                'Time Taken',
+                'ERROR',
+                'Average Speed',
+                'Out of DeadLine',
+              ]"
+              :data="simulationStore().logPerWork"
             />
-          </div>
-          <div class="black-card-content">
-            <BlackDataCard
-              title="Average Speed"
-              :content="simulationStore().averageSpeed.data"
-              :percentage="simulationStore().averageSpeed.percent + '%'"
-              :fontColor="
-                simulationStore().averageSpeed.percent >= 0 ? 'red' : 'blue'
-              "
-              :height="'130px'"
-              width="250px"
-            />
-            <BlackDataCard
-              title="OHT ERROR"
-              :content="simulationStore().ohtError.data"
-              :percentage="simulationStore().ohtError.percent + '%'"
-              :fontColor="
-                simulationStore().ohtError.percent >= 0 ? 'red' : 'blue'
-              "
-              :height="'130px'"
-              width="250px"
-            />
-          </div>
+          </section>
         </div>
       </section>
-      <!-- Log By Total-work -->
-      <div class="white-box log-table-box">
-        <section class="title">
-          <Cardhead
-            :headerText="
-              'Log By Total Work(' + simulationStore().totalCnt + '건)'
-            "
-            contentText="각 작업을 클릭하여 해당하는 로그를 시뮬레이션과 함께 확인하실 수 있습니다."
-          />
-        </section>
-        <section class="table-container">
-          <Table
-            class="table-component"
-            width="100%"
-            bodyFontSize="14px"
-            headerFontSize="12px"
-            @toggle-side-page="toggleSidePageHandler"
-            :columns="[
-              'No.',
-              'Period',
-              'Time Taken',
-              'ERROR',
-              'Average Speed',
-              'Out of DeadLine',
-            ]"
-            :data="simulationStore().logPerWork"
-          />
-        </section>
-      </div>
-    </section>
-  </div>
-  <div class="side-page" :class="{ open: isSidePageOpen }">
-    <!-- 사이드 페이지 내용을 여기에 추가하세요 -->
-    <section class="back-icon">
-      <font-awesome-icon
-        @click="toggleSidePage"
-        :icon="['fas', 'angles-right']"
-        size="2xl"
-        style="color: #383839; margin-left: 15px; margin-top: 20px"
-      />
-    </section>
-    <SimulationSideTapView />
+    </div>
+    <div class="side-page" :class="{ open: isSidePageOpen }">
+      <!-- 사이드 페이지 내용을 여기에 추가하세요 -->
+      <section class="back-icon">
+        <font-awesome-icon
+          @click="toggleSidePage"
+          :icon="['fas', 'angles-right']"
+          size="2xl"
+          style="color: #383839; margin-left: 15px; margin-top: 20px"
+        />
+      </section>
+      <SimulationSideTapView />
+    </div>
   </div>
   <div class="footer"></div>
 </template>
