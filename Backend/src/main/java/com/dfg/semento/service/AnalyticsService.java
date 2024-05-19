@@ -42,6 +42,8 @@ public class AnalyticsService {
                 TimeConverter.convertLocalDateTimeToString(searchTimeRequest.getEndTime()));
 
         for(ErrorInfoDto errorInfo : aiResponse.getCongestionInfo()) {
+            System.out.println("실행됨");
+
             errorInfo.setRelatedOhtId(
                 getOhtListInCongestion(
                         searchTimeRequest.getStartTime(), searchTimeRequest.getEndTime(),errorInfo.getPath()
