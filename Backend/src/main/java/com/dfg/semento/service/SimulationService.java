@@ -123,6 +123,7 @@ public class SimulationService {
 
         //평균위한 Running oht 갯수 초기화
         runningOhtCnt = setRunningOhtCnt(startTime, endTime);
+        System.out.println("갯수 "+runningOhtCnt);
         if(runningOhtCnt == 0) throw new RestApiException(CommonErrorCode.NO_RUNNING_OHT);
 
         //각 검색결과 얻기
@@ -148,7 +149,7 @@ public class SimulationService {
                 .field("oht_id");
 
         // 판단필터 생성 => 운행중이었던것만 체크
-        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status.keyword", "G");
+        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status", "G");
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
                 .filter(statusFilter);
 
