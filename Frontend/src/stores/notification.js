@@ -1,9 +1,8 @@
-import { ref, computed } from 'vue'
-import { defineStore } from 'pinia'
-import { instance } from '@/util/axios-util'
+import { ref, computed } from "vue";
+import { defineStore } from "pinia";
+import { instance } from "@/util/axios-util";
 
-
-export const useNotificationStore = defineStore('notificationStore', () => {
+export const useNotificationStore = defineStore("notificationStore", () => {
   //플로팅알림 변수
   const showNotification = ref(false);
 
@@ -12,7 +11,7 @@ export const useNotificationStore = defineStore('notificationStore', () => {
     showNotification.value = true;
     setTimeout(() => {
       closeNotification();
-    }, 3000); // 3초 후에 알림을 닫음 (조절 가능)
+    }, 5000); // 5초 후에 알림을 닫음 (조절 가능)
   };
 
   //플로팅 알림 닫기
@@ -20,9 +19,9 @@ export const useNotificationStore = defineStore('notificationStore', () => {
     showNotification.value = false;
   };
 
-  return { 
+  return {
     showNotification,
     sendNotification,
-    closeNotification
-  }
-})
+    closeNotification,
+  };
+});

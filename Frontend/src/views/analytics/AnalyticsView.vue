@@ -163,9 +163,7 @@ const handleAIDetectionButton = async () => {
   notificationStore.sendNotification(); // 알림 띄우기
 };
 
-onMounted(async () => {
-  notificationStore.sendNotification(); // 알림 띄우기
-});
+onMounted(async () => {});
 </script>
 
 <template>

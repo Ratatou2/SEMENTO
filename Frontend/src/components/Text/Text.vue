@@ -56,5 +56,6 @@ const props = defineProps({
 .content {
   margin-left: 5px;
   color: black;
+  font-weight: bold;
 }
 </style>

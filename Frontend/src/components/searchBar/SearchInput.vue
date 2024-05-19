@@ -57,7 +57,7 @@ function transformatDate(date) {
     <VDatePicker v-model="startDate" mode="dateTime" is24hr>
       <template #default="{ togglePopover }">
         <button class="date-box" @click="togglePopover">
-          {{ startDate == null ? "Start Date" : transformatDate(startDate) }}
+          {{ startDate == null ? "시작 시간" : transformatDate(startDate) }}
           <font-awesome-icon
             :icon="['fas', 'calendar']"
             size="xs"
@@ -71,7 +71,7 @@ function transformatDate(date) {
     <VDatePicker v-model="endDate" mode="dateTime" is24hr>
       <template #default="{ togglePopover }">
         <button class="date-box" @click="togglePopover">
-          {{ endDate == null ? "End Date" : transformatDate(endDate) }}
+          {{ endDate == null ? "종료 시간" : transformatDate(endDate) }}
           <font-awesome-icon
             :icon="['fas', 'calendar']"
             size="xs"
