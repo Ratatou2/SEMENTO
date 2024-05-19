@@ -206,16 +206,6 @@ const formatNumber = (value) => {
                   dashboardStore.ohtJobAnalysisData['average-work'].data
                 ) + ' 건'
               "
-              :percentage="
-                formatNumber(
-                  dashboardStore.ohtJobAnalysisData['average-work'].percent
-                ) + '%'
-              "
-              :fontColor="
-                dashboardStore.ohtJobAnalysisData['average-work'].percent >= 0
-                  ? 'red'
-                  : 'blue'
-              "
               :width="'320px'"
               :height="'130px'"
             />
