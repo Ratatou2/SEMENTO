@@ -145,7 +145,7 @@ function timeDataFormatting(temp, refData) {
   } else {
     refData.value.startTime = temp + ":00";
     if (temp + 1 == 24) refData.value.endTime = "00:00";
-    else refData.value.endTime = "0" + (temp + 1) + ":00";
+    else refData.value.endTime = (temp + 1) + ":00";
   }
 }
 
