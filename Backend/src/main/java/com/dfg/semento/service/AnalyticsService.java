@@ -62,7 +62,7 @@ public class AnalyticsService {
                                              String path) throws IOException {
 
         BoolQueryBuilder boolQuery = QueryBuilders.boolQuery()
-                .must(QueryBuilders.termQuery("path", path));
+                .must(QueryBuilders.termQuery("path.keyword", path));
         // 필요한 필드만 가져오기
         TermsAggregationBuilder aggregation = AggregationBuilders
                 .terms("unique_oht_ids")

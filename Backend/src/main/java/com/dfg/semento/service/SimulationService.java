@@ -72,13 +72,13 @@ public class SimulationService {
         FilterAggregationBuilder specificOhtCount = AggregationBuilders.filter("specific_oht_count",
                 QueryBuilders.boolQuery()
                         .must(QueryBuilders.termQuery("oht_id", ohtId))
-                        .must(QueryBuilders.termQuery("status", "W"))
+                        .must(QueryBuilders.termQuery("status.keyword", "W"))
         ).subAggregation(
                 AggregationBuilders.cardinality("unique_starts").field("start_time")
         );
 
         FilterAggregationBuilder overallOhtCount = AggregationBuilders.filter("overall_oht_count",
-                QueryBuilders.termQuery("status", "W")
+                QueryBuilders.termQuery("status.keyword", "W")
         ).subAggregation(
                 AggregationBuilders.cardinality("unique_starts").field("start_time")
         );
@@ -123,7 +123,7 @@ public class SimulationService {
 
         //평균위한 Running oht 갯수 초기화
         runningOhtCnt = setRunningOhtCnt(startTime, endTime);
-        System.out.println("갯수 "+runningOhtCnt);
+        System.out.println("runningOht 갯수"+runningOhtCnt);
         if(runningOhtCnt == 0) throw new RestApiException(CommonErrorCode.NO_RUNNING_OHT);
 
         //각 검색결과 얻기
@@ -149,7 +149,7 @@ public class SimulationService {
                 .field("oht_id");
 
         // 판단필터 생성 => 운행중이었던것만 체크
-        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status", "G");
+        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status.keyword", "G");
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
                 .filter(statusFilter);
 
@@ -172,7 +172,7 @@ public class SimulationService {
         double overallTotalWorkAvg = (double) dashboardService.getOhtTotalWorkByStartTimeAndEndTime(startTime, endTime) / runningOhtCnt;
 
         // 작업 중인 로그만 검색하도록 설정
-        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status", "W");
+        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status.keyword", "W");
         // 특정 OHT_ID만 필터링
         TermQueryBuilder ohtIdFilter = QueryBuilders.termQuery("oht_id", ohtId);
 
@@ -289,7 +289,7 @@ public class SimulationService {
                                 );
 
         BoolQueryBuilder filter = QueryBuilders.boolQuery()
-                .must(QueryBuilders.termQuery("status", "W"))
+                .must(QueryBuilders.termQuery("status.keyword", "W"))
                 .must(QueryBuilders.termQuery("is_fail", true));
 
         SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime, filter,
@@ -424,7 +424,7 @@ public class SimulationService {
                 .field("curr_time").size(minuteRange);//1분에 60개, 5분에 300개
 
         TopHitsAggregationBuilder ohtDetails = AggregationBuilders.topHits("oht_details")
-                .fetchSource(new String[]{"oht_id", "path", "curr_node", "point_x", "point_y", "status", "error", "carrier", "speed", "is_fail"}, null)
+                .fetchSource(new String[]{"oht_id", "path", "curr_node", "point_x", "point_y", "status.keyword", "error", "carrier", "speed", "is_fail"}, null)
                 .size(ohtCnt) //OHT 최대갯수
                 .sort("curr_time", SortOrder.DESC) // Sort by curr_time in descending order
                 .sort("oht_id", SortOrder.ASC); // Additional sort by oht_id in ascending order
@@ -454,7 +454,7 @@ public class SimulationService {
                 SimulationPerOhtDto simulationPerOhtDto = SimulationPerOhtDto.builder()
                         .ohtId(Long.parseLong(sourceAsMap.get("oht_id").toString()))
                         .location(locationDto)
-                        .status((String) sourceAsMap.get("status"))
+                        .status((String) sourceAsMap.get("status.keyword"))
                         .carrier((Boolean) sourceAsMap.get("carrier"))
                         .error((Integer) sourceAsMap.get("error"))
                         .speed((Double) sourceAsMap.get("speed"))
