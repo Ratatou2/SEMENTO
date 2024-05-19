@@ -8,6 +8,7 @@ import Line from "@/components/line/Line.vue";
 import "vue-multiselect/dist/vue-multiselect.css";
 import Map from "./components/summary/Map.vue";
 import Info from "@/components/info/Info.vue";
+import InitialPage from "@/components/loading/InitialPage.vue";
 // chart
 import DurationChart from "./components/summary/DurationChart.vue";
 import ErrorChart from "./components/summary/ErrorChart.vue";
@@ -23,7 +24,7 @@ import Loading from "@/components/loading/Loading.vue";
 
 const analysisStore = useAnalysisStore();
 
-const nowLoading = ref(true); //로딩창 기본 비활성화
+const nowLoading = ref(false); //로딩창 기본 비활성화
 const cnt = ref(11);
 const congTime = ref(0);
 
@@ -144,7 +145,7 @@ const handleEndDate = (newDate) => {
 const handleAIDetectionButton = async () => {
   nowLoading.value = true;
   await analysisStore.getNewAIDetection(startTime, endTime);
-  nowLoading.value = false;
+  //nowLoading.value = false;
 };
 
 onMounted(async () => {
@@ -154,12 +155,14 @@ onMounted(async () => {
     congTime.value +=
       (new Date(result["end-date"]) - new Date(result["start-date"])) / 1000;
   });
-  nowLoading.value = false;
+  //nowLoading.value = false;
 });
+//==초기 화면
+const initialPage = ref(true);
 </script>
 
 <template>
-  <div v-if="nowLoading"><Loading /></div>
+  <div v-if="nowLoading"><Loading title="AI가 로그를 분석중입니다." /></div>
   <div v-else="!nowLoading" class="body-container">
     <!-- 설명 및 검색창 -->
     <section class="input">
@@ -183,14 +186,16 @@ onMounted(async () => {
       </div>
     </section>
     <Line></Line>
+    <!-- 아직 검색 안했을때 -->
+    <div v-if="initialPage"><InitialPage /></div>
     <!-- 검색결과 -->
-    <section class="header">
+    <section v-else="initialPage" class="header">
       <!--제목 -->
       <HeadText header-text="# Summary" />
       <Text :text="summaryText" />
     </section>
 
-    <section class="result">
+    <section v-else="initialPage" class="result">
       <!-- 시뮬레이션 -->
       <div class="white-box simulation-box">
         <div class="info-box">
@@ -202,7 +207,7 @@ onMounted(async () => {
       </div>
     </section>
     <!-- 그래프 분석 -->
-    <section class="chart">
+    <section v-else="initialPage" class="chart">
       <div class="white-box error-chart-box">
         <section class="title">
           <Cardhead
@@ -247,8 +252,8 @@ onMounted(async () => {
       </div>
     </section>
     <!-- 각 정체별 상세분석 -->
-    <Line />
-    <section class="header">
+    <Line v-else="initialPage" />
+    <section v-else="initialPage" class="header">
       <!--제목 -->
       <HeadText :header-text="detectionReportText" />
     </section>

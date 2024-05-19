@@ -122,8 +122,8 @@ export const simulationStore = defineStore("simulationStore", () => {
       // newEndDate.value = new Date().setHours(new Date().getHours(), 0, 0, 0);
 
       //현재 날짜에서 24-05-11로 default 날짜 설정 변경(날짜 임의로 임시 설정함)
-      newStartDate.value = new Date(2024, 4, 11).setHours(20, 30, 0, 0);
-      newEndDate.value = new Date(2024, 4, 11).setHours(20, 50, 0, 0);
+      //newStartDate.value = new Date(2024, 4, 11).setHours(20, 30, 0, 0);
+      //newEndDate.value = new Date(2024, 4, 11).setHours(20, 50, 0, 0);
     }
 
     setStartDate(newStartDate);

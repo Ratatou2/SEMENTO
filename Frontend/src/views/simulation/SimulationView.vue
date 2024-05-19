@@ -15,9 +15,10 @@ import Table from "@/components/table/Table.vue";
 import Loading from "@/components/loading/Loading.vue";
 import { simulationStore } from "@/stores/simulation";
 import moment from "moment";
+import InitialPage from "@/components/loading/InitialPage.vue";
 const { getNewResult } = simulationStore();
 
-const nowLoading = ref(true); //로딩창 기본 비활성화
+const nowLoading = ref(false); //로딩창 기본 비활성화
 const isSidePageOpen = ref(false); //사이드탭 기본 비활성화
 
 function transformatDate(date) {
@@ -59,7 +60,7 @@ const options = [
   { name: "2614호기", value: 2614 },
   { name: "2615호기", value: 2615 },
 ];
-const selectedOhtId = ref(ref(options[0]));
+const selectedOhtId = ref();
 const newStartDate = ref();
 const newEndDate = ref();
 
@@ -90,9 +91,12 @@ function toggleSidePageHandler(data) {
 
 //== axios 통신 ==
 onMounted(async () => {
-  await getNewResult(newStartDate, newEndDate, selectedOhtId);
-  nowLoading.value = false;
+  //await getNewResult(newStartDate, newEndDate, selectedOhtId);
+  // nowLoading.value = false;
 });
+
+//==초기 화면
+const initialPage = ref(true);
 </script>
 
 <template>
@@ -130,8 +134,10 @@ onMounted(async () => {
       </div>
     </section>
     <Line></Line>
+    <!-- 아직 검색 안했을때 -->
+    <div v-if="initialPage"><InitialPage /></div>
     <!-- 검색결과 -->
-    <section class="result">
+    <section v-else="initialPage" class="result">
       <!-- 시뮬레이션 -->
       <div class="white-box simulation-box">
         <section class="title">
@@ -221,7 +227,9 @@ onMounted(async () => {
       <div class="white-box log-table-box">
         <section class="title">
           <Cardhead
-            :headerText="'Log By Total Work(' + simulationStore().totalCnt + '건)'"
+            :headerText="
+              'Log By Total Work(' + simulationStore().totalCnt + '건)'
+            "
             contentText="각 작업을 클릭하여 해당하는 로그를 시뮬레이션과 함께 확인하실 수 있습니다."
           />
         </section>
