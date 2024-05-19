@@ -252,20 +252,9 @@ function toggleSidePageHandler(data) {
                 'Out of DeadLine',
               ]"
               :data="simulationStore().logPerWork"
+              :ohtId="simulationStore().ohtId"
             />
           </section>
-        </div>
-        <!-- Log By Total-work -->
-        <div class="side-page" :class="{ open: isSidePageOpen }">
-          <section class="back-icon">
-            <font-awesome-icon
-              @click="toggleSidePage"
-              :icon="['fas', 'angles-right']"
-              size="2xl"
-              style="color: #383839; margin-left: 15px; margin-top: 20px"
-            />
-          </section>
-          <SimulationSideTapView />
         </div>
       </section>
     </div>
