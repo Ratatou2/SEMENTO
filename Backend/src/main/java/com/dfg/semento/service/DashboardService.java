@@ -244,7 +244,7 @@ public class DashboardService {
     public int getOhtTotalWorkByStartTimeAndEndTime(LocalDateTime startTime, LocalDateTime endTime) throws
         IOException {
         // ==== 쿼리 검색 ====
-        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status", "W");
+        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status.keyword", "W");
 
         // Bool Query로  두 filter 적용
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
@@ -290,7 +290,7 @@ public class DashboardService {
         IOException {
         // ==== 쿼리 검색 ====
         // 작업 중인 로그만 검색하도록 설정
-        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status", "W");
+        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status.keyword", "W");
 
         // Bool Query로  두 filter 적용
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
@@ -327,10 +327,10 @@ public class DashboardService {
      */
     public Map<Integer, Integer> getOhtJobHourly(LocalDateTime startTime, LocalDateTime endTime) throws IOException {
         // ==== 쿼리 검색 ====
-        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status", "W");
+        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status.keyword", "W");
         MatchQueryBuilder carrierFilter = QueryBuilders.matchQuery("carrier", false);
         ScriptQueryBuilder scriptFilter = QueryBuilders.scriptQuery(
-            new Script("doc['current_node'] == doc['target_node']")
+            new Script("doc['current_node.keyword'].value == doc['target_node.keyword'].value")
         );
 
         // Bool Query로  두 filter 적용
@@ -375,7 +375,6 @@ public class DashboardService {
                 long maxTime = (long) maxCurrTime.getValue();
                 // timezone 변경
                 ZonedDateTime dateTime = Instant.ofEpochMilli(maxTime).atZone(ZoneId.of("Asia/Seoul"));
-                System.out.println("dateTime = " + dateTime);
                 hourCounts.put(dateTime.getHour(), hourCounts.get(dateTime.getHour()) + 1);
             }
         } while (afterKey != null);
@@ -389,9 +388,9 @@ public class DashboardService {
     private JobResultAnalysisRatioResponse getJobResultCount(LocalDateTime startTime, LocalDateTime endTime) throws
         IOException {
         // ==== 쿼리 검색 ====
-        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status", "W");
+        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status.keyword", "W");
         ScriptQueryBuilder scriptFilter = QueryBuilders.scriptQuery(
-            new Script("doc['current_node'] == doc['target_node']")
+            new Script("doc['current_node.keyword'].value == doc['target_node.keyword'].value")
         );
 
         // Bool Query로  두 filter 적용
@@ -455,12 +454,6 @@ public class DashboardService {
 
                 ))
             .size(BUKET_SIZE);
-
-        // // 검색 요청
-        // SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime, boolQuery, compositeAgg);
-
-        // // 결과에서 집계 데이터 추출
-        // CompositeAggregation compositeAggregation = searchResponse.getAggregations().get("unique_combinations");
 
         // ==== 데이터 저장할 자료구조 ====
         // 에러 수 집계용
@@ -541,7 +534,7 @@ public class DashboardService {
      */
     private int getIdleTime(LocalDateTime startTime, LocalDateTime endTime) throws IOException {
         // ==== 쿼리 검색 ====
-        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status", "I");
+        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status.keyword", "I");
 
         // Bool Query로  두 filter 적용
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
@@ -550,7 +543,7 @@ public class DashboardService {
         // ==== 집계 검색 ====
         CardinalityAggregationBuilder cardinalityAggregation = AggregationBuilders
             .cardinality("count_working")
-            .field("doc_id");
+            .script(new Script("doc['oht_id'].value + ' ' + doc['curr_time'].value"));
 
         // ==== 질의 ====
         SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime, boolQueryBuilder, cardinalityAggregation);
@@ -566,7 +559,7 @@ public class DashboardService {
      */
     private int getWorkingTime(LocalDateTime startTime, LocalDateTime endTime) throws IOException {
         // ==== 쿼리 검색 ====
-        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status", "I");
+        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status.keyword", "I");
 
         // Bool Query로  두 filter 적용
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
@@ -575,7 +568,7 @@ public class DashboardService {
         // ==== 집계 검색 ====
         CardinalityAggregationBuilder cardinalityAggregation = AggregationBuilders
             .cardinality("count_working")
-            .field("doc_id");
+            .script(new Script("doc['oht_id'].value + ' ' + doc['curr_time'].value"));
 
         // ==== 질의 ====
         SearchResponse searchResponse = elasticsearchQueryUtil.sendEsQuery(startTime, endTime, boolQueryBuilder, cardinalityAggregation);
@@ -592,7 +585,7 @@ public class DashboardService {
      */
     private Map<Integer, Integer> getWorkStateHourly(LocalDateTime startTime, LocalDateTime endTime) throws IOException {
         // ==== 쿼리 검색 ====
-        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status", "I");
+        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status.keyword", "I");
 
         // Bool Query로  두 filter
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
@@ -645,7 +638,7 @@ public class DashboardService {
      */
     private Map<Integer, Integer> getIdleStateHourly(LocalDateTime startTime, LocalDateTime endTime) throws IOException {
         // ==== 쿼리 검색 ====
-        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status", "I");
+        TermQueryBuilder statusFilter = QueryBuilders.termQuery("status.keyword", "I");
 
         // Bool Query로  두 filter
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
