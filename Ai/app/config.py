@@ -145,3 +145,8 @@ all_paths = np.array([np.nan, 'path', 'path1', 'path8', 'path309', 'path16', 'pa
        'path227', 'path123', 'path313', 'path14', 'path179', 'path13',
        'path12', 'path11', 'path10', 'path9', 'path180', 'path139',
        'path140', 'path138', 'path171', 'path172', 'path173'])
+
+
+df_cols = ['oht_id', 'mode', 'status', 'current_node', 'next_node',
+       'target_node', 'carrier', 'error', 'oht_connect', 'curr_node_offset', 'speed',
+       'is_fail', 'curr_time', 'start_time', 'point_x', 'point_y', 'path']

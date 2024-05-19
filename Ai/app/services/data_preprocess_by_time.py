@@ -2,21 +2,27 @@ import numpy as np
 import pandas as pd
 import category_encoders as ce
 from concurrent.futures import ProcessPoolExecutor
-from config import all_nodes, all_paths, path_and_before_path_info, length_info, facility_length_info, facility_length_info_excel
+from config import all_nodes, all_paths, path_and_before_path_info, length_info, facility_length_info, facility_length_info_excel, df_cols
 import os
 from tqdm import tqdm
 
 
-def data_preprocessing_by_time(
+async def data_preprocessing_by_time(
     df: pd.DataFrame,
 ):
     try:
+        
 
         # MinMaxScailing
         df["speed"] = df["speed"] / 5
         df["point_x"] = (df["point_x"] - 60) / (2040 - 60)
         df["point_y"] = (df["point_y"] - 320) / (560 - 320)
         df["curr_node_offset"] = df["curr_node_offset"] / 8.5
+
+        if 'oht_connect' not in df.columns:
+            df['oht_connect'] = df['error'].apply(lambda x: 1 if x == 200 else 0)
+
+        df = df.reindex(columns=df_cols)
 
         encoder = ce.BinaryEncoder(cols=['node'])  # 임시 컬럼 인덱스 node 사용
         encoder.fit(pd.DataFrame(all_nodes, columns=['node']))
@@ -32,8 +38,8 @@ def data_preprocessing_by_time(
 
         df['is_idle'] = df['status'].apply(lambda x: True if x == 'I' else False)
         # "oht_connect" 컬럼이 존재하지 않으면 추가
-        if 'oht_connect' not in df.columns:
-            df['oht_connect'] = df['error'].apply(lambda x: 1 if x == 200 else 0)
+        
+
 
 
         # 인코딩된 결과를 원래의 데이터프레임에 새로운 컬럼으로 추가
