@@ -54,7 +54,7 @@ function transformatDate(date) {
 <template>
   <section class="container">
     <!-- 시작 -->
-    <VDatePicker v-model="startDate" mode="dateTime" is24hr>
+    <VDatePicker v-model="startDate" mode="dateTime" is24hrz>
       <template #default="{ togglePopover }">
         <button class="date-box" @click="togglePopover">
           {{ startDate == null ? "시작 시간" : transformatDate(startDate) }}

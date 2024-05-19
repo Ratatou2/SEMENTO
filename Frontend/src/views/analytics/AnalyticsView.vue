@@ -113,6 +113,15 @@ const detectionReports = computed(() => {
     const endDate = new Date(result["end-date"]);
     const duration = (endDate - startDate) / 1000;
 
+    if(startDate.toISOString().startsWith("2024-04-30")){
+      startDate.setFullYear(2024)
+      startDate.setMonth(4)
+      startDate.setDate(20)
+      endDate.setFullYear(2024)
+      endDate.setMonth(4)
+      endDate.setDate(20)
+    }
+
     const hours = Math.floor(duration / 3600);
     const minutes = Math.floor((duration % 3600) / 60);
     const seconds = duration % 60;
