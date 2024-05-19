@@ -11,14 +11,13 @@ import "vue-multiselect/dist/vue-multiselect.css";
 import StickChart from "./components/StickChart.vue";
 import BlackDataCard from "@/components/card/BlackDataCard.vue";
 import SimulationSideTapView from "./SimulationSideTapView.vue";
-import Table from "@/components/table/Table.vue";
+import SideTabTable from "@/components/table/SideTabTable.vue";
 import Loading from "@/components/loading/Loading.vue";
 import { simulationStore } from "@/stores/simulation";
 import moment from "moment";
 const { getNewResult } = simulationStore();
 
 const nowLoading = ref(true); //로딩창 기본 비활성화
-const isSidePageOpen = ref(false); //사이드탭 기본 비활성화
 
 function transformatDate(date) {
   return (
@@ -77,16 +76,6 @@ const handleSimulationButton = async () => {
   await getNewResult(newStartDate, newEndDate, selectedOhtId);
   nowLoading.value = false;
 };
-
-//== 이벤트 핸들러 ==
-function toggleSidePage(date) {
-  isSidePageOpen.value = !isSidePageOpen.value;
-}
-
-function toggleSidePageHandler(data) {
-  //emit 받는 핸들러
-  toggleSidePage(data);
-}
 
 //== axios 통신 ==
 onMounted(async () => {
@@ -164,7 +153,7 @@ onMounted(async () => {
                 :labels="simulationStore().timeArray"
                 :work-per-all="simulationStore().averageArray"
                 :work-per-one="simulationStore().meArray"
-                :oht-id="`${ohtId}호기`"
+                :oht-id="`${simulationStore().ohtId}호기`"
               />
             </div>
           </div>
@@ -226,12 +215,12 @@ onMounted(async () => {
           />
         </section>
         <section class="table-container">
-          <Table
+          <SideTabTable
             class="table-component"
             width="100%"
             bodyFontSize="14px"
             headerFontSize="12px"
-            @toggle-side-page="toggleSidePageHandler"
+            :ohtId = simulationStore().ohtId
             :columns="[
               'No.',
               'Period',
@@ -246,38 +235,10 @@ onMounted(async () => {
       </div>
     </section>
   </div>
-  <div class="side-page" :class="{ open: isSidePageOpen }">
-    <!-- 사이드 페이지 내용을 여기에 추가하세요 -->
-    <section class="back-icon">
-      <font-awesome-icon
-        @click="toggleSidePage"
-        :icon="['fas', 'angles-right']"
-        size="2xl"
-        style="color: #383839; margin-left: 15px; margin-top: 20px"
-      />
-    </section>
-    <SimulationSideTapView />
-  </div>
   <div class="footer"></div>
 </template>
 
 <style scoped>
-.side-page {
-  width: 48%;
-  height: 100%;
-  background-color: #f3f2f7;
-  position: fixed;
-  top: 0;
-  right: -48%; /* 초기 위치는 오른쪽 바깥에 있습니다 */
-  transition: right 0.5s;
-  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.09);
-  overflow: scroll;
-}
-
-.side-page.open {
-  right: 0; /* 열릴 때 위치 */
-}
-
 .garo {
   width: 97%;
   display: flex;

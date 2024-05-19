@@ -4,8 +4,8 @@ import { instance } from "@/util/axios-util";
 import moment from "moment";
 
 export const useAnalysisStore = defineStore("analysisStore", () => {
-  const startDate = ref("2024-05-11T20:00:00");
-  const endDate = ref("2024-05-11T20:30:00");
+  const startDate = ref("2024-05-11T20:30:00");
+  const endDate = ref("2024-05-11T20:47:00");
   const detectionResult = ref([]);
   const totalTime = ref(0);
   const totalCongestionTime = ref(0);
@@ -31,12 +31,6 @@ export const useAnalysisStore = defineStore("analysisStore", () => {
       (new Date(endDate.value) - new Date(startDate.value)) / 1000;
 
     congestionRatio.value = (totalCongestionTime.value / totalTime.value) * 100;
-
-    // console.log("analysis.js안에서");
-    // console.log("detectionResult.value:", detectionResult.value);
-    // console.log("totalCongestionTime.value", totalCongestionTime.value);
-    // console.log("totalTime.value", totalTime.value);
-    // console.log("congestionRatio.value: ", congestionRatio.value);
   };
   const computedDetectionResult = computed(() => detectionResult.value);
   const computedCongestionRatio = computed(() => congestionRatio.value);
