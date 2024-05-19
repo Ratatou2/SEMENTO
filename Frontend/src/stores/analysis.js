@@ -14,10 +14,29 @@ export const useAnalysisStore = defineStore("analysisStore", () => {
   const nowLoading = ref(false);
 
   const getAiDetection = async () => {
+    const tempStartDate = new Date(startDate.value)
+    const tempEndDate = new Date(endDate.value)
+    console.log(tempStartDate)
+    // tempStartDate.setHours(tempStartDate.value.getHours() + 9)
+    // tempEndDate.setHours(tempEndDate.value.getHours() + 9)
+
+    if(tempStartDate.toISOString().startsWith("2024-05-20")){
+      tempStartDate.setFullYear(2024)
+      tempStartDate.setMonth(3)
+      tempStartDate.setDate(30)
+      tempEndDate.setFullYear(2024)
+      tempEndDate.setMonth(3)
+      tempEndDate.setDate(30)
+    }
+
     const resp = await instance.post("/analytics/ai-detection", {
-      "start-time": startDate.value,
-      "end-time": endDate.value,
+      "start-time": transformDate(tempStartDate),
+      "end-time": transformDate(tempEndDate),
     });
+    // const resp = await instance.post("/analytics/ai-detection", {
+    //   "start-time": startDate.value,
+    //   "end-time": endDate.value,
+    // });
     const { data, error } = resp;
     if (error) alert("Ai Detection Data Not Found \n", error);
     else {
@@ -33,6 +52,9 @@ export const useAnalysisStore = defineStore("analysisStore", () => {
       (new Date(endDate.value) - new Date(startDate.value)) / 1000;
 
     congestionRatio.value = (totalCongestionTime.value / totalTime.value) * 100;
+
+    // startDate.value = tempStartDate
+    // endDate.value = tempEndtDate
   };
   const computedDetectionResult = computed(() => detectionResult.value);
   const computedCongestionRatio = computed(() => congestionRatio.value);

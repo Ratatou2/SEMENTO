@@ -35,7 +35,7 @@ const datas = ref([]);
 onMounted(async () => {
   const start = new Date(detectionResult[props.number - 1]["start-date"]); //에러 시작 시간을 마지막 시간으로 설정해야함
   const end = new Date(detectionResult[props.number - 1]["end-date"]);
-  start.setSeconds(start.getSeconds() - 30);
+  start.setSeconds(start.getSeconds() - 15);
   start.setHours(start.getHours() + 9);
   end.setHours(end.getHours() + 9);
   logs.value = await getCongestionSimulation(
@@ -44,10 +44,25 @@ onMounted(async () => {
     [detectionResult[props.number - 1]["cause-oht"]]
   );
 
+  if(start.toISOString().startsWith("2024-04-30")){
+      start.setFullYear(2024)
+      start.setMonth(4)
+      start.setDate(20)
+      end.setFullYear(2024)
+      end.setMonth(4)
+      end.setDate(20)
+    }
+
   logs.value["simulation-log"].forEach((log) => {
-    const [, year, month, day, hour, minute, second] = log["time"].match(
+    
+    let [, year, month, day, hour, minute, second] = log["time"].match(
       /(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/
     );
+    
+    if(year == "2024" && month == "04" && day == "30"){
+      month = "05"
+      day = "20"
+    }
     const dateString = `${year}.${month}.${day} ${hour}:${minute}:${second}`;
     const data = [
       dateString,
