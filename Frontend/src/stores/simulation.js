@@ -4,9 +4,9 @@ import { instance } from "@/util/axios-util";
 import moment from "moment";
 
 export const simulationStore = defineStore("simulationStore", () => {
-  const startDate = ref("2023-01-01T00:00:00");
-  const endDate = ref("2023-01-01T23:59:59");
-  const ohtId = ref(2600);
+  const startDate = ref();
+  const endDate = ref();
+  const ohtId = ref();
 
   //==결과 데이터
   const simulationData = ref(null);
