@@ -10,13 +10,17 @@ from tqdm import tqdm
 async def data_preprocessing_for_Conan(
     df: pd.DataFrame,
 ):
-    try:
+    # try:
         
         # MinMaxScailing
         df["speed"] = df["speed"] / 5
         df["point_x"] = (df["point_x"] - 60) / (2040 - 60)
         df["point_y"] = (df["point_y"] - 320) / (560 - 320)
         df["curr_node_offset"] = df["curr_node_offset"] / 8.5
+
+        # "oht_connect" 컬럼이 존재하지 않으면 추가
+        if 'oht_connect' not in df.columns:
+            df['oht_connect'] = df['error'].apply(lambda x: 1 if x == 200 else 0)
 
         encoder = ce.BinaryEncoder(cols=['node'])  # 임시 컬럼 인덱스 node 사용
         encoder.fit(pd.DataFrame(all_nodes, columns=['node']))
@@ -32,11 +36,7 @@ async def data_preprocessing_for_Conan(
         df['is_idle'] = df['status'].apply(lambda x: True if x == 'I' else False)
 
         # 인코딩된 결과를 원래의 데이터프레임에 새로운 컬럼으로 추가
-        df = pd.concat([df, encoded_target.add_suffix('_target'), encoded_current.add_suffix('_current'), encoded_status.add_suffix('_status')], axis=1)
-        # df.drop(['target_node', 'current_node', 'curr_time', 'status', 'mode', 'start_time'], axis=1, inplace=True)
-
         # dataset에서 Fail일때의 deadline 범위 추출
-
         df = pd.concat([df, encoded_target.add_suffix('_target'), encoded_current.add_suffix('_current'),
                              encoded_status.add_suffix('_status'), encoded_next.add_suffix('_next')], axis=1)
 
@@ -47,10 +47,11 @@ async def data_preprocessing_for_Conan(
         path_and_second_arr = []
         path_visited = {}
         oht_visited = {}
-
+        test = []
         error_info = []
-        congestion_idx = 0
-        congestion_time = 0
+        error_dict = {}
+        oht_error_new_dict = {}
+        path_dict_new_dict = {}
 
         for path_info in path_and_before_path_info.iloc[:, 0]:
             path_visited[path_info] = False
@@ -67,11 +68,11 @@ async def data_preprocessing_for_Conan(
 
             # 노드 앞 path 위에 몇대가 있는지를 저장할 객체
             path_count = {}
-
+            
             for oht in ohts_arr:
-
                 path_name = oht['path']
                 path_count.setdefault(path_name, 0)
+                if oht["is_idle"] == 1: continue
                 # nan 처리
                 if type(path_name) == float: continue
 
@@ -81,19 +82,25 @@ async def data_preprocessing_for_Conan(
 
             #path 정체가 풀렸는지 확인
             for oht in ohts_arr:
+                if oht["is_idle"] == 1: continue
                 path_name = oht['path']
                 if path_name in length_info and path_name in path_count:
                     temp_count_criterion = 3 if length_info[path_name] >= 5 else 2
                     if path_count[path_name] < temp_count_criterion and path_visited[path_name] and not oht_visited[oht["oht_id"]]:
                         path_visited[path_name] = False
-                        
+                        try:
+                            error_info.append(path_dict_new_dict[path_name])
+                        except Exception as e:
+                            if path_name in oht_error_new_dict:
+                                error_info.append(oht_error_new_dict[path_name])
+
                 
             for idx, oht in enumerate(ohts_arr):
                 oht_id = oht["oht_id"]
                 path_name = oht["path"]
+                if oht["is_idle"] == 1: continue
                 # oht 에러인 경우
-                if oht['error'] == 200 and not oht_visited[oht_id]:
-
+                if oht['error'] == 200:
                     is_deadlock_oht_error = False
 
                     for idx, other_oht in enumerate(ohts_arr):
@@ -104,41 +111,46 @@ async def data_preprocessing_for_Conan(
                         elif other_path == path_name and other_offset != 0 and other_offset < oht["curr_node_offset"]:
                             # 고장난 oht 뒤에 있는 다른 oht의 속도가 0이면 정체
                             is_deadlock_oht_error = True
-                            oht_visited[oht_id] = True
-                            
                             break
                         elif other_path in path_and_before_path_info[path_and_before_path_info["before_node"] == oht["current_node"]]["path"].values \
                                                 and other_offset != 0 and other_oht["status"] != "W" and other_oht["speed"] == 0:
                             # 뒷길확인 로직 - oht에러가 난 호기의 이전 path에 존재하는 경우
                             is_deadlock_oht_error = True
-                            oht_visited[oht_id] = True
-                            
                             break
-                    if is_deadlock_oht_error:
-                        path_visited[path_name] = True
-                        path_and_second_arr.append((now_second, path_name))
-                        info_dict = {
-                                    "oht-id": int(oht["oht_id"]),
-                                    "time": int(now_second),
-                                    "path": path_name,
-                                    "error-code": int(oht['error']),
-                                    "status": oht["status"],
-                                    "carrier": bool(oht["carrier"]),
-                                    "error": int(oht["error"]),
-                                    "speed": float(oht["speed"]),
-                                    "is-fail": bool(oht["is_fail"]),
-                                    "current-node": oht["current_node"],
-                                    "next-node": oht["next_node"],
-                                    "congestion-time": int(10)
-                                    }
-                        error_info.append(info_dict)
-                        
 
+                    if is_deadlock_oht_error:
+                        if oht_visited[oht["oht_id"]]:
+                            oht_error_new_dict[oht["oht_id"]]["congestion-time"] += 1
+                        else:
+                            oht_visited[oht_id] = True
+                            path_visited[path_name] = True
+                            path_and_second_arr.append((now_second, path_name))
+                            test.append()
+                            info_dict = {
+                                            "oht-id": int(oht["oht_id"]),
+                                            "time": int(now_second),
+                                            "path": path_name,
+                                            "error-code": int(oht['error']),
+                                            "status": oht["status"],
+                                            "carrier": bool(oht["carrier"]),
+                                            "error": int(oht["error"]),
+                                            "speed": float(oht["speed"]),
+                                            "is-fail": bool(oht["is_fail"]),
+                                            "current-node": oht["current_node"],
+                                            "next-node": oht["next_node"],
+                                            "target-node": oht["target_node"],
+                                            "curr_node_offset": oht["curr_node_offset"],
+                                            "congestion-time": int(1)
+                            }
+                            test.append(info_dict)
+                            oht_error_new_dict[oht["oht_id"]] = info_dict
+                        
                 # 설비 길이만 참고하는 정체 로직 짜기 - facility_length_info
                 elif path_name in facility_length_info and not path_visited[path_name]:
 
-                    oht_visited[oht_id] = False
-
+                    if oht_visited[oht_id]: 
+                        error_info.append(oht_error_new_dict[oht["oht_id"]])
+                        oht_visited[oht_id] = False
                     # 길이에 따른 oht 최대 수용 개수
                     count_criterion = 3 if facility_length_info[path_name] >= 5 else 2
 
@@ -153,6 +165,7 @@ async def data_preprocessing_for_Conan(
                         if is_facility_deadlock:
                             path_visited[path_name] = True
                             path_and_second_arr.append((now_second, path_name))
+                            test.append(info_dict)
                             info_dict = {
                                     "oht-id": int(oht["oht_id"]),
                                     "time": int(now_second),
@@ -165,14 +178,45 @@ async def data_preprocessing_for_Conan(
                                     "is-fail": bool(oht["is_fail"]),
                                     "current-node": oht["current_node"],
                                     "next-node": oht["next_node"],
-                                    "congestion-time": int(10)
-                                    }
+                                    "target-node": oht["target_node"],
+                                    "curr_node_offset": oht["curr_node_offset"],
+                                    "congestion-time": int(CONGESTION_CRITERION_TIME)
+                                }
 
-                            error_info.append(info_dict)
-        
+                            path_dict_new_dict[path_name] = info_dict
+
+                elif path_name in length_info and not path_visited[path_name]:
+                    if oht_visited[oht_id]: 
+                        error_info.append(oht_error_new_dict[oht["oht_id"]])
+                        oht_visited[oht_id] = False
+                    
+                     # 길이에 따른 oht 최대 수용 개수
+                    count_criterion = 3 if length_info[path_name] >= 5 else 2
+
+                    # 정체 발생했을 경우 (노드 앞 path에 3개 혹은  2개 이상의 oht가 존재할 경우)
+                    if path_count[path_name] >= count_criterion and now_second-FAILURE_DEADLINE >= 0:
+                        # 지난 20초간 count_criterion 이상이면 혼잡/정체라고 판단
+                        is_deadlock = True
+                        for temp_count in path_count_arr[now_second-20:now_second]:
+                            if temp_count.setdefault(path_name, 0) < count_criterion:
+                                is_deadlock = False
+
+                        if is_deadlock:
+                            path_visited[path_name] = True
+                            path_and_second_arr.append((now_second, path_name))
+
                 else:
-                        
-                    oht_visited[oht_id] = False
+                    
+                    if oht_visited[oht_id]:
+                        error_info.append(oht_error_new_dict[oht["oht_id"]])
+                        oht_visited[oht_id] = False
+                        path_visited[path_name] = False
+                    elif type(path_name) == str and path_name is not None and path_visited[path_name]:
+                        try:
+                            path_dict_new_dict[path_name]["congestion-time"] += 1
+                        except Exception as e:
+                            if path_name in oht_error_new_dict:
+                                oht_error_new_dict[path_name]["congestion-time"] += 1
 
             path_count_arr.append(path_count)
 
@@ -183,14 +227,10 @@ async def data_preprocessing_for_Conan(
         SNAPSHOT_MATRIX = [[df.iloc[k*N_OHTS + idx] for idx in range(N_OHTS)] for k in range(len(df) // N_OHTS)]
         dataset = list(tqdm(make_matrix_by_path(df, path, moment_time, N_OHTS, DROP_LENGTH, SNAPSHOT_MATRIX) for (moment_time, path) in path_and_second_arr))
 
-        # # 멀티프로세싱으로 결과 계산
-        # with ProcessPoolExecutor(max_workers=8) as executor:
-        #     # results = await executor.submit(process_path_data, args)
-        #     results = list(tqdm(executor.map(process_path_data, args), total=len(args)))
-
-        return {"dataset": dataset, "error_info": error_info}
-    except Exception as e:
-        raise e(status_code=500, detail=str(e))
+        return {"dataset": dataset, "error_info": error_info, "test":test}
+    # except Exception as e:
+    #     print(str(e) + "@")
+    #     raise e(status_code=500, detail=str(e))
 
 
 def process_path_data(args):
