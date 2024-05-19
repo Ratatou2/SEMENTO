@@ -1,6 +1,6 @@
 <script setup>
 import HeadText from "@/components/Text/HeadText.vue";
-import Simulation from "@/components/simulation/Simulation.vue";
+import DeadLineSimulation from "@/components/simulation/DeadLineSimulation.vue";
 import Table from "@/components/table/Table.vue";
 import Cardhead from "@/components/Text/Cardhead.vue";
 import moment from "moment";
@@ -24,7 +24,7 @@ function transformatDate(date) {
           <Cardhead headerText="Simulation" contentText=""></Cardhead>
         </section>
         <section class="content">
-          <Simulation />
+          <DeadLineSimulation/>
         </section>
       </section>
       <section class="table">

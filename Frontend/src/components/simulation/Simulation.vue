@@ -2,19 +2,19 @@
 import { ref, onMounted, watch } from "vue";
 import * as d3 from "d3";
 import { simulationComponentStore } from "@/stores/simulationComponent";
-const {
-  startDate, endDate,
-  splitTimeRange,
-  getSimulation,
-  intervals
-} = simulationComponentStore();
+import { simulationStore } from "@/stores/simulation";
 
-const timeOrder = ref(0)
+const { splitTimeRange, getSimulation, intervals } =
+  simulationComponentStore();
+
+const { startDate, endDate } = simulationStore();
+
+const timeOrder = ref(0);
 const ohtLogs = ref({
       "simulation-log": [
         {
-            "time": "0000-00-00T00:00:00",
-            "data": [
+            time: "0000-00-00T00:00:00",
+            data: [
                 {
                     "oht-id": 2586,
                     "location": {
@@ -1558,8 +1558,8 @@ const currentTimeText = ref("2024.01.08 13:38:23");
 
 const formatTime = (time) => {
     // 날짜와 시간을 추출
-  const datePart = time.slice(0, 10).split('-');
-  const timePart = time.slice(11, 19).split(':');
+  const datePart = time.slice(0, 10).split("-");
+  const timePart = time.slice(11, 19).split(":");
 
   // 날짜 부분을 원하는 형식으로 조합
   const formattedDate = `${datePart[0]}.${datePart[1]}.${datePart[2]}`;
@@ -1569,7 +1569,7 @@ const formatTime = (time) => {
 
   // 최종적으로 날짜와 시간을 조합하여 원하는 형식으로 출력
   return `${formattedDate} ${formattedTime}`;
-}
+};
 
 
 currentTimeText.value = formatTime(ohtLogs.value["simulation-log"][0]['time'])
@@ -1673,7 +1673,6 @@ const endDrag = () => {
 const parentElement = ref(null);
 
 // timeOrder의 변화를 감지하여 새로운 시뮬레이션 데이터를 가져오고 movePoint 실행
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 let svg = null;
 let path = null;
 
@@ -1781,7 +1780,7 @@ function drawSimulation(width, height) {
     .text((d) => d.id);
 
 
-  //ohtLogs가 있을 경우에만(조회한 시간대에 시뮬레이션 로그가 있는 경우에만) oht 그려주기  
+  //ohtLogs가 있을 경우에만(조회한 시간대에 시뮬레이션 로그가 있는 경우에만)  
   if(ohtLogs.value["simulation-log"].length !== 0){
     // for문을 사용하여 30개의 원을 생성하고 ohts 배열에 저장합니다.
     for (let i = 0; i < ohtLogs.value["simulation-log"][0]["data"].length; i++) {
@@ -1838,6 +1837,29 @@ function movePoint(currentTime) {
         );
       });
 
+    if (currentOht["status"] === "W") {
+      ohtTexts[idx].attr("fill", "#F27A16");
+      point.attr("fill", "#F27A16");
+    } else {
+      ohtTexts[idx].attr("fill", ohtColor);
+      point.attr("fill", ohtColor);
+    }
+
+    if (currentOht["status"] !== "W" && currentOht["error"] === 0) {
+      ohtTexts[idx].attr("fill", ohtColor);
+      point.attr("fill", ohtColor);
+    } else if (currentOht["status"] !== "W" && currentOht["error"] === 200) {
+      ohtTexts[idx].attr("fill", "red");
+      point.attr("fill", "red");
+    } else if (currentOht["error"] === 300) {
+      ohtTexts[idx].attr("fill", "blue");
+      point.attr("fill", "blue");
+    }
+
+    // if (currentOht["oht-id"] === props.errorData["cause-oht"]) {
+    //   ohtTexts[idx].attr("fill", "#AD29B6");
+    // }
+
     point
       .transition()
       .duration(1000) //1초의 시간을 할당
@@ -1873,7 +1895,7 @@ watch(timeOrder, async (newTimeOrder) => {
   }
 });
 
-onMounted(async () => { ///////////////////////////////////////////////////onMounted//////////////////////////////////////////////////////////////
+onMounted(async () => { 
   parentElement.value = document.querySelector(".white-box");
     //== 시뮬레이션 데이터 로드 : 시간단위로 잘라서 연속적으로 요청해야함
   splitTimeRange(startDate, endDate)
