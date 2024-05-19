@@ -13,6 +13,7 @@ export const simulationStore = defineStore("simulationStore", () => {
   const classificationLog = ref(null);
   const chartData = ref(null);
   const comparedData = ref(null);
+  const isDataLoaded = ref(false);
 
   //차트관련
   const timeArray = ref([null]);
@@ -138,6 +139,8 @@ export const simulationStore = defineStore("simulationStore", () => {
 
     await getClassificationLog();
     setclassificationLogData();
+
+    isDataLoaded.value = true;
   };
 
   //==시뮬레이션 데이터를 로드==
@@ -193,6 +196,7 @@ export const simulationStore = defineStore("simulationStore", () => {
     ohtId,
     startDate,
     endDate,
+    isDataLoaded,
     //axios 통신
     getNewResult,
     //차트데이터

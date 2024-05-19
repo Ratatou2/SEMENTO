@@ -6,7 +6,7 @@ import Text2 from "@/components/Text/Text2.vue";
 import SearchInput from "@/components/searchBar/SearchInput.vue";
 import Button from "@/components/button/Button.vue";
 import Line from "@/components/line/Line.vue";
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, computed } from "vue";
 import Multiselect from "vue-multiselect";
 import "vue-multiselect/dist/vue-multiselect.css";
 import StickChart from "./components/StickChart.vue";
@@ -17,11 +17,13 @@ import Loading from "@/components/loading/Loading.vue";
 import { simulationStore } from "@/stores/simulation";
 import moment from "moment";
 import InitialPage from "@/components/loading/InitialPage.vue";
-const { getNewResult } = simulationStore();
+
+const usesimulationStore = simulationStore();
+const { getNewResult, isDataLoaded } = simulationStore();
 
 const nowLoading = ref(false); //로딩창 기본 비활성화
 //==초기 화면
-const initialPage = ref(true);
+// const initialPage = ref(true);
 const isSidePageOpen = ref(false); //사이드탭 기본 비활성화
 
 function transformatDate(date) {
@@ -80,8 +82,13 @@ const handleSimulationButton = async () => {
   nowLoading.value = true;
   await getNewResult(newStartDate, newEndDate, selectedOhtId);
   nowLoading.value = false;
-  initialPage.value = false;
+  // initialPage.value = false;
 };
+
+const initialPage = computed(() => {
+  console.log("isDataLoaded: ", !usesimulationStore.isDataLoaded);
+  return !usesimulationStore.isDataLoaded;
+});
 
 //== 이벤트 핸들러 ==
 function toggleSidePage(date) {
@@ -138,7 +145,7 @@ function toggleSidePageHandler(data) {
     <!-- 아직 검색 안했을때 -->
     <div v-if="initialPage"><InitialPage /></div>
     <!-- 검색결과 -->
-    <div v-else="!initialPage">
+    <div v-else>
       <section class="result">
         <!-- 시뮬레이션 -->
         <div class="white-box simulation-box">
