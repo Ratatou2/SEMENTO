@@ -13,8 +13,9 @@ public class SimulationRequest {
     @NotNull
     private List<Long> ohtId;
     @NotNull
-    @PastOrPresent
+    //@PastOrPresent
     private LocalDateTime startDate;
-    @NotNull @PastOrPresent
+    @NotNull
+    //@PastOrPresent
     private LocalDateTime endDate;
 }
