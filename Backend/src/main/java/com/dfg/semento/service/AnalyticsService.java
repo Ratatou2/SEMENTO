@@ -42,6 +42,8 @@ public class AnalyticsService {
                 TimeConverter.convertLocalDateTimeToString(searchTimeRequest.getEndTime()));
 
         for(ErrorInfoDto errorInfo : aiResponse.getCongestionInfo()) {
+            System.out.println("실행됨");
+
             errorInfo.setRelatedOhtId(
                 getOhtListInCongestion(
                         searchTimeRequest.getStartTime(), searchTimeRequest.getEndTime(),errorInfo.getPath()
@@ -60,7 +62,7 @@ public class AnalyticsService {
                                              String path) throws IOException {
 
         BoolQueryBuilder boolQuery = QueryBuilders.boolQuery()
-                .must(QueryBuilders.termQuery("path.keyword", path));
+                .must(QueryBuilders.termQuery("path", path));
         // 필요한 필드만 가져오기
         TermsAggregationBuilder aggregation = AggregationBuilders
                 .terms("unique_oht_ids")
