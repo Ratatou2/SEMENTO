@@ -28,7 +28,7 @@ const notificationStore = useNotificationStore();
 
 const nowLoading = ref(false); //로딩창 기본 비활성화
 //==초기 화면
-const initialPage = ref(true);
+// const initialPage = ref(true);
 const cnt = ref(11);
 const congTime = ref(0);
 
@@ -50,6 +50,10 @@ watch(
   },
   { immediate: true }
 );
+
+const initialPage = computed(() => {
+  return analysisStore.computedDetectionResult.length === 0;
+});
 
 const detectionReportText = computed(() => {
   return "# Detection Report (" + cnt.value + ")";
@@ -155,7 +159,7 @@ const handleAIDetectionButton = async () => {
       (new Date(result["end-date"]) - new Date(result["start-date"])) / 1000;
   });
   nowLoading.value = false;
-  initialPage.value = false;
+  // initialPage.value = false;
   notificationStore.sendNotification(); // 알림 띄우기
 };
 
