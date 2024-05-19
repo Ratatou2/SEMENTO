@@ -102,7 +102,7 @@ public class ElasticsearchQueryUtil {
         SearchRequest searchRequest = new SearchRequest(indexArray);
         searchRequest.source(searchSourceBuilder);
 
-        log.debug("[ES request] : "+ searchSourceBuilder);
+        log.debug("[ES request] : "+ startTime + " =>" + endTime);
         SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
         // log.debug("[ES response] : "+searchResponse.toString());
         return searchResponse;
@@ -139,7 +139,7 @@ public class ElasticsearchQueryUtil {
         SearchRequest searchRequest = new SearchRequest(indexArray);
         searchRequest.source(searchSourceBuilder);
 
-        log.debug("[ES request] : "+ searchSourceBuilder);
+        log.debug("[ES request] : "+ startTime + " =>" + endTime);
         SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
         //log.debug("[ES response] : "+searchResponse.toString());
 
