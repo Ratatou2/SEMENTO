@@ -32,19 +32,23 @@ const errorData = computed(() => {
     {
       name: "Facility Error",
       amount: errorCounts.value["Facility Error"],
+      size: errorCounts.value["Facility Error"] + 2, 
       color: "#292D30",
     },
     {
       name: "OHT Error",
       amount: errorCounts.value["OHT Error"],
+      size: errorCounts.value["OHT Error"] + 2, 
       color: "#34B3F1",
     },
     {
       name: "Scheduling Error",
       amount: errorCounts.value["ETC Error"],
+      size: errorCounts.value["ETC Error"] + 2, 
       color: "#BCE0F2",
     },
-  ].filter((error) => error.amount > 0);
+  ]
+  // .filter((error) => error.amount > 0);
 });
 
 // const transformedErrorData = {
@@ -60,7 +64,7 @@ const transformedErrorData = computed(() => ({
   name: "Top Level",
   children: errorData.value.map((error) => ({
     ...error,
-    size: error.amount,
+    size: error.size,
     parent: "Top Level",
   })),
 }));
