@@ -78,7 +78,6 @@ const handleEndDate = (newDate) => {
 const handleSimulationButton = async () => {
   nowLoading.value = true;
   await getNewResult(newStartDate, newEndDate, selectedOhtId);
-  console.log("logPerWeek: ", simulationStore().logPerWork);
   nowLoading.value = false;
 };
 

@@ -139,12 +139,15 @@ const detectionReports = computed(() => {
       cause = "기타 에러";
     }
 
+    const accuracy = `${parseFloat(result["accuracy"]).toFixed(1)}%`;
+
     return {
       index: index + 1,
       startDate: moment(startDate).format("YYYY.MM.DD HH:mm:ss"),
       endDate: moment(endDate).format("YYYY.MM.DD HH:mm:ss"),
       durationText: durationText,
       cause: cause,
+      accuracy: accuracy,
     };
   });
 });
