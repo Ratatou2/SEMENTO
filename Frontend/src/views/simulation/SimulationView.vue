@@ -181,7 +181,7 @@ function toggleSidePageHandler(data) {
           <div class="black-card-box">
             <div class="black-card-content">
               <BlackDataCard
-                title="Total Work"
+                title="총 작업량"
                 :content="simulationStore().totalWork.data"
                 :percentage="simulationStore().totalWork.percent + '%'"
                 :fontColor="
@@ -191,7 +191,7 @@ function toggleSidePageHandler(data) {
                 width="250px"
               />
               <BlackDataCard
-                title="Out Of DeadLine"
+                title="데드라인 초과"
                 :content="simulationStore().outOfDeadline.data"
                 :percentage="simulationStore().outOfDeadline.percent + '%'"
                 :fontColor="
@@ -203,7 +203,7 @@ function toggleSidePageHandler(data) {
             </div>
             <div class="black-card-content">
               <BlackDataCard
-                title="Average Speed"
+                title="평균 속도"
                 :content="simulationStore().averageSpeed.data"
                 :percentage="simulationStore().averageSpeed.percent + '%'"
                 :fontColor="
@@ -213,7 +213,7 @@ function toggleSidePageHandler(data) {
                 width="250px"
               />
               <BlackDataCard
-                title="OHT ERROR"
+                title="OHT 에러"
                 :content="simulationStore().ohtError.data"
                 :percentage="simulationStore().ohtError.percent + '%'"
                 :fontColor="
@@ -230,7 +230,7 @@ function toggleSidePageHandler(data) {
           <section class="title">
             <Cardhead
               :headerText="
-                'Log By Total Work(' + simulationStore().totalCnt + '건)'
+                '총 작업 로그(' + simulationStore().totalCnt + '건)'
               "
               contentText="각 작업을 클릭하여 해당하는 로그를 시뮬레이션과 함께 확인하실 수 있습니다."
             />
