@@ -62,8 +62,6 @@ public class TimeConverter {
     public static String convertLocalDateTimeToString(@NotNull LocalDateTime startTime){
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
         String formattedDate = startTime.format(formatter);
-        System.out.println("Formatted LocalDateTime: " + formattedDate);
-
         return formattedDate;
     }
     
