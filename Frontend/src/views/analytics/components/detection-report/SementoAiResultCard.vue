@@ -27,6 +27,10 @@ const props = defineProps({
     type: String,
     default: "Facility Error",
   },
+  accuracy: {
+    type: String,
+    default: "",
+  },
 });
 
 const logs = ref([]);
@@ -44,24 +48,23 @@ onMounted(async () => {
     [detectionResult[props.number - 1]["cause-oht"]]
   );
 
-  if(start.toISOString().startsWith("2024-04-30")){
-      start.setFullYear(2024)
-      start.setMonth(4)
-      start.setDate(20)
-      end.setFullYear(2024)
-      end.setMonth(4)
-      end.setDate(20)
-    }
+  if (start.toISOString().startsWith("2024-04-30")) {
+    start.setFullYear(2024);
+    start.setMonth(4);
+    start.setDate(20);
+    end.setFullYear(2024);
+    end.setMonth(4);
+    end.setDate(20);
+  }
 
   logs.value["simulation-log"].forEach((log) => {
-    
     let [, year, month, day, hour, minute, second] = log["time"].match(
       /(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/
     );
-    
-    if(year == "2024" && month == "04" && day == "30"){
-      month = "05"
-      day = "20"
+
+    if (year == "2024" && month == "04" && day == "30") {
+      month = "05";
+      day = "20";
     }
     const dateString = `${year}.${month}.${day} ${hour}:${minute}:${second}`;
     const data = [
@@ -88,7 +91,7 @@ onMounted(async () => {
     <section class="content">
       <div class="ai">
         <div class="blue block">[ SEMENTO AI 분석결과 ]</div>
-        <div class="white block">{{ cause }}</div>
+        <div class="white block">{{ cause }} {{ accuracy }}</div>
       </div>
       <div class="simulation-and-table">
         <CongestionSimulation

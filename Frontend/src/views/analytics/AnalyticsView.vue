@@ -69,12 +69,10 @@ watch(
 );
 
 const formattedStartDate = computed(() => {
-  console.log("startTime: ", startTime.value);
   return moment(startTime.value).format("YYYY.MM.DD HH:mm:ss");
 });
 
 const formattedEndDate = computed(() => {
-  console.log("endTime: ", endTime.value);
   return moment(endTime.value).format("YYYY.MM.DD HH:mm:ss");
 });
 
@@ -113,13 +111,13 @@ const detectionReports = computed(() => {
     const endDate = new Date(result["end-date"]);
     const duration = (endDate - startDate) / 1000;
 
-    if(startDate.toISOString().startsWith("2024-04-30")){
-      startDate.setFullYear(2024)
-      startDate.setMonth(4)
-      startDate.setDate(20)
-      endDate.setFullYear(2024)
-      endDate.setMonth(4)
-      endDate.setDate(20)
+    if (startDate.toISOString().startsWith("2024-04-30")) {
+      startDate.setFullYear(2024);
+      startDate.setMonth(4);
+      startDate.setDate(20);
+      endDate.setFullYear(2024);
+      endDate.setMonth(4);
+      endDate.setDate(20);
     }
 
     const hours = Math.floor(duration / 3600);
@@ -169,7 +167,6 @@ const handleAIDetectionButton = async () => {
       (new Date(result["end-date"]) - new Date(result["start-date"])) / 1000;
   });
   analysisStore.nowLoading = false;
-  // initialPage.value = false;
   notificationStore.sendNotification(); // 알림 띄우기
 };
 
@@ -177,7 +174,9 @@ onMounted(async () => {});
 </script>
 
 <template>
-  <div v-if="analysisStore.nowLoading"><Loading title="AI가 로그를 분석중입니다." /></div>
+  <div v-if="analysisStore.nowLoading">
+    <Loading title="AI가 로그를 분석중입니다." />
+  </div>
   <div v-else="!analysisStore.nowLoading" class="body-container">
     <!-- 설명 및 검색창 -->
     <section class="input">
@@ -283,6 +282,7 @@ onMounted(async () => {});
           :number="report.index"
           :text="`${report.startDate} ~ ${report.endDate} [총 ${report.durationText}]`"
           :cause="report.cause"
+          :accuracy="report.accuracy"
         />
       </section>
     </div>

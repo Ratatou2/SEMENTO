@@ -164,6 +164,7 @@ onUnmounted(() => {
               }"
             >
               <div
+                v-if="cell !== 0"
                 class="inner-content"
                 :class="{
                   'no-error': columns[columnIndex] === 'ERROR' && cell === 0,
@@ -240,7 +241,7 @@ td.table-cell div.status-cell div.inner-content {
 
 td.table-cell div.error-cell div.inner-content.no-error {
   border: none;
-  color: black; /* 오류가 없을 때 텍스트 색상 변경 가능 */
+  color: white;
 }
 
 /* 마우스 호버 시 행의 배경색을 변경 */

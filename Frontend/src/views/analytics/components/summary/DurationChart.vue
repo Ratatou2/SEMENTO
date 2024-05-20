@@ -45,9 +45,7 @@ let lineChartRef = null;
 watch(
   () => analysisStore.computedDetectionResult,
   (newValue, oldValue) => {
-    console.log("computedDetectionResult changed:", oldValue, "->", newValue);
     const len = newValue.length;
-    console.log("len: ", len);
     labels.value = Array.from({ length: len }, (_, i) => (i + 1).toString());
 
     duration_times.value = newValue.map((result) => {
@@ -55,7 +53,6 @@ watch(
         (new Date(result["end-date"]) - new Date(result["start-date"])) / 1000;
       return timeDiff;
     });
-    console.log("duration_times: ", duration_times.value);
     if (lineChartRef) {
       lineChartRef.data.labels = labels.value;
       lineChartRef.data.datasets[0].data = duration_times.value;
@@ -71,14 +68,11 @@ onMounted(async () => {
   //실시간 변화시 차트 업데이트
   watchEffect(() => {
     //라인차트 업데이트
-    console.log("DurationChart.vue에서의 duration_times: ", duration_times);
     if (lineChartRef) {
       lineChartRef.data.labels = labels.value;
       lineChartRef.data.datasets[0].data = duration_times.value;
       lineChartRef.update();
     }
-    // lineChartRef.data.datasets[0].data = duration_times;
-    // lineChartRef.update();
   });
 });
 

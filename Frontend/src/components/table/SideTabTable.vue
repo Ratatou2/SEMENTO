@@ -46,17 +46,17 @@ const props = defineProps({
   },
 });
 
-const tableData = ref(props.data)
+const tableData = ref(props.data);
 const isSidePageOpen = ref(false); //사이드탭 기본 비활성화
 
 //== 이벤트 핸들러 ==
 function toggleSidePage(idx) {
   isSidePageOpen.value = !isSidePageOpen.value;
-  if(idx == -1 || !isSidePageOpen.value){
+  if (idx == -1 || !isSidePageOpen.value) {
     simulationSideTapView.value.setPage(tableData.value, props.ohtId, -1);
-    return
+    return;
   }
-  tableData.value = props.data[idx]
+  tableData.value = props.data[idx];
 
   //simulationSideTapView가 열릴 때, SimulationSideTapView 화면 설정
   if (simulationSideTapView.value && isSidePageOpen.value) {
@@ -163,7 +163,12 @@ onUnmounted(() => {
                 'status-cell': columns[columnIndex] === 'STATUS',
               }"
             >
-              <div class="inner-content">
+              <div
+                class="inner-content"
+                :class="{
+                  'no-error': columns[columnIndex] === 'ERROR' && cell === '',
+                }"
+              >
                 {{ cell }}
               </div>
             </div>
@@ -177,33 +182,34 @@ onUnmounted(() => {
     </table>
 
     <div class="side-page" :class="{ open: isSidePageOpen }">
-    <!-- 사이드 페이지 내용을 여기에 추가하세요 -->
-    <section>
-      <font-awesome-icon
-        @click="toggleSidePage(-1)"
-        :icon="['fas', 'angles-right']"
-        size="2xl"
-        style="color: #383839; margin-left: 15px; margin-top: 20px"
-      />
-    </section>
-    <SimulationSideTapView
+      <!-- 사이드 페이지 내용을 여기에 추가하세요 -->
+      <section>
+        <font-awesome-icon
+          @click="toggleSidePage(-1)"
+          :icon="['fas', 'angles-right']"
+          size="2xl"
+          style="color: #383839; margin-left: 15px; margin-top: 20px"
+        />
+      </section>
+      <SimulationSideTapView
         ref="simulationSideTapView"
         class="table-component"
         width="100%"
         bodyFontSize="14px"
         headerFontSize="12px"
         :columns="[
-            'No.',
-            'Period',
-            'Time Taken',
-            'ERROR',
-            'Average Speed',
-            'Out of DeadLine',
+          'No.',
+          'Period',
+          'Time Taken',
+          'ERROR',
+          'Average Speed',
+          'Out of DeadLine',
         ]"
-        :data="tableData">
-    </SimulationSideTapView>
+        :data="tableData"
+      >
+      </SimulationSideTapView>
+    </div>
   </div>
-  </div>	
 </template>
 
 <style scoped>
@@ -273,6 +279,11 @@ td.table-cell div.status-cell div.inner-content {
   display: inline-block;
   color: #2e5aac;
   font-weight: bold;
+}
+
+td.table-cell div.error-cell div.inner-content.no-error {
+  border: none;
+  color: black; /* 오류가 없을 때 텍스트 색상 변경 가능 */
 }
 
 /* 마우스 호버 시 행의 배경색을 변경 */

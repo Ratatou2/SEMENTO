@@ -22,7 +22,6 @@ const { getNewResult, isDataLoaded } = simulationStore();
 
 const nowLoading = ref(false); //로딩창 기본 비활성화
 //==초기 화면
-// const initialPage = ref(true);
 const isSidePageOpen = ref(false); //사이드탭 기본 비활성화
 
 function transformatDate(date) {
@@ -70,23 +69,20 @@ const newStartDate = ref();
 const newEndDate = ref();
 
 const handleStartDate = (newDate) => {
-  console.log("handleStartDate");
   newStartDate.value = newDate;
 };
 const handleEndDate = (newDate) => {
-  console.log("handleEndDate");
   newEndDate.value = newDate;
 };
 //시뮬레이션 버튼 핸들링 이벤트
 const handleSimulationButton = async () => {
   nowLoading.value = true;
   await getNewResult(newStartDate, newEndDate, selectedOhtId);
+  console.log("logPerWeek: ", simulationStore().logPerWork);
   nowLoading.value = false;
-  // initialPage.value = false;
 };
 
 const initialPage = computed(() => {
-  console.log("isDataLoaded: ", !usesimulationStore.isDataLoaded);
   return !usesimulationStore.isDataLoaded;
 });
 
@@ -99,7 +95,6 @@ function toggleSidePageHandler(data) {
   //emit 받는 핸들러
   toggleSidePage(data);
 }
-
 </script>
 
 <template>
@@ -231,9 +226,7 @@ function toggleSidePageHandler(data) {
         <div class="white-box log-table-box">
           <section class="title">
             <Cardhead
-              :headerText="
-                '총 작업 로그(' + simulationStore().totalCnt + '건)'
-              "
+              :headerText="'총 작업 로그(' + simulationStore().totalCnt + '건)'"
               contentText="각 작업을 클릭하여 해당하는 로그를 시뮬레이션과 함께 확인하실 수 있습니다."
             />
           </section>

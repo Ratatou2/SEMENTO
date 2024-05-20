@@ -56,7 +56,6 @@ const endTime =
   dateFormatter
     .format(lastDayOfMonth)
     .replace(/(\d{4})\. (\d{2})\. (\d{2})\./, "$1-$2-$3") + "T23:59:59";
-console.log(startTime, endTime);
 
 // ===========================
 const nowLoading = ref(true); //로딩창 기본 활성화
@@ -80,9 +79,8 @@ const maxIdleTime = ref({
   endTime: "",
 });
 
-onMounted(async() => {
-  if(dashboardStore.startTime == "" && dashboardStore.endTime == "") {  
-    console.log("대시보드 데이터를 가져옵니다.");
+onMounted(async () => {
+  if (dashboardStore.startTime == "" && dashboardStore.endTime == "") {
     await dashboardStore.getOhtJobAnalysis(startTime, endTime);
     await dashboardStore.getJobResultAnalysis(startTime, endTime);
     await dashboardStore.getStateAnalysis(startTime, endTime);
@@ -128,14 +126,23 @@ onMounted(async() => {
 
   // 에러 로그 데이터 전처리
   errorLog.value = [];
-  errorLog.value = dashboardStore.jobResultAnalysisData['job-result-error-log'].map((item, index) => [index+1, String(item['oht-id']), String(item['error']), String(item['count'])])
+  errorLog.value = dashboardStore.jobResultAnalysisData[
+    "job-result-error-log"
+  ].map((item, index) => [
+    index + 1,
+    String(item["oht-id"]),
+    String(item["error"]),
+    String(item["count"]),
+  ]);
 
-  nowLoading.value = false;   
+  nowLoading.value = false;
 });
 
-watch(() => dashboardStore.watchedJobResultAnalysisData, (oldValue, newValue) => {
-
-},{ deep: true }); 
+watch(
+  () => dashboardStore.watchedJobResultAnalysisData,
+  (oldValue, newValue) => {},
+  { deep: true }
+);
 
 function timeDataFormatting(temp, refData) {
   if (temp < 10) {
@@ -145,7 +152,7 @@ function timeDataFormatting(temp, refData) {
   } else {
     refData.value.startTime = temp + ":00";
     if (temp + 1 == 24) refData.value.endTime = "00:00";
-    else refData.value.endTime = (temp + 1) + ":00";
+    else refData.value.endTime = temp + 1 + ":00";
   }
 }
 

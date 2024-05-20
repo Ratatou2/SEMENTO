@@ -116,12 +116,9 @@ export const simulationStore = defineStore("simulationStore", () => {
   //==Input 업데이트시 모든 데이터를 새로 업로드
   const getNewResult = async (newStartDate, newEndDate, newOhtId) => {
     if (newStartDate.value == null || newStartDate.value == undefined) {
-      // newStartDate.value = new Date().setHours(0, 0, 0, 0);
-      // newEndDate.value = new Date().setHours(new Date().getHours(), 0, 0, 0);
-
       //현재 날짜에서 24-05-11로 default 날짜 설정 변경(날짜 임의로 임시 설정함)
       newStartDate.value = new Date(2024, 3, 30).setHours(10, 30, 0, 0);
-      newEndDate.value = new Date(2024, 3, 30).setHours(10 ,50, 0, 0);
+      newEndDate.value = new Date(2024, 3, 30).setHours(10, 50, 0, 0);
     }
 
     setStartDate(newStartDate);
