@@ -1571,7 +1571,6 @@ const formatTime = (time) => {
   return `${formattedDate} ${formattedTime}`;
 };
 
-
 currentTimeText.value = formatTime(ohtLogs.value["simulation-log"][0]['time'])
 
 //컬러설정

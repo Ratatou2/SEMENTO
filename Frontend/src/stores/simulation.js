@@ -13,6 +13,7 @@ export const simulationStore = defineStore("simulationStore", () => {
   const classificationLog = ref(null);
   const chartData = ref(null);
   const comparedData = ref(null);
+  const isDataLoaded = ref(false);
 
   //차트관련
   const timeArray = ref([null]);
@@ -32,8 +33,6 @@ export const simulationStore = defineStore("simulationStore", () => {
   const averageSpeed = ref();
   const ohtError = ref();
   function setComparedData() {
-    console.log("setComparedData");
-    console.log(comparedData.value);
     totalWork.value = {
       data: comparedData.value["total-work"].data,
       percent: formatNumber(comparedData.value["total-work"].percent),
@@ -117,13 +116,12 @@ export const simulationStore = defineStore("simulationStore", () => {
   //==Input 업데이트시 모든 데이터를 새로 업로드
   const getNewResult = async (newStartDate, newEndDate, newOhtId) => {
     if (newStartDate.value == null || newStartDate.value == undefined) {
-      console.log("no data");
       // newStartDate.value = new Date().setHours(0, 0, 0, 0);
       // newEndDate.value = new Date().setHours(new Date().getHours(), 0, 0, 0);
 
       //현재 날짜에서 24-05-11로 default 날짜 설정 변경(날짜 임의로 임시 설정함)
-      //newStartDate.value = new Date(2024, 4, 11).setHours(20, 30, 0, 0);
-      //newEndDate.value = new Date(2024, 4, 11).setHours(20, 50, 0, 0);
+      newStartDate.value = new Date(2024, 3, 30).setHours(10, 30, 0, 0);
+      newEndDate.value = new Date(2024, 3, 30).setHours(10 ,50, 0, 0);
     }
 
     setStartDate(newStartDate);
@@ -138,6 +136,8 @@ export const simulationStore = defineStore("simulationStore", () => {
 
     await getClassificationLog();
     setclassificationLogData();
+
+    isDataLoaded.value = true;
   };
 
   //==시뮬레이션 데이터를 로드==
@@ -193,6 +193,7 @@ export const simulationStore = defineStore("simulationStore", () => {
     ohtId,
     startDate,
     endDate,
+    isDataLoaded,
     //axios 통신
     getNewResult,
     //차트데이터

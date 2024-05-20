@@ -1555,6 +1555,7 @@ const curvedLinks = [
 ];
 
 //로그
+
 const currentTimeText = ref("2024.01.08 13:38:23");
 
 const formatTime = (time) => {
@@ -1936,6 +1937,18 @@ function movePoint(currentTime) {
           currentTimeText.value = formatTime(
             ohtLogs.value["simulation-log"][currentTime + 1]["time"]
           );
+          
+
+          const text = currentTimeText.value
+          // 시작이 특정 날짜로 시작하는지 확인
+          let targetDate = "2024.04.30";
+          let newDate = "2024.05.20";
+
+          // 텍스트가 targetDate로 시작하는 경우
+          if (text.startsWith(targetDate)) {
+              // targetDate를 newDate로 변경
+              currentTimeText.value = newDate + text.slice(targetDate.length);
+          }
           movePoint(currentTime + 1);
         }
       });
@@ -1946,6 +1959,7 @@ watch(timeOrder, async () => {
   currentTimeText.value = formatTime(
     ohtLogs.value["simulation-log"][0]["time"]
   );
+
   movePoint(nowTime);
 });
 
