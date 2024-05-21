@@ -41,8 +41,8 @@ const props = defineProps({
   },
 });
 
-const data = ref(props.data)
-const checkProps = ref(0)
+const data = ref(props.data);
+const checkProps = ref(0);
 const emits = defineEmits(["toggle-side-page"]);
 const selectedRowIndex = ref(null);
 
@@ -57,10 +57,10 @@ const handleRowClick = (index) => {
   }
 };
 
-function checkPropsChange(datas){
-    checkProps.value = !checkProps.value;
-    data.value = datas
-    visibleData.value = data.value.slice(0, pageSize);
+function checkPropsChange(datas) {
+  checkProps.value = !checkProps.value;
+  data.value = datas;
+  visibleData.value = data.value.slice(0, pageSize);
 }
 
 //== 무한스크롤
@@ -111,8 +111,8 @@ onUnmounted(() => {
 });
 
 defineExpose({
-  checkPropsChange
-})
+  checkPropsChange,
+});
 </script>
 
 <template>
@@ -163,11 +163,17 @@ defineExpose({
           >
             <div
               :class="{
-                'error-cell': columns[columnIndex] === 'ERROR',
+                'error-cell': columns[columnIndex] === 'ERROR' && cell != 0,
                 'status-cell': columns[columnIndex] === 'STATUS',
               }"
             >
-              <div class="inner-content">
+              <div
+                v-if="columns[columnIndex] !== 'ERROR' || cell !== 0"
+                class="inner-content"
+                :class="{
+                  'no-error': columns[columnIndex] === 'ERROR' && cell === 0,
+                }"
+              >
                 {{ cell }}
               </div>
             </div>
@@ -234,6 +240,11 @@ td.table-cell div.status-cell div.inner-content {
   display: inline-block;
   color: #2e5aac;
   font-weight: bold;
+}
+
+td.table-cell div.error-cell div.inner-content.no-error {
+  border: none;
+  color: white;
 }
 
 /* 마우스 호버 시 행의 배경색을 변경 */
