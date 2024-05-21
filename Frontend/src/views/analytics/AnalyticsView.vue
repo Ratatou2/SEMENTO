@@ -95,6 +95,7 @@ const congestionText = computed(() => {
 watch(
   () => analysisStore.computedDetectionResult,
   (newValue, oldValue) => {
+    congTime.value = 0;
     congTime.value = newValue.reduce((total, result) => {
       return (
         total +
@@ -165,6 +166,7 @@ const handleAIDetectionButton = async () => {
   analysisStore.nowLoading = true;
   await analysisStore.getNewAIDetection(startTime, endTime);
   cnt.value = analysisStore.computedDetectionResult.length;
+  congTime.value = 0;
   analysisStore.computedDetectionResult.forEach((result) => {
     congTime.value +=
       (new Date(result["end-date"]) - new Date(result["start-date"])) / 1000;
