@@ -40,8 +40,9 @@ export const useAnalysisStore = defineStore("analysisStore", () => {
         (new Date(result["end-date"]) - new Date(result["start-date"])) / 1000;
     });
 
-    totalTime.value =
-      (new Date(endDate.value) - new Date(startDate.value)) / 1000;
+    // totalTime.value =
+    //   (new Date(endDate.value) - new Date(startDate.value)) / 1000;
+    totalTime.value = 3600;
 
     congestionRatio.value = (totalCongestionTime.value / totalTime.value) * 100;
   };

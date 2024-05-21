@@ -4,45 +4,45 @@ import HeadText from "@/components/Text/HeadText.vue";
 import DeadLineSimulation from "@/components/simulation/DeadLineSimulation.vue";
 import Table from "@/components/table/SideTabInfoTable.vue";
 import Cardhead from "@/components/Text/Cardhead.vue";
-import { defineExpose } from 'vue';
+import { defineExpose } from "vue";
 import { simulationComponentStore } from "@/stores/simulationComponent";
 const { getCongestionSimulation } = simulationComponentStore();
 
-const headerText = ref("")
-const tapNum = ref(0)
-const datas = ref([])
-const responseData = ref(null)
+const headerText = ref("");
+const tapNum = ref(0);
+const datas = ref([]);
+const responseData = ref(null);
 const tableView = ref(null);
 const simulationView = ref(null);
 
 async function setPage(data, ohtId, idx) {
-  if(idx === -1){
-    simulationView.value.checkPropsChange(null)
-    return
+  if (idx === -1) {
+    simulationView.value.checkPropsChange(null);
+    return;
   }
   // 문자열을 분리하여 각 시간 부분을 추출
-  const [startString, endString] = data[1].split(' - ');
-  headerText.value = data[1]
-  tapNum.value = idx + 1
+  const [startString, endString] = data[1].split(" - ");
+  headerText.value = data[1];
+  tapNum.value = idx + 1;
 
   // 각각의 문자열을 Date 객체로 변환
   const startDate = new Date(startString);
   const endDate = new Date(endString);
 
-  startDate.setHours(startDate.getHours() + 9)
-  endDate.setHours(endDate.getHours() + 9)
+  startDate.setHours(startDate.getHours() + 9);
+  endDate.setHours(endDate.getHours() + 9);
 
   const response = await getCongestionSimulation(
     startDate.toISOString(),
     endDate.toISOString(),
     [ohtId]
-  )
-  
-  responseData.value = response
-  
-  const newDatas = []
+  );
 
-  response["simulation-log"].forEach(log => {
+  responseData.value = response;
+
+  const newDatas = [];
+
+  response["simulation-log"].forEach((log) => {
     const data = [
       log["time"],
       log["data"][0]["oht-id"],
@@ -51,20 +51,20 @@ async function setPage(data, ohtId, idx) {
       log["data"][0]["carrier"],
       log["data"][0]["error"],
       log["data"][0]["speed"],
-      log["data"][0]["fail"]
-    ]
+      log["data"][0]["fail"],
+    ];
 
-    newDatas.push(data)
+    newDatas.push(data);
   });
 
-  datas.value = newDatas
-  tableView.value.checkPropsChange(datas.value)
-  simulationView.value.checkPropsChange(responseData.value)
+  datas.value = newDatas;
+  tableView.value.checkPropsChange(datas.value);
+  simulationView.value.checkPropsChange(responseData.value);
 }
 
 defineExpose({
-  setPage
-})
+  setPage,
+});
 </script>
 
 <template>
@@ -73,7 +73,7 @@ defineExpose({
       <div class="left">
         <section class="head-title">
           <div class="badge">#{{ tapNum }}</div>
-          <HeadText :headerText=headerText />
+          <HeadText :headerText="headerText" />
         </section>
       </div>
       <section class="white-box simulation-box">
@@ -81,9 +81,7 @@ defineExpose({
           <Cardhead headerText="Simulation" contentText=""></Cardhead>
         </section>
         <section class="content">
-          <DeadLineSimulation
-            ref = "simulationView"
-          />
+          <DeadLineSimulation ref="simulationView" />
         </section>
       </section>
       <section class="table">

@@ -85,7 +85,7 @@ const congestionText = computed(() => {
   const minutes = Math.floor(congTime.value / 60);
   const seconds = congTime.value % 60;
 
-  let text = "총";
+  let text = "총 ";
   if (hours > 0) text += `${hours}시간 `;
   if (minutes > 0 || hours > 0) text += `${minutes}분 `;
   text += `${seconds}초의 정체시간이 소요되었습니다.`;
