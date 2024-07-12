@@ -1,12 +1,12 @@
-## :trophy: SSAFY 자율프로젝트 결선 3위 (전국 159개팀 中 3위)
+## :trophy: SSAFY 10기 자율프로젝트 결선 3위 (전국 159개팀 中 3위)
 
 > [![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fgjbae1212%2Fhttps%3A%2F%2Fgithub.com%2FDofarming%2FSEMENTOhit-counter&count_bg=%23468FDD&title_bg=%23555555&icon=github.svg&icon_color=%23FFFFFF&title=SEMENTO&edge_flat=false)](https://hits.seeyoufarm.com)  </br>
 Samsung Software Academy For Youth 10기 자율프로젝트
 
  </br>
-도메인 : SEMES 기업 연계 AI 프로젝트 </br>
-주제 : AI를 활용한 물류데이터 로그 분석 시스템 </br>
-개발 기간 : 2024.04.08 ~ 2024.05.20
+도메인 : `SEMES 기업 연계 AI 프로젝트` </br>
+주제 : `AI를 활용한 물류데이터 로그 분석 시스템` </br>
+개발 기간 : `2024.04.08 ~ 2024.05.20`
 
 </br>
 
