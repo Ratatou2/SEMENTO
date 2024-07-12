@@ -81,7 +81,7 @@ OHT의 한달 기준으로 전 달과 현재 달의 데이터를 비교하여 �
 </br>
 
 ## :small_blue_diamond: 팀원소개
-> AI팀과 시뮬레이션+WEB팀으로 분리해 진행하였습니다.
+> `AI팀`과 `시뮬레이션+WEB팀`으로 분리해 진행하였습니다.
 <table>
   <tr>
     <td align="center" width="33%"><img src="https://avatars.githubusercontent.com/u/86724344?v=4" width="130px;" alt=""></td>
