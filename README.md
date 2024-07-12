@@ -26,10 +26,6 @@ OHT들이 작업을 하다보면 다양한 에러들이 발생합니다. 예를 
 </br>
 
 ## :small_blue_diamond: 주요 기능 소개
-
-</br>
-
-
 ### (1) AnyLogic 시뮬레이터를 통한 실시간 로그 데이터 생성
 시뮬레이터를 실행하면 OHT들이 Wapper를 나르는 것을 실시간을 확인할 수 있습니다. 또한, OHT들이 이동하는 것을 1초 단위로 로그를 생성하고 이를 데이터베이스에 저장하고 있습니다.
 ![simulation](https://github.com/user-attachments/assets/7e451530-6b3e-4a53-a928-ce84fb1ce722)
