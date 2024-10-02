@@ -35,8 +35,10 @@ const months = [
   "December", // 12월
 ];
 const currentDate = new Date();
-const year = currentDate.getFullYear(); // 년도 가져오기
-const month = currentDate.getMonth(); // 월 가져오기 (0부터 시작하므로 +1 해줘야 함)
+// const year = currentDate.getFullYear(); // 년도 가져오기
+// const month = currentDate.getMonth(); // 월 가져오기 (0부터 시작하므로 +1 해줘야 함)
+const year = 2024; // 년도 가져오기
+const month = 6; // 월 가져오기 (0부터 시작하므로 +1 해줘야 함)
 const firstDayOfMonth = new Date(year, month, 1);
 const lastDayOfMonth = new Date(year, month + 1, 0);
 

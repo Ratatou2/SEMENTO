@@ -84,15 +84,6 @@ setTimeout(() => {
     </div>
     <div class="right-side">
       <font-awesome-icon :icon="['fas', 'bell']" class="notification-icon" />
-      <div class="search-container">
-        <input class="search-box" type="text" placeholder="Search here" />
-        <div class="search-icon-container">
-          <font-awesome-icon
-            :icon="['fas', 'magnifying-glass']"
-            class="search-icon"
-          />
-        </div>
-      </div>
     </div>
   </div>
   <Line class="line"></Line>

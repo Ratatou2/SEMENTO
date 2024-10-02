@@ -1,12 +1,5 @@
-<!-- 
-** SearchInput 사용법 **
-
- <SearchInput />
-
--->
 <script setup>
 import moment from "moment";
-// import { useAnalysisStore } from "@/stores/analysis";
 import { ref, watch } from "vue";
 
 //== 초기값 변경
@@ -20,6 +13,7 @@ const props = defineProps({
     default: null,
   },
 });
+
 //== 초기화코드
 const startDate = ref(props.propsStartDate);
 const endDate = ref(props.propsEndDate);
@@ -37,24 +31,31 @@ function transformatDate(date) {
   return moment(date).format("YYYY.MM.DD HH:mm:ss");
 }
 
-//== 수혁코드
-// const analysisStore = useAnalysisStore();
-// function formatDateToISO(date) {
-//   return moment(date).format("YYYY-MM-DDTHH:mm:ss");
-// }
-// // pinia의 startDate와 endDate 업데이트
-// watch(startDate, (newDate) => {
-//   analysisStore.startDate.value = formatDateToISO(newDate);
-// });
-// watch(endDate, (newDate) => {
-//   analysisStore.endDate.value = formatDateToISO(newDate);
-// });
+// 최소 및 최대 날짜 설정 (2024년 4월 1일부터 5월 31일까지)
+const minDate = new Date(2024, 3, 1); // Months are zero-indexed (3 = April)
+const maxDate = new Date(2024, 4, 31);
+
+// VDatePicker에 필요한 옵션 설정
+const datePickerOptions = {
+  minDate,
+  maxDate,
+  disableYearPicker: true,
+  disableMonthYearSelect: true,
+};
 </script>
 
 <template>
   <section class="container">
     <!-- 시작 -->
-    <VDatePicker v-model="startDate" mode="dateTime" is24hr>
+    <VDatePicker
+      v-model="startDate"
+      mode="dateTime"
+      is24hr
+      :min-date="minDate"
+      :max-date="maxDate"
+      :disable-year-picker="true"
+      :disable-month-year-select="true"
+    >
       <template #default="{ togglePopover }">
         <button class="date-box" @click="togglePopover">
           {{ startDate == null ? "시작 시간" : transformatDate(startDate) }}
@@ -66,9 +67,19 @@ function transformatDate(date) {
         </button>
       </template>
     </VDatePicker>
+
     <p>-</p>
+
     <!-- 끝 -->
-    <VDatePicker v-model="endDate" mode="dateTime" is24hr>
+    <VDatePicker
+      v-model="endDate"
+      mode="dateTime"
+      is24hr
+      :min-date="minDate"
+      :max-date="maxDate"
+      :disable-year-picker="true"
+      :disable-month-year-select="true"
+    >
       <template #default="{ togglePopover }">
         <button class="date-box" @click="togglePopover">
           {{ endDate == null ? "종료 시간" : transformatDate(endDate) }}
